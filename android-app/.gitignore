@@ -1,0 +1,17 @@
+local.properties
+build/
+.gradle/
+.idea/
+*.iml
+.kotlin/
+captures/
+.omc/
+
+# Signing material: never commit
+*.jks
+*.keystore
+keystore.properties
+*-keystore.properties
+
+# gradle/wrapper/gradle-wrapper.jar is intentionally committed
+!gradle/wrapper/gradle-wrapper.jar

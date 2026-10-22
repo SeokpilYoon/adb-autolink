@@ -1,0 +1,36 @@
+{
+  "name": "adb-autolink",
+  "version": "0.1.0",
+  "description": "MCP server + CLI for controlling Android devices over wireless adb, with on-demand mDNS auto-connect (ADB Autolink)",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "adb-autolink-mcp": "dist/index.js",
+    "adb-autolink": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "npm run typecheck && node scripts/build.mjs",
+    "test": "vitest run",
+    "start": "node dist/index.js",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "@types/node": "^24.0.0",
+    "@types/pngjs": "^6.0.5",
+    "esbuild": "^0.28.2",
+    "jpeg-js": "^0.4.4",
+    "pngjs": "^7.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4",
+    "zod": "^3.25.76"
+  },
+  "license": "MIT"
+}

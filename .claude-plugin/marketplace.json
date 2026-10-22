@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "adb-autolink",
+  "description": "Zero-touch wireless ADB for Claude Code",
+  "owner": {
+    "name": "SeokpilYoon"
+  },
+  "plugins": [
+    {
+      "name": "adb-autolink",
+      "description": "Zero-touch wireless ADB: auto-enable wireless debugging on trusted Wi-Fi and auto-reconnect via mDNS. MCP tools for install, screenshot, input and logcat.",
+      "version": "0.1.0",
+      "source": "./",
+      "category": "development",
+      "homepage": "https://github.com/SeokpilYoon/adb-autolink",
+      "tags": ["android", "adb", "mcp", "wireless-debugging"]
+    }
+  ]
+}
