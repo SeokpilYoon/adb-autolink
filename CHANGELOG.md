@@ -11,6 +11,12 @@ All notable changes to adb-autolink are recorded here. Each version must match a
 
 Release pages are generated from these sections.
 
+## v0.2.1 - Cloning the repository no longer adds a broken project MCP server
+
+**Upgrading from 0.2.0:** run `/plugin update adb-autolink` and restart Claude Code. If you opened Claude Code inside a clone of this repository and approved the project server `adb-autolink` it offered, remove that approval with `/mcp` or `claude mcp reset-project-choices`. The plugin server (`plugin:adb-autolink:adb-autolink`) is not affected, and the phone app is unchanged apart from its version number.
+
+- **Fix: running Claude Code inside a clone no longer fails with `adb-autolink: CONNECTION_CLOSED`.** The MCP server was declared in a root `.mcp.json`. Claude Code also reads that file as the project MCP config of any clone, and there `${CLAUDE_PLUGIN_ROOT}` is not expanded, so node looked for `<clone>/${CLAUDE_PLUGIN_ROOT}/mcp-server/dist/index.js` and exited. The server is now declared in `.claude-plugin/plugin.json` (`mcpServers`), and the root `.mcp.json` is gone.
+
 ## v0.2.0 - Six languages, release tooling and secret guards
 
 **Upgrading from 0.1.0:** run `/plugin update adb-autolink` and restart Claude Code. Then call `install_companion_app` to update the phone app; it is signed with the same key, so it updates in place and keeps your whitelist. The MCP state directory (`~/.adb-autolink`) and tool names are unchanged.

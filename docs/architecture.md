@@ -7,7 +7,7 @@
 | `android-app/` | **ADB Autolink** (Kotlin, Compose, minSdk 30) turns wireless debugging back on when the phone joins a whitelisted network. |
 | `mcp-server/` | MCP server over stdio and the `adb-autolink` CLI. TypeScript sources are bundled into `dist/` with esbuild, so the plugin needs no runtime dependencies. |
 | `skills/setup/` | The `/adb-autolink:setup` onboarding skill. |
-| `.claude-plugin/`, `.mcp.json` | Plugin and marketplace manifests. The repository root is the plugin. |
+| `.claude-plugin/` | Plugin manifest (including the MCP server definition) and marketplace manifest. The repository root is the plugin. |
 
 ## Why wireless ADB breaks and how it is fixed
 
