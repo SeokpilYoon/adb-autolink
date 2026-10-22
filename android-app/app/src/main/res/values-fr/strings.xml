@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_name">Surveillance Wi-Fi</string>
+    <string name="channel_alert_name">Approbation requise</string>
+
+    <string name="section_secure_settings">1. Autorisation des paramètres sécurisés</string>
+    <string name="developer_options_on">Options pour les développeurs + Débogage USB : ACTIVÉS</string>
+    <string name="developer_options_off">Options pour les développeurs / Débogage USB : DÉSACTIVÉS (activés automatiquement lors de l’activation)</string>
+    <string name="permission_ok">Autorisation OK</string>
+    <string name="grant_from_pc">Accordez-la une fois depuis un PC (adb USB ou sans fil) :</string>
+    <string name="copy_command">Copier la commande</string>
+    <string name="copied">Copié</string>
+
+    <string name="section_location">2. Localisation (nécessaire pour lire le nom du Wi-Fi)</string>
+    <string name="grant_precise_location">Autoriser la localisation précise</string>
+    <string name="background_location_hint">Choisissez « Toujours autoriser » pour que le SSID puisse être lu en arrière-plan.</string>
+    <string name="allow_all_the_time">Toujours autoriser</string>
+    <string name="app_settings">Paramètres de l’appli</string>
+    <string name="location_permission_ok">Autorisation de localisation OK</string>
+    <string name="location_services_off">Les services de localisation sont désactivés. Le SSID reste masqué tant qu’ils ne sont pas activés.</string>
+    <string name="open_location_settings">Ouvrir les paramètres de localisation</string>
+    <string name="allow_notifications">Autoriser les notifications (notification d’état)</string>
+
+    <string name="section_keep_running">3. Maintenir en marche (Samsung)</string>
+    <string name="battery_optimization_ignored">Optimisation de la batterie : ignorée (OK)</string>
+    <string name="battery_optimization_on">Optimisation de la batterie : ACTIVÉE - le service peut être arrêté</string>
+    <string name="stop_optimizing_battery">Arrêter l’optimisation de la batterie</string>
+    <string name="samsung_battery_hint">Réglez aussi Infos sur l’appli &gt; Batterie &gt; « Sans restriction », et ajoutez cette appli dans Paramètres &gt; Batterie &gt; Limites d’utilisation en arrière-plan &gt; « Applis jamais en veille ».</string>
+    <string name="open_app_info">Ouvrir les infos de l’appli</string>
+    <string name="auto_revoke_off">Supprimer les autorisations si l’appli n’est pas utilisée : désactivé (OK)</string>
+    <string name="auto_revoke_on">Supprimer les autorisations si l’appli n’est pas utilisée : ACTIVÉ - peut révoquer la localisation</string>
+    <string name="turn_off_auto_revoke">Désactiver « Supprimer les autorisations si l’appli n’est pas utilisée »</string>
+
+    <string name="section_current_network">Réseau actuel</string>
+    <string name="ssid_not_on_wifi">SSID : pas de Wi-Fi</string>
+    <string name="ssid_hidden">SSID : &lt;unknown ssid&gt; - masqué par Android. Accordez la localisation « Toujours autoriser » et activez la localisation.</string>
+    <string name="ssid_value">SSID : %1$s</string>
+    <string name="ssid_value_bssid">SSID : %1$s  (%2$s)</string>
+    <string name="wireless_debugging_on">Débogage sans fil : ACTIVÉ</string>
+    <string name="wireless_debugging_off">Débogage sans fil : DÉSACTIVÉ</string>
+    <string name="address">Adresse : %1$s:%2$s</string>
+    <string name="retry_port_discovery">Relancer la détection du port</string>
+    <string name="turn_off">Désactiver</string>
+    <string name="enable_now">Activer maintenant</string>
+    <string name="add_to_whitelist">Ajouter à la liste blanche</string>
+    <string name="first_time_approval_hint">La première fois sur chaque réseau, Android demande « Autoriser le débogage sans fil sur ce réseau ? ». Cochez une fois « Toujours autoriser sur ce réseau ».</string>
+    <string name="open_wireless_debugging_settings">Ouvrir Options pour les développeurs &gt; Débogage sans fil</string>
+
+    <string name="section_whitelist">Wi-Fi en liste blanche</string>
+    <string name="whitelist_empty">Aucun réseau pour l’instant. Connectez-vous à votre Wi-Fi et appuyez sur « Ajouter à la liste blanche ».</string>
+    <string name="remove">Retirer</string>
+    <string name="section_auto_enable">Activation automatique</string>
+    <string name="auto_enable_label">Activer le débogage sans fil sur les Wi-Fi en liste blanche</string>
+
+    <string name="section_auth_timeout">Facultatif : expiration de l’autorisation</string>
+    <string name="auth_timeout_current">Actuel : %1$s</string>
+    <string name="auth_timeout_never">n’expire jamais</string>
+    <plurals name="auth_timeout_hours">
+        <item quantity="one">%d heure</item>
+        <item quantity="many">%d heures</item>
+        <item quantity="other">%d heures</item>
+    </plurals>
+    <string name="disable_auth_timeout">Désactiver l’expiration après 7 jours</string>
+    <string name="auth_timeout_warning">Android oublie les autorisations de PC inutilisées depuis 7 jours. En désactivant cette option, votre PC reste autorisé indéfiniment : toute personne disposant de la clé adb de ce PC peut se connecter tant que le débogage sans fil est activé. À n’utiliser qu’avec des PC et réseaux de confiance.</string>
+
+    <string name="section_language">Langue</string>
+    <string name="language_label">Langue de l’appli</string>
+    <string name="change_language">Modifier</string>
+
+    <string name="status_watching">Surveillance du Wi-Fi…</string>
+    <string name="status_reset_retrying">%1$s : débogage sans fil réinitialisé, nouvelle tentative…</string>
+    <string name="status_no_permission">WRITE_SECURE_SETTINGS non accordée</string>
+    <string name="status_no_wifi">Pas de Wi-Fi</string>
+    <string name="status_ssid_hidden">ERREUR : SSID masqué (&lt;unknown ssid&gt;). Autorisez la localisation « Toujours » et activez la localisation</string>
+    <string name="status_not_whitelisted">%1$s : pas dans la liste blanche</string>
+    <string name="status_waiting_ip">%1$s : en attente d’IP…</string>
+    <string name="status_on">%1$s : débogage sans fil ACTIVÉ</string>
+    <string name="status_off_manual">%1$s : débogage sans fil DÉSACTIVÉ (manuellement)</string>
+    <string name="status_waiting_approval">%1$s : en attente d’approbation sur ce point d’accès</string>
+    <string name="status_off">%1$s : débogage sans fil DÉSACTIVÉ</string>
+    <string name="status_enabling">%1$s : activation du débogage sans fil…</string>
+
+    <string name="alert_title">Approuver le débogage sans fil sur « %1$s »</string>
+    <string name="alert_text">Approuvez « Toujours autoriser sur ce réseau » pour ce point d’accès</string>
+    <string name="alert_big_text">Android a réinitialisé le débogage sans fil pour ce point d’accès. Activez-le une fois et cochez « Toujours autoriser sur ce réseau ». Les réseaux maillés ou bibande peuvent l’exiger une fois par point d’accès.</string>
+
+    <string name="tile_setup_needed">Configuration requise</string>
+    <string name="tile_on">Activé</string>
+    <string name="tile_off">Désactivé</string>
+
+    <string name="error_secure_settings_missing">WRITE_SECURE_SETTINGS non accordée. Exécutez : %1$s</string>
+</resources>

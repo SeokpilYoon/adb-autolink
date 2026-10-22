@@ -26,8 +26,8 @@ android {
         applicationId = "dev.adbautolink.companion"
         minSdk = 30
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
     }
 
     signingConfigs {
@@ -52,6 +52,10 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+    androidResources {
+        // Ship only the translated locales (drops partial AndroidX translations); keep in sync with res/xml/locales_config.xml.
+        localeFilters += listOf("en", "ko", "ja", "zh-rCN", "es", "fr")
     }
     buildFeatures {
         compose = true

@@ -31,7 +31,7 @@ object AdbWifiController {
             global(context, Settings.Global.ADB_ENABLED) == 1
 
     /** Returns null on success, otherwise an error message. */
-    fun setEnabled(context: Context, enabled: Boolean): String? = write {
+    fun setEnabled(context: Context, enabled: Boolean): String? = write(context) {
         val cr = context.contentResolver
         if (enabled) {
             for (key in listOf(Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, Settings.Global.ADB_ENABLED)) {
@@ -51,7 +51,7 @@ object AdbWifiController {
     fun allowedConnectionTimeMs(context: Context): Long =
         Settings.Global.getLong(context.contentResolver, ADB_ALLOWED_CONNECTION_TIME, DEFAULT_CONNECTION_TIME_MS)
 
-    fun setAuthTimeoutDisabled(context: Context, disabled: Boolean): String? = write {
+    fun setAuthTimeoutDisabled(context: Context, disabled: Boolean): String? = write(context) {
         Settings.Global.putLong(
             context.contentResolver, ADB_ALLOWED_CONNECTION_TIME,
             if (disabled) 0L else DEFAULT_CONNECTION_TIME_MS,
@@ -68,11 +68,11 @@ object AdbWifiController {
 
     private fun global(context: Context, key: String) = Settings.Global.getInt(context.contentResolver, key, 0)
 
-    private inline fun write(block: () -> Unit): String? = try {
+    private inline fun write(context: Context, block: () -> Unit): String? = try {
         block()
         null
     } catch (e: SecurityException) {
         Log.w(TAG, "WRITE_SECURE_SETTINGS missing", e)
-        "WRITE_SECURE_SETTINGS not granted. Run: $GRANT_COMMAND"
+        context.getString(R.string.error_secure_settings_missing, GRANT_COMMAND)
     }
 }

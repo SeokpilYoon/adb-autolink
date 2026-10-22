@@ -1,6 +1,6 @@
 {
   "name": "adb-autolink",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Zero-touch wireless ADB for Android: a companion app re-enables wireless debugging on trusted Wi-Fi, and an MCP server auto-reconnects via mDNS so Claude can install APKs, take screenshots, tap/swipe and read logcat.",
   "author": {
     "name": "SeokpilYoon"

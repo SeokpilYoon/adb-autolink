@@ -1,7 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ADB Autolink</string>
-    <string name="tile_label">ADB Autolink</string>
+    <string name="app_name" translatable="false">ADB Autolink</string>
+    <string name="tile_label" translatable="false">ADB Autolink</string>
+
+    <!-- Notification channels -->
     <string name="channel_name">Wi-Fi watcher</string>
     <string name="channel_alert_name">Approval needed</string>
+
+    <!-- Main screen: 1. secure settings -->
+    <string name="section_secure_settings">1. Secure settings permission</string>
+    <string name="developer_options_on">Developer options + USB debugging: ON</string>
+    <string name="developer_options_off">Developer options / USB debugging: OFF (turned on automatically when enabling)</string>
+    <string name="permission_ok">Permission OK</string>
+    <string name="grant_from_pc">Grant once from a PC (USB or wireless adb):</string>
+    <string name="copy_command">Copy command</string>
+    <string name="copied">Copied</string>
+
+    <!-- Main screen: 2. location -->
+    <string name="section_location">2. Location (needed to read the Wi-Fi name)</string>
+    <string name="grant_precise_location">Grant precise location</string>
+    <string name="background_location_hint">Choose \"Allow all the time\" so the SSID can be read in the background.</string>
+    <string name="allow_all_the_time">Allow all the time</string>
+    <string name="app_settings">App settings</string>
+    <string name="location_permission_ok">Location permission OK</string>
+    <string name="location_services_off">Location services are OFF. The SSID is hidden until you turn them on.</string>
+    <string name="open_location_settings">Open location settings</string>
+    <string name="allow_notifications">Allow notifications (status notification)</string>
+
+    <!-- Main screen: 3. keep running -->
+    <string name="section_keep_running">3. Keep running (Samsung)</string>
+    <string name="battery_optimization_ignored">Battery optimization: ignored (OK)</string>
+    <string name="battery_optimization_on">Battery optimization: ON - the watcher may be killed</string>
+    <string name="stop_optimizing_battery">Stop optimizing battery</string>
+    <string name="samsung_battery_hint">Also set App info &gt; Battery &gt; \"Unrestricted\", and add this app to Settings &gt; Battery &gt; Background usage limits &gt; \"Never sleeping apps\".</string>
+    <string name="open_app_info">Open app info</string>
+    <string name="auto_revoke_off">Remove permissions if unused: off (OK)</string>
+    <string name="auto_revoke_on">Remove permissions if unused: ON - may revoke location</string>
+    <string name="turn_off_auto_revoke">Turn off \"Remove permissions if unused\"</string>
+
+    <!-- Main screen: current network -->
+    <string name="section_current_network">Current network</string>
+    <string name="ssid_not_on_wifi">SSID: not on Wi-Fi</string>
+    <string name="ssid_hidden">SSID: &lt;unknown ssid&gt; - Android hides it. Grant location \"Allow all the time\" and turn location ON.</string>
+    <string name="ssid_value">SSID: %1$s</string>
+    <string name="ssid_value_bssid">SSID: %1$s  (%2$s)</string>
+    <string name="wireless_debugging_on">Wireless debugging: ON</string>
+    <string name="wireless_debugging_off">Wireless debugging: OFF</string>
+    <string name="address">Address: %1$s:%2$s</string>
+    <string name="retry_port_discovery">Retry port discovery</string>
+    <string name="turn_off">Turn off</string>
+    <string name="enable_now">Enable now</string>
+    <string name="add_to_whitelist">Add to whitelist</string>
+    <string name="first_time_approval_hint">The first time on each network, Android asks \"Allow wireless debugging on this network?\" - tick \"Always allow on this network\" once.</string>
+    <string name="open_wireless_debugging_settings">Open Wireless debugging settings</string>
+
+    <!-- Main screen: whitelist / auto-enable -->
+    <string name="section_whitelist">Whitelisted Wi-Fi</string>
+    <string name="whitelist_empty">No networks yet. Connect to your Wi-Fi and tap \"Add to whitelist\".</string>
+    <string name="remove">Remove</string>
+    <string name="section_auto_enable">Auto-enable</string>
+    <string name="auto_enable_label">Turn on Wireless debugging on whitelisted Wi-Fi</string>
+
+    <!-- Main screen: authorization timeout -->
+    <string name="section_auth_timeout">Optional: authorization timeout</string>
+    <string name="auth_timeout_current">Current: %1$s</string>
+    <string name="auth_timeout_never">never expires</string>
+    <plurals name="auth_timeout_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <string name="disable_auth_timeout">Disable 7-day authorization timeout</string>
+    <string name="auth_timeout_warning">Android forgets PC authorizations not used for 7 days. Disabling this keeps your PC authorized forever: anyone holding that PC\'s adb key can connect while Wireless debugging is on. Only use with trusted PCs and networks.</string>
+
+    <!-- Main screen: language (Android 13+) -->
+    <string name="section_language">Language</string>
+    <string name="language_label">App language</string>
+    <string name="change_language">Change</string>
+
+    <!-- Status notification -->
+    <string name="status_watching">Watching Wi-Fi…</string>
+    <string name="status_reset_retrying">%1$s: Wireless debugging reset, retrying…</string>
+    <string name="status_no_permission">WRITE_SECURE_SETTINGS not granted</string>
+    <string name="status_no_wifi">No Wi-Fi</string>
+    <string name="status_ssid_hidden">ERROR: SSID hidden (&lt;unknown ssid&gt;). Allow location \"all the time\" and turn location ON</string>
+    <string name="status_not_whitelisted">%1$s: not whitelisted</string>
+    <string name="status_waiting_ip">%1$s: waiting for IP…</string>
+    <string name="status_on">%1$s: Wireless debugging ON</string>
+    <string name="status_off_manual">%1$s: Wireless debugging OFF (turned off manually)</string>
+    <string name="status_waiting_approval">%1$s: waiting for approval on this access point</string>
+    <string name="status_off">%1$s: Wireless debugging OFF</string>
+    <string name="status_enabling">%1$s: enabling Wireless debugging…</string>
+
+    <!-- Approval alert notification -->
+    <string name="alert_title">Approve wireless debugging on \"%1$s\"</string>
+    <string name="alert_text">Approve \"Always allow on this network\" for this AP</string>
+    <string name="alert_big_text">Android reset Wireless debugging for this access point. Turn it on once and tick \"Always allow on this network\". Mesh/dual-band networks may need this once per AP.</string>
+
+    <!-- Quick Settings tile -->
+    <string name="tile_setup_needed">Setup needed</string>
+    <string name="tile_on">On</string>
+    <string name="tile_off">Off</string>
+
+    <!-- Errors -->
+    <string name="error_secure_settings_missing">WRITE_SECURE_SETTINGS not granted. Run: %1$s</string>
 </resources>

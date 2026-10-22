@@ -8,6 +8,7 @@ import { downloadCompanionApk } from "./companion.js";
 import { COMPANION_APP_NAME, COMPANION_PACKAGE } from "./config.js";
 import { adbDisconnect, ensureConnected, formatSnapshot, listAdbDevices, snapshot } from "./connector.js";
 import { describeCandidate, loadAliases, resolveDevice, setAlias } from "./devices.js";
+import { LOCALES, t, withLang } from "./i18n.js";
 import { decodePng, downscale, encodeJpeg, isAllBlack } from "./image.js";
 import {
   installFailureHint,
@@ -25,7 +26,15 @@ const deviceParam = z
   .optional()
   .describe('Target device: serial, ip:port, alias, or model like "S21" / "S24+". Optional if only one device.');
 
-const text = (t: string): CallToolResult => ({ content: [{ type: "text", text: t }] });
+const langParam = z
+  .string()
+  .optional()
+  .describe(
+    `Language for human-facing guidance and errors in the result (${LOCALES.join(", ")}; BCP 47 tags like "ko-KR" are fine). ` +
+      "Pass the language the user is writing in. Defaults to the system locale.",
+  );
+
+const text = (s: string): CallToolResult => ({ content: [{ type: "text", text: s }] });
 
 async function guard(fn: () => Promise<CallToolResult>): Promise<CallToolResult> {
   try {
@@ -35,16 +44,15 @@ async function guard(fn: () => Promise<CallToolResult>): Promise<CallToolResult>
   }
 }
 
+/** guard() with human-facing text in `lang` (falls back to the detected locale). */
+const guardLang = (lang: string | undefined, fn: () => Promise<CallToolResult>) => withLang(lang, () => guard(fn));
+
 async function shell(serial: string, command: string, timeoutMs = 30_000): Promise<string> {
   const r = await runAdb(["shell", command], { serial, timeoutMs });
   return `${r.stdout}${r.stderr}`.trim();
 }
 
 const intParam = z.number().int().min(0).max(100_000);
-
-const LOCK_WARNING =
-  "WARNING: the lock screen is still showing (secure lock cannot be dismissed over adb). Unlock the phone, or set up " +
-  "Smart Lock / Extend Unlock (trusted place or trusted device) so it stays unlocked at home.";
 
 /** Wake the screen and try to dismiss a non-secure keyguard. Returns a warning if still locked. */
 async function ensureAwake(serial: string): Promise<string | undefined> {
@@ -55,7 +63,7 @@ async function ensureAwake(serial: string): Promise<string | undefined> {
   await shell(serial, "wm dismiss-keyguard").catch(() => "");
   await new Promise((r) => setTimeout(r, 500));
   const after = await shell(serial, "dumpsys window | grep -iE 'keyguard|lockscreen'", 10_000).catch(() => "");
-  return parseKeyguardShowing(after) ? LOCK_WARNING : undefined;
+  return parseKeyguardShowing(after) ? t("warn.locked") : undefined;
 }
 
 /** Validate a local .apk path and return it absolute. */
@@ -72,7 +80,7 @@ async function adbInstall(serial: string, abs: string, flags: string[]): Promise
   const out = `${r.stdout}${r.stderr}`.trim();
   if (!/\bSuccess\b/.test(out)) {
     const hint = installFailureHint(out);
-    throw new Error(`Install failed on ${serial}:\n${out}${hint ? `\n\nHint: ${hint}` : ""}`);
+    throw new Error(`${t("install.failed", serial)}\n${out}${hint ? `\n\n${t("install.hint", hint)}` : ""}`);
   }
   return out;
 }
@@ -105,12 +113,12 @@ export function registerTools(server: McpServer): void {
     "connect_device",
     {
       description: "Connect to a device over wireless adb: tries its last known ip:port, then finds its current port via mDNS and runs adb connect. Usually not needed, since every other tool auto-connects. The phone must have been paired once (see pair_device).",
-      inputSchema: { device: deviceParam },
+      inputSchema: { device: deviceParam, lang: langParam },
     },
-    ({ device }) =>
-      guard(async () => {
+    ({ device, lang }) =>
+      guardLang(lang, async () => {
         const r = await ensureConnected(device);
-        const lines = [`Connected: ${describeCandidate(r.device, loadAliases())}`];
+        const lines = [t("connected", describeCandidate(r.device, loadAliases()))];
         if (r.log.length) lines.push(...r.log.map((l) => `  ${l}`));
         return text(lines.join("\n"));
       }),
@@ -397,27 +405,23 @@ export function registerTools(server: McpServer): void {
       inputSchema: {
         address: z.string().describe('ip:port shown in the "Pair device with pairing code" dialog, e.g. 192.168.0.23:37099'),
         code: z.string().describe("6-digit Wi-Fi pairing code shown in the same dialog"),
+        lang: langParam,
       },
     },
-    ({ address, code }) =>
-      guard(async () => {
+    ({ address, code, lang }) =>
+      guardLang(lang, async () => {
         const args = validatePairArgs(address, code);
         const r = await runAdb(["pair", args.address, args.code], { timeoutMs: 30_000, allowFailure: true });
         const pair = parsePairOutput(`${r.stdout}\n${r.stderr}`);
-        if (!pair.ok) {
-          throw new Error(
-            `Pairing with ${args.address} failed:\n${pair.message}\n\nCheck that the pairing dialog is still open on the phone, ` +
-              "the code and port are current (they change every time the dialog opens), and the phone is on the same network as this PC.",
-          );
-        }
+        if (!pair.ok) throw new Error(t("pair.failed", args.address, pair.message));
         const lines = [pair.message];
         try {
           // The connect port is advertised via mDNS; give the phone a moment to publish it.
           await new Promise((res) => setTimeout(res, 1_500));
           const c = await ensureConnected(pair.serial);
-          lines.push(`Connected: ${describeCandidate(c.device, loadAliases())}`, ...c.log.map((l) => `  ${l}`));
+          lines.push(t("connected", describeCandidate(c.device, loadAliases())), ...c.log.map((l) => `  ${l}`));
         } catch (e) {
-          lines.push(`Paired, but not connected yet: ${(e as Error).message.split("\n")[0]}`, "Try connect_device in a few seconds.");
+          lines.push(t("pair.notConnectedYet", (e as Error).message.split("\n")[0] ?? ""));
         }
         return text(lines.join("\n"));
       }),
@@ -434,23 +438,24 @@ export function registerTools(server: McpServer): void {
       inputSchema: {
         device: deviceParam,
         apk_path: z.string().optional().describe("Local companion .apk to install instead of downloading the latest release"),
+        lang: langParam,
       },
     },
-    ({ device, apk_path }) =>
-      guard(async () => {
+    ({ device, apk_path, lang }) =>
+      guardLang(lang, async () => {
         const steps: string[] = [];
         let apk: string;
         if (apk_path) {
           apk = apkFile(apk_path);
-          steps.push(`1. Using local APK ${apk}`);
+          steps.push(t("companion.usingLocal", apk));
         } else {
           const d = await downloadCompanionApk();
           apk = d.file;
-          steps.push(`1. APK ${d.note}`);
+          steps.push(d.note);
         }
         const { serial } = await ensureConnected(device);
         await adbInstall(serial, apk, ["-r"]);
-        steps.push(`2. Installed on ${serial}`);
+        steps.push(t("companion.installed", serial));
         const grant = await runAdb(["shell", "pm", "grant", COMPANION_PACKAGE, "android.permission.WRITE_SECURE_SETTINGS"], {
           serial,
           timeoutMs: 15_000,
@@ -459,29 +464,17 @@ export function registerTools(server: McpServer): void {
         const grantOut = `${grant.stdout}${grant.stderr}`.trim();
         steps.push(
           grant.code === 0 && !/exception|error/i.test(grantOut)
-            ? "3. Granted WRITE_SECURE_SETTINGS (lets the app toggle Wireless debugging)"
-            : `3. FAILED to grant WRITE_SECURE_SETTINGS: ${grantOut}\n   (Xiaomi/MIUI: enable "USB debugging (Security settings)" in Developer options, then run this again.)`,
+            ? t("companion.granted")
+            : t("companion.grantFailed", grantOut),
         );
         try {
           await ensureAwake(serial);
           await launchPackage(serial, COMPANION_PACKAGE);
-          steps.push("4. Launched the app");
+          steps.push(t("companion.launched"));
         } catch (e) {
-          steps.push(`4. Could not launch the app: ${(e as Error).message}`);
+          steps.push(t("companion.launchFailed", (e as Error).message));
         }
-        return text(
-          [
-            ...steps,
-            "",
-            `Next steps on the phone, in the ${COMPANION_APP_NAME} app:`,
-            '  a. Location permission: choose "Allow all the time" and keep Location on (needed to read the Wi-Fi name in the background).',
-            "  b. Allow notifications.",
-            '  c. Battery usage: set the app to "Unrestricted" so the system does not kill it (important on Samsung).',
-            '  d. While on your home/office Wi-Fi, tap "Add current Wi-Fi" to whitelist it, then enable auto mode.',
-            '  e. The first time Wireless debugging turns on for a network, the phone asks to allow it: check "Always allow on this network".',
-            "     Trust is per router (BSSID), so mesh nodes or separate 2.4/5 GHz networks each need one approval.",
-          ].join("\n"),
-        );
+        return text([...steps, "", t("companion.nextSteps", COMPANION_APP_NAME)].join("\n"));
       }),
   );
 

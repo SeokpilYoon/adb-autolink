@@ -25,6 +25,7 @@ import {
   serialFromInstance,
   splitHostPort,
 } from "./parse.js";
+import { t } from "./i18n.js";
 
 /** ip:port → ro.serialno (ports change per session, so this never goes stale for a live address). */
 const addressSerialCache = new Map<string, string>();
@@ -106,14 +107,7 @@ export async function discoverMdns(): Promise<DeviceInfo[]> {
 const online = (d: DeviceInfo) => d.state === "device";
 
 export function troubleshootingHint(): string {
-  return [
-    "No reachable device found over wireless adb. Check:",
-    `  1. The phone is on a Wi-Fi network whitelisted in the ${COMPANION_APP_NAME} app, on the same LAN as this PC.`,
-    "  2. Wireless debugging is ON (the app turns it on automatically; check its notification / Quick Settings tile).",
-    "  3. The phone was paired with this PC once (pair_device tool, or Developer options > Wireless debugging > Pair device).",
-    "  4. The PC firewall allows adb inbound UDP 5353 (mDNS) on this network (Windows: allow adb.exe on the Private profile).",
-    "  5. `adb mdns check` reports an mdns daemon; try `adb kill-server` if discovery is stuck.",
-  ].join("\n");
+  return t("hint.troubleshoot", COMPANION_APP_NAME);
 }
 
 async function adbConnect(address: string, timeoutMs = 10_000): Promise<{ ok: boolean; message: string }> {
@@ -284,16 +278,16 @@ async function ensureConnectedUnlocked(selector?: string): Promise<EnsureResult>
   const onlineNow = uniquePhysical(devices.filter(online));
   const parts: string[] = [];
   if (selector) {
-    parts.push(`Device "${selector}" is not connected and could not be connected automatically.`);
+    parts.push(t("connect.notConnected", selector));
   } else {
-    parts.push("No online device.");
+    parts.push(t("connect.noOnline"));
   }
-  if (onlineNow.length) parts.push(`Online devices:\n${onlineNow.map((d) => `  - ${describeCandidate(d, aliases)}`).join("\n")}`);
+  if (onlineNow.length) parts.push(`${t("connect.onlineDevices")}\n${onlineNow.map((d) => `  - ${describeCandidate(d, aliases)}`).join("\n")}`);
   if (lastDiscovered.length)
-    parts.push(`Discovered via mDNS:\n${lastDiscovered.map((d) => `  - ${d.mdns?.instance} ${d.address}`).join("\n")}`);
-  if (log.length) parts.push(`Attempts:\n${log.map((l) => `  - ${l}`).join("\n")}`);
+    parts.push(`${t("connect.discovered")}\n${lastDiscovered.map((d) => `  - ${d.mdns?.instance} ${d.address}`).join("\n")}`);
+  if (log.length) parts.push(`${t("connect.attempts")}\n${log.map((l) => `  - ${l}`).join("\n")}`);
   const unauthorized = devices.filter((d) => d.state === "unauthorized");
-  if (unauthorized.length) parts.push(`Unauthorized (accept the RSA prompt on the phone): ${unauthorized.map((d) => d.serial).join(", ")}`);
+  if (unauthorized.length) parts.push(t("connect.unauthorized", unauthorized.map((d) => d.serial).join(", ")));
   parts.push(troubleshootingHint());
   throw new DeviceSelectionError(parts.join("\n\n"));
 }
@@ -333,17 +327,17 @@ export function formatSnapshot(s: { adb: DeviceInfo[]; discovered: DeviceInfo[];
   const lines: string[] = [];
   const on = s.adb.filter(online);
   const other = s.adb.filter((d) => !online(d));
-  lines.push(`Online (${on.length}):`);
-  lines.push(...(on.length ? on.map((d) => `  - ${describeCandidate(d, s.aliases)}`) : ["  (none)"]));
+  lines.push(t("snapshot.online", on.length));
+  lines.push(...(on.length ? on.map((d) => `  - ${describeCandidate(d, s.aliases)}`) : [`  ${t("snapshot.none")}`]));
   if (other.length) {
-    lines.push(`Not ready (${other.length}):`);
+    lines.push(t("snapshot.notReady", other.length));
     lines.push(...other.map((d) => `  - ${describeCandidate(d, s.aliases)}`));
   }
-  lines.push(`Discovered via mDNS, not connected (${s.discovered.length}):`);
+  lines.push(t("snapshot.discovered", s.discovered.length));
   lines.push(
     ...(s.discovered.length
       ? s.discovered.map((d) => `  - ${describeCandidate({ ...d, serial: d.address ?? "" }, s.aliases)} instance=${d.mdns?.instance}`)
-      : ["  (none)"]),
+      : [`  ${t("snapshot.none")}`]),
   );
   return lines.join("\n");
 }

@@ -44,11 +44,13 @@ class AdbWifiTileService : TileService() {
         val tile = qsTile ?: return
         val on = AdbWifiController.isEnabled(this)
         tile.state = if (on) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
-        tile.subtitle = when {
-            !AdbWifiController.hasPermission(this) -> "Setup needed"
-            on -> "On"
-            else -> "Off"
-        }
+        tile.subtitle = getString(
+            when {
+                !AdbWifiController.hasPermission(this) -> R.string.tile_setup_needed
+                on -> R.string.tile_on
+                else -> R.string.tile_off
+            }
+        )
         tile.updateTile()
     }
 

@@ -58,7 +58,7 @@ class WifiWatcherService : Service() {
             )
         )
         ServiceCompat.startForeground(
-            this, STATUS_ID, statusNotification("Watching Wi-Fi…"),
+            this, STATUS_ID, statusNotification(getString(R.string.status_watching)),
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE else 0,
         )
         multicastLock = getSystemService(WifiManager::class.java).createMulticastLock(TAG).apply { setReferenceCounted(false) }
@@ -111,7 +111,7 @@ class WifiWatcherService : Service() {
             retried = true
             state = State.IDLE
             schedule(RETRY_MS)
-            notifications.notify(STATUS_ID, statusNotification("$ssid: Wireless debugging reset, retrying…"))
+            notifications.notify(STATUS_ID, statusNotification(getString(R.string.status_reset_retrying, ssid)))
             return
         }
         if (dropped) alertApprovalNeeded(ssid)
@@ -129,23 +129,23 @@ class WifiWatcherService : Service() {
         val enabled = AdbWifiController.isEnabled(this)
         if (enabled) notifications.cancel(ALERT_ID)
         val text = when {
-            !AdbWifiController.hasPermission(this) -> "WRITE_SECURE_SETTINGS not granted"
-            snap == null -> "No Wi-Fi"
-            ssid == null -> "ERROR: SSID hidden (<unknown ssid>). Allow location \"all the time\" and turn location ON"
-            !whitelisted -> "$ssid: not whitelisted"
-            snap.ipv4 == null -> "$ssid: waiting for IP…"
+            !AdbWifiController.hasPermission(this) -> getString(R.string.status_no_permission)
+            snap == null -> getString(R.string.status_no_wifi)
+            ssid == null -> getString(R.string.status_ssid_hidden)
+            !whitelisted -> getString(R.string.status_not_whitelisted, ssid)
+            snap.ipv4 == null -> getString(R.string.status_waiting_ip, ssid)
             enabled -> {
                 state = State.DONE
-                "$ssid: Wireless debugging ON"
+                getString(R.string.status_on, ssid)
             }
-            prefs.userDisabled -> "$ssid: Wireless debugging OFF (turned off manually)"
+            prefs.userDisabled -> getString(R.string.status_off_manual, ssid)
             state == State.IDLE -> enable(ssid)
             state == State.VERIFYING -> {
                 state = State.DONE
                 alertApprovalNeeded(ssid)
-                "$ssid: waiting for approval on this access point"
+                getString(R.string.status_waiting_approval, ssid)
             }
-            else -> "$ssid: Wireless debugging OFF"
+            else -> getString(R.string.status_off, ssid)
         }
         notifications.notify(STATUS_ID, statusNotification(text))
     }
@@ -155,7 +155,7 @@ class WifiWatcherService : Service() {
         Log.i(TAG, "Enabled wireless debugging on $ssid / ${snapshot?.bssid}")
         state = State.VERIFYING
         schedule(VERIFY_MS)
-        return "$ssid: enabling Wireless debugging…"
+        return getString(R.string.status_enabling, ssid)
     }
 
     private fun alertApprovalNeeded(ssid: String) {
@@ -166,12 +166,9 @@ class WifiWatcherService : Service() {
             ALERT_ID,
             NotificationCompat.Builder(this, CHANNEL_ALERT)
                 .setSmallIcon(R.drawable.ic_tile)
-                .setContentTitle("Approve wireless debugging on \"$ssid\"")
-                .setContentText("Approve 'Always allow on this network' for this AP")
-                .setStyle(NotificationCompat.BigTextStyle().bigText(
-                    "Android reset Wireless debugging for this access point. Turn it on once and tick " +
-                        "'Always allow on this network'. Mesh/dual-band networks may need this once per AP."
-                ))
+                .setContentTitle(getString(R.string.alert_title, ssid))
+                .setContentText(getString(R.string.alert_text))
+                .setStyle(NotificationCompat.BigTextStyle().bigText(getString(R.string.alert_big_text)))
                 .setContentIntent(open)
                 .setAutoCancel(true)
                 .build(),

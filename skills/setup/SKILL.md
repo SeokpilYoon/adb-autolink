@@ -1,9 +1,25 @@
 ---
 name: setup
-description: First-time setup of adb-autolink for an Android phone — pair over wireless debugging, install the ADB Autolink companion app, grant its permission, and walk the user through the on-phone settings. Use when the user asks to set up, onboard, or add a new phone for wireless adb / adb-autolink.
+description: >-
+  First-time setup of adb-autolink for an Android phone: pair over wireless debugging, install the ADB Autolink
+  companion app, grant its permission, and walk the user through the on-phone settings. Use when the user asks to set
+  up, onboard or add a new phone for wireless adb / adb-autolink. Triggers: wireless adb setup, wireless debugging,
+  pair phone, connect phone over Wi-Fi, 무선 디버깅, 무선 adb, 폰 연결, 휴대폰 연결, 페어링, ワイヤレスデバッグ,
+  ワイヤレス デバッグ, スマホ接続, ペア設定, 无线调试, 连接手机, 配对, depuración inalámbrica, vincular teléfono,
+  débogage sans fil, associer le téléphone.
+version: 0.2.0
+license: MIT
+depends_on:
+  required_bins:
+    - name: adb
+      why: Android SDK platform-tools; the MCP server drives the phone through adb (pair, connect, install, shell). Set ADB_PATH if it is not on PATH.
+    - name: node
+      why: Runs the bundled adb-autolink MCP server (Node.js 20 or newer).
 ---
 
 # adb-autolink setup
+
+Always talk to the user in the language they are using; pass `lang` to tools that return guidance (`pair_device`, `install_companion_app`, `connect_device`), e.g. `lang: "ko"`. Use the phone's localized setting names (ko: 개발자 옵션 > 무선 디버깅, ja: 開発者向けオプション > ワイヤレス デバッグ, zh: 开发者选项 > 无线调试, es: Opciones para desarrolladores > Depuración inalámbrica, fr: Options pour les développeurs > Débogage sans fil).
 
 Goal: after this, the phone re-enables wireless debugging by itself on trusted Wi-Fi and every adb-autolink MCP tool reconnects automatically.
 

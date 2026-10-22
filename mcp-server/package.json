@@ -1,6 +1,6 @@
 {
   "name": "adb-autolink",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server + CLI for controlling Android devices over wireless adb, with on-demand mDNS auto-connect (ADB Autolink)",
   "type": "module",
   "main": "dist/index.js",

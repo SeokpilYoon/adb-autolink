@@ -1,0 +1,19 @@
+# .gitleaks.toml — secret-scan policy for adb-autolink (public repo).
+# Used by .githooks/pre-commit and can be run manually:  gitleaks git --config .gitleaks.toml .
+title = "adb-autolink secret-scan policy"
+
+[extend]
+useDefault = true
+
+# Android signing passwords written as properties.
+[[rules]]
+id = "android-keystore-password"
+description = "Android keystore / key password in a properties or gradle file"
+regex = '''(?i)(storePassword|keyPassword)\s*[=:]\s*["']?[^\s"'$]{6,}'''
+keywords = ["storepassword", "keypassword"]
+
+# GitHub tokens are covered by the default ruleset; keep README examples allowed.
+[allowlist]
+description = "Documentation placeholders"
+paths = ['''(^|/)README(\.[a-zA-Z-]+)?\.md$''', '''^docs/''']
+regexes = ['''(storeFile|storePassword|keyAlias|keyPassword)\s*[=:]\s*<[^>]+>''']

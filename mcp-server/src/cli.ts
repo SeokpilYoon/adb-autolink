@@ -1,10 +1,7 @@
 import { resolveAdbPath } from "./adb.js";
 import { ensureConnected, formatSnapshot, snapshot } from "./connector.js";
 import { describeCandidate, loadAliases } from "./devices.js";
-
-const USAGE = `Usage:
-  adb-autolink devices             List connected and mDNS-discovered devices
-  adb-autolink connect [device]    Connect (serial, ip:port, alias or model like S21 / S24+)`;
+import { t } from "./i18n.js";
 
 async function main(argv: string[]): Promise<number> {
   const [cmd, ...rest] = argv;
@@ -16,17 +13,17 @@ async function main(argv: string[]): Promise<number> {
     case "connect": {
       const r = await ensureConnected(rest[0]);
       for (const l of r.log) console.log(l);
-      console.log(`Connected: ${describeCandidate(r.device, loadAliases())}`);
+      console.log(t("connected", describeCandidate(r.device, loadAliases())));
       return 0;
     }
     case undefined:
     case "-h":
     case "--help":
     case "help":
-      console.log(USAGE);
+      console.log(t("cli.usage"));
       return cmd ? 0 : 1;
     default:
-      console.error(`Unknown command "${cmd}"\n${USAGE}`);
+      console.error(`${t("cli.unknownCommand", cmd)}\n${t("cli.usage")}`);
       return 1;
   }
 }

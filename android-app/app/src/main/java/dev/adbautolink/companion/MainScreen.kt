@@ -45,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -160,28 +161,29 @@ fun MainScreen() {
         ) {
             Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall)
 
-            Section("1. Secure settings permission", ok = status.secureSettings && status.developerOptions) {
+            Section(stringResource(R.string.section_secure_settings), ok = status.secureSettings && status.developerOptions) {
                 Text(
-                    if (status.developerOptions) "Developer options + USB debugging: ON"
-                    else "Developer options / USB debugging: OFF (turned on automatically when enabling)"
+                    stringResource(
+                        if (status.developerOptions) R.string.developer_options_on else R.string.developer_options_off
+                    )
                 )
                 if (status.secureSettings) {
-                    Text("Permission OK")
+                    Text(stringResource(R.string.permission_ok))
                 } else {
-                    Text("Grant once from a PC (USB or wireless adb):")
+                    Text(stringResource(R.string.grant_from_pc))
                     SelectionContainer {
                         Text(AdbWifiController.GRANT_COMMAND, fontFamily = FontFamily.Monospace)
                     }
                     OutlinedButton(onClick = {
                         context.getSystemService(ClipboardManager::class.java)
                             .setPrimaryClip(ClipData.newPlainText("pm grant", AdbWifiController.GRANT_COMMAND))
-                        Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
-                    }) { Text("Copy command") }
+                        Toast.makeText(context, R.string.copied, Toast.LENGTH_SHORT).show()
+                    }) { Text(stringResource(R.string.copy_command)) }
                 }
             }
 
             Section(
-                "2. Location (needed to read the Wi-Fi name)",
+                stringResource(R.string.section_location),
                 ok = status.fineLocation && status.backgroundLocation && status.locationOn,
             ) {
                 when {
@@ -189,73 +191,79 @@ fun MainScreen() {
                         permissionLauncher.launch(
                             arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
                         )
-                    }) { Text("Grant precise location") }
+                    }) { Text(stringResource(R.string.grant_precise_location)) }
                     !status.backgroundLocation -> {
-                        Text("Choose \"Allow all the time\" so the SSID can be read in the background.")
+                        Text(stringResource(R.string.background_location_hint))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(onClick = {
                                 permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION))
-                            }) { Text("Allow all the time") }
-                            TextButton(onClick = { context.openAppDetails() }) { Text("App settings") }
+                            }) { Text(stringResource(R.string.allow_all_the_time)) }
+                            TextButton(onClick = { context.openAppDetails() }) { Text(stringResource(R.string.app_settings)) }
                         }
                     }
-                    else -> Text("Location permission OK")
+                    else -> Text(stringResource(R.string.location_permission_ok))
                 }
                 if (!status.locationOn) {
-                    Text("Location services are OFF. The SSID is hidden until you turn them on.",
-                        color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.location_services_off), color = MaterialTheme.colorScheme.error)
                     OutlinedButton(onClick = {
                         context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-                    }) { Text("Open location settings") }
+                    }) { Text(stringResource(R.string.open_location_settings)) }
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !status.notifications) {
                     TextButton(onClick = {
                         permissionLauncher.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS))
-                    }) { Text("Allow notifications (status notification)") }
+                    }) { Text(stringResource(R.string.allow_notifications)) }
                 }
             }
 
-            Section("3. Keep running (Samsung)", ok = status.batteryUnrestricted && status.autoRevokeExempt) {
-                Text("Battery optimization: ${if (status.batteryUnrestricted) "ignored (OK)" else "ON - the watcher may be killed"}")
-                if (!status.batteryUnrestricted) {
-                    Button(onClick = { context.requestIgnoreBatteryOptimizations() }) { Text("Stop optimizing battery") }
-                }
+            Section(stringResource(R.string.section_keep_running), ok = status.batteryUnrestricted && status.autoRevokeExempt) {
                 Text(
-                    "Also set App info > Battery > \"Unrestricted\", and add this app to Settings > Battery > " +
-                        "Background usage limits > \"Never sleeping apps\".",
-                    style = MaterialTheme.typography.bodySmall,
+                    stringResource(
+                        if (status.batteryUnrestricted) R.string.battery_optimization_ignored
+                        else R.string.battery_optimization_on
+                    )
                 )
-                OutlinedButton(onClick = { context.openAppDetails() }) { Text("Open app info") }
-                Text("Remove permissions if unused: ${if (status.autoRevokeExempt) "off (OK)" else "ON - may revoke location"}")
+                if (!status.batteryUnrestricted) {
+                    Button(onClick = { context.requestIgnoreBatteryOptimizations() }) {
+                        Text(stringResource(R.string.stop_optimizing_battery))
+                    }
+                }
+                Text(stringResource(R.string.samsung_battery_hint), style = MaterialTheme.typography.bodySmall)
+                OutlinedButton(onClick = { context.openAppDetails() }) { Text(stringResource(R.string.open_app_info)) }
+                Text(stringResource(if (status.autoRevokeExempt) R.string.auto_revoke_off else R.string.auto_revoke_on))
                 if (!status.autoRevokeExempt) {
                     OutlinedButton(onClick = { context.openPackageSetting(Intent.ACTION_AUTO_REVOKE_PERMISSIONS) }) {
-                        Text("Turn off \"Remove permissions if unused\"")
+                        Text(stringResource(R.string.turn_off_auto_revoke))
                     }
                 }
             }
 
-            Section("Current network", ok = wifi?.ssid != null) {
+            Section(stringResource(R.string.section_current_network), ok = wifi?.ssid != null) {
                 val ssid = wifi?.ssid
+                val bssid = wifi?.bssid
                 when {
-                    wifi == null -> Text("SSID: not on Wi-Fi")
-                    ssid == null -> Text(
-                        "SSID: <unknown ssid> - Android hides it. Grant location \"Allow all the time\" and turn location ON.",
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                    else -> Text("SSID: $ssid" + (wifi?.bssid?.let { "  ($it)" } ?: ""))
+                    wifi == null -> Text(stringResource(R.string.ssid_not_on_wifi))
+                    ssid == null -> Text(stringResource(R.string.ssid_hidden), color = MaterialTheme.colorScheme.error)
+                    bssid == null -> Text(stringResource(R.string.ssid_value, ssid))
+                    else -> Text(stringResource(R.string.ssid_value_bssid, ssid, bssid))
                 }
-                Text("Wireless debugging: ${if (status.adbWifi) "ON" else "OFF"}")
+                Text(stringResource(if (status.adbWifi) R.string.wireless_debugging_on else R.string.wireless_debugging_off))
                 if (status.adbWifi && ip != null) {
                     SelectionContainer {
-                        Text("Address: $ip:${port ?: "?"}", fontFamily = FontFamily.Monospace)
+                        Text(
+                            stringResource(R.string.address, ip, port?.toString() ?: "?"),
+                            fontFamily = FontFamily.Monospace,
+                        )
                     }
-                    if (port == null) TextButton(onClick = { refreshKey++ }) { Text("Retry port discovery") }
+                    if (port == null) {
+                        TextButton(onClick = { refreshKey++ }) { Text(stringResource(R.string.retry_port_discovery)) }
+                    }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(enabled = status.secureSettings, onClick = {
                         context.toastIfError(AdbWifiController.setEnabledByUser(context, !status.adbWifi))
                         refresh()
-                    }) { Text(if (status.adbWifi) "Turn off" else "Enable now") }
+                    }) { Text(stringResource(if (status.adbWifi) R.string.turn_off else R.string.enable_now)) }
                     OutlinedButton(
                         enabled = ssid != null && ssid !in whitelist,
                         onClick = {
@@ -263,20 +271,16 @@ fun MainScreen() {
                             prefs.whitelist = whitelist
                             reevaluate()
                         },
-                    ) { Text("Add to whitelist") }
+                    ) { Text(stringResource(R.string.add_to_whitelist)) }
                 }
-                Text(
-                    "First time on each network Android asks \"Allow wireless debugging on this network?\" " +
-                        "- tick \"Always allow on this network\" once.",
-                    style = MaterialTheme.typography.bodySmall,
-                )
+                Text(stringResource(R.string.first_time_approval_hint), style = MaterialTheme.typography.bodySmall)
                 TextButton(onClick = {
                     context.startActivity(AdbWifiController.wirelessDebuggingSettingsIntent(context))
-                }) { Text("Open Wireless debugging settings") }
+                }) { Text(stringResource(R.string.open_wireless_debugging_settings)) }
             }
 
-            Section("Whitelisted Wi-Fi", ok = whitelist.isNotEmpty()) {
-                if (whitelist.isEmpty()) Text("No networks yet. Connect to your Wi-Fi and tap \"Add to whitelist\".")
+            Section(stringResource(R.string.section_whitelist), ok = whitelist.isNotEmpty()) {
+                if (whitelist.isEmpty()) Text(stringResource(R.string.whitelist_empty))
                 whitelist.sorted().forEach { name ->
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text(name, Modifier.weight(1f))
@@ -284,14 +288,14 @@ fun MainScreen() {
                             whitelist = whitelist - name
                             prefs.whitelist = whitelist
                             reevaluate()
-                        }) { Text("Remove") }
+                        }) { Text(stringResource(R.string.remove)) }
                     }
                 }
             }
 
-            Section("Auto-enable", ok = autoEnabled) {
+            Section(stringResource(R.string.section_auto_enable), ok = autoEnabled) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Turn on Wireless debugging on whitelisted Wi-Fi", Modifier.weight(1f))
+                    Text(stringResource(R.string.auto_enable_label), Modifier.weight(1f))
                     Switch(checked = autoEnabled, onCheckedChange = { on ->
                         autoEnabled = on
                         prefs.autoEnabled = on
@@ -306,25 +310,37 @@ fun MainScreen() {
                 }
             }
 
-            Section("Optional: authorization timeout", ok = true) {
+            Section(stringResource(R.string.section_auth_timeout), ok = true) {
                 val disabled = status.authTimeoutMs == 0L
+                val hours = (status.authTimeoutMs / 3_600_000).toInt()
                 Text(
-                    "Current: " + if (disabled) "never expires" else "${status.authTimeoutMs / 3_600_000} h",
+                    stringResource(
+                        R.string.auth_timeout_current,
+                        if (disabled) stringResource(R.string.auth_timeout_never)
+                        else pluralStringResource(R.plurals.auth_timeout_hours, hours, hours),
+                    ),
                     fontFamily = FontFamily.Monospace,
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Disable 7-day authorization timeout", Modifier.weight(1f))
+                    Text(stringResource(R.string.disable_auth_timeout), Modifier.weight(1f))
                     Switch(checked = disabled, enabled = status.secureSettings, onCheckedChange = { on ->
                         context.toastIfError(AdbWifiController.setAuthTimeoutDisabled(context, on))
                         refresh()
                     })
                 }
-                Text(
-                    "Android forgets PC authorizations not used for 7 days. Disabling this keeps your PC " +
-                        "authorized forever: anyone holding that PC's adb key can connect while Wireless " +
-                        "debugging is on. Only use with trusted PCs and networks.",
-                    style = MaterialTheme.typography.bodySmall,
-                )
+                Text(stringResource(R.string.auth_timeout_warning), style = MaterialTheme.typography.bodySmall)
+            }
+
+            // The system per-app language picker exists only on Android 13+.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Section(stringResource(R.string.section_language), ok = true) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.language_label), Modifier.weight(1f))
+                        OutlinedButton(onClick = { context.openPackageSetting(Settings.ACTION_APP_LOCALE_SETTINGS) }) {
+                            Text(stringResource(R.string.change_language))
+                        }
+                    }
+                }
             }
         }
     }

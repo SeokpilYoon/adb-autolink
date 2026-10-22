@@ -1,14 +1,24 @@
-# adb-autolink
+<h1 align="center">adb-autolink</h1>
 
-**Zero-touch wireless ADB for Android developers, built for Claude Code.**
+<p align="center"><b>Zero-touch wireless ADB for Android developers, built for Claude Code.</b></p>
+
+<p align="center">
+
+**English** · [한국어](README.ko.md) · [日本語](README.ja.md) · [简体中文](README.zh-Hans.md) · [Español](README.es.md) · [Français](README.fr.md)
+
+</p>
+
+<p align="center">
+  <img src=".claude-plugin/icon.png" width="96" alt="adb-autolink icon" />
+</p>
+
+---
 
 Walk out with your phone, come back, and just ask Claude:
 
 > "Install Builds/game.apk on my S21, launch it and take a screenshot."
 
 No re-pairing, no typing IP addresses, ports or pairing codes. The phone turns wireless debugging back on by itself when it joins a Wi-Fi network you trust, and the MCP server finds it via mDNS and reconnects on demand.
-
-[한국어 README](README.ko.md)
 
 ## How it works
 
@@ -89,6 +99,18 @@ Every device tool auto-connects first. Select a device by serial, `ip:port`, ali
 
 CLI: `node mcp-server/dist/cli.js devices` · `node mcp-server/dist/cli.js connect S21`
 
+## Languages
+
+The companion app, the CLI, setup guidance and the setup skill support **English, 한국어, 日本語, 简体中文, Español and Français**.
+
+- **App:** follows the phone's language. On Android 13+ you can also pick a language per app.
+- **CLI and tool guidance:** follow `ADB_AUTOLINK_LANG` (`en`, `ko`, `ja`, `zh-Hans`, `es`, `fr`), or the OS locale if it isn't set.
+- **Claude:** answers in the language you write in.
+
+## Documentation
+
+See [docs/](docs/README.md): [architecture](docs/architecture.md), [troubleshooting](docs/troubleshooting.md), [release process](docs/release.md), [security](SECURITY.md), [changelog](CHANGELOG.md).
+
 ## Troubleshooting
 
 | Symptom | Check |
@@ -121,6 +143,8 @@ cd android-app && ./gradlew assembleDebug
 # (storeFile, storePassword, keyAlias, keyPassword); unsigned if absent.
 ./gradlew assembleRelease   # → android-app/build/dist/adb-autolink.apk
 ```
+
+Contributors: enable the secret-guard hook once per clone with `git config core.hooksPath .githooks` (see [SECURITY.md](SECURITY.md)).
 
 ## License
 

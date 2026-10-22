@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# .githooks/pre-commit — blocks secrets and signing material from entering history.
+# Enable once per clone:  git config core.hooksPath .githooks
+# Intentional bypass (you own the risk):  git commit --no-verify
+set -euo pipefail
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$staged" ] && exit 0
+
+# 1. Signing keys and local config never belong in the repo (fail-closed, no tools needed).
+blocked=$(printf '%s\n' "$staged" | grep -E -i '(\.jks|\.keystore|\.p12|\.pem|keystore\.properties|(^|/)local\.properties|(^|/)\.env(\..*)?)$' | grep -v -E '\.env\.(example|sample|template)$' || true)
+if [ -n "$blocked" ]; then
+  echo "pre-commit: refusing to commit signing keys / local secrets:" >&2
+  printf '  %s\n' $blocked >&2
+  exit 1
+fi
+
+# 2. Secret scan of the staged diff with gitleaks (policy: .gitleaks.toml).
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks git --staged --redact --no-banner --config .gitleaks.toml . || {
+    echo "pre-commit: gitleaks found a secret in the staged changes." >&2
+    exit 1
+  }
+else
+  echo "pre-commit: warning: gitleaks not installed — only the filename check ran (https://github.com/gitleaks/gitleaks)." >&2
+fi
+
+# 3. The plugin runs the committed bundle: source changes must ship with a rebuilt dist.
+if printf '%s\n' "$staged" | grep -q '^mcp-server/src/' && ! printf '%s\n' "$staged" | grep -q '^mcp-server/dist/'; then
+  echo "pre-commit: mcp-server/src changed but mcp-server/dist is not staged. Run: (cd mcp-server && npm run build)" >&2
+  exit 1
+fi

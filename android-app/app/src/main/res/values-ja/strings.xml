@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_name">Wi-Fi 監視</string>
+    <string name="channel_alert_name">承認が必要</string>
+
+    <string name="section_secure_settings">1. セキュア設定の権限</string>
+    <string name="developer_options_on">開発者向けオプション + USB デバッグ: ON</string>
+    <string name="developer_options_off">開発者向けオプション / USB デバッグ: OFF（有効化時に自動で ON）</string>
+    <string name="permission_ok">権限 OK</string>
+    <string name="grant_from_pc">PC から一度だけ権限を付与してください（USB またはワイヤレス adb）:</string>
+    <string name="copy_command">コマンドをコピー</string>
+    <string name="copied">コピーしました</string>
+
+    <string name="section_location">2. 位置情報（Wi-Fi 名の取得に必要）</string>
+    <string name="grant_precise_location">正確な位置情報を許可</string>
+    <string name="background_location_hint">バックグラウンドで SSID を取得できるよう「常に許可」を選択してください。</string>
+    <string name="allow_all_the_time">常に許可</string>
+    <string name="app_settings">アプリの設定</string>
+    <string name="location_permission_ok">位置情報の権限 OK</string>
+    <string name="location_services_off">位置情報サービスが OFF です。ON にするまで SSID は非表示になります。</string>
+    <string name="open_location_settings">位置情報の設定を開く</string>
+    <string name="allow_notifications">通知を許可（ステータス通知）</string>
+
+    <string name="section_keep_running">3. 常駐させる（Samsung）</string>
+    <string name="battery_optimization_ignored">電池の最適化: 対象外（OK）</string>
+    <string name="battery_optimization_on">電池の最適化: ON - 監視サービスが停止される可能性あり</string>
+    <string name="stop_optimizing_battery">電池の最適化を停止</string>
+    <string name="samsung_battery_hint">アプリ情報 &gt; バッテリー &gt;「制限なし」に設定し、設定 &gt; バッテリー &gt; バックグラウンドでの使用制限 &gt;「スリープさせないアプリ」にこのアプリを追加してください。</string>
+    <string name="open_app_info">アプリ情報を開く</string>
+    <string name="auto_revoke_off">使用されていないアプリの権限を削除: OFF（OK）</string>
+    <string name="auto_revoke_on">使用されていないアプリの権限を削除: ON - 位置情報の権限が取り消される可能性あり</string>
+    <string name="turn_off_auto_revoke">「使用されていないアプリの権限を削除」を OFF にする</string>
+
+    <string name="section_current_network">現在のネットワーク</string>
+    <string name="ssid_not_on_wifi">SSID: Wi-Fi 未接続</string>
+    <string name="ssid_hidden">SSID: &lt;unknown ssid&gt; - Android によって非表示になっています。位置情報を「常に許可」にし、位置情報を ON にしてください。</string>
+    <string name="ssid_value">SSID: %1$s</string>
+    <string name="ssid_value_bssid">SSID: %1$s  (%2$s)</string>
+    <string name="wireless_debugging_on">ワイヤレス デバッグ: ON</string>
+    <string name="wireless_debugging_off">ワイヤレス デバッグ: OFF</string>
+    <string name="address">アドレス: %1$s:%2$s</string>
+    <string name="retry_port_discovery">ポート検出を再試行</string>
+    <string name="turn_off">OFF にする</string>
+    <string name="enable_now">今すぐ ON</string>
+    <string name="add_to_whitelist">許可リストに追加</string>
+    <string name="first_time_approval_hint">各ネットワークで初回は「このネットワークでワイヤレス デバッグを許可しますか？」と表示されます。「このネットワークで常に許可」に一度チェックを入れてください。</string>
+    <string name="open_wireless_debugging_settings">開発者向けオプション &gt; ワイヤレス デバッグを開く</string>
+
+    <string name="section_whitelist">許可済み Wi-Fi</string>
+    <string name="whitelist_empty">まだネットワークがありません。Wi-Fi に接続して「許可リストに追加」をタップしてください。</string>
+    <string name="remove">削除</string>
+    <string name="section_auto_enable">自動で ON</string>
+    <string name="auto_enable_label">許可済み Wi-Fi でワイヤレス デバッグを ON にする</string>
+
+    <string name="section_auth_timeout">オプション: 承認の有効期限</string>
+    <string name="auth_timeout_current">現在: %1$s</string>
+    <string name="auth_timeout_never">期限なし</string>
+    <plurals name="auth_timeout_hours">
+        <item quantity="other">%d 時間</item>
+    </plurals>
+    <string name="disable_auth_timeout">7 日間の承認期限を無効にする</string>
+    <string name="auth_timeout_warning">Android は 7 日間使われていない PC の承認を破棄します。これを無効にすると PC は永久に承認されたままになり、ワイヤレス デバッグが ON の間はその PC の adb 鍵を持つ誰でも接続できます。信頼できる PC とネットワークでのみ使用してください。</string>
+
+    <string name="section_language">言語</string>
+    <string name="language_label">アプリの言語</string>
+    <string name="change_language">変更</string>
+
+    <string name="status_watching">Wi-Fi を監視中…</string>
+    <string name="status_reset_retrying">%1$s: ワイヤレス デバッグがリセットされました。再試行中…</string>
+    <string name="status_no_permission">WRITE_SECURE_SETTINGS が許可されていません</string>
+    <string name="status_no_wifi">Wi-Fi なし</string>
+    <string name="status_ssid_hidden">エラー: SSID が非表示です（&lt;unknown ssid&gt;）。位置情報を「常に許可」にし、位置情報を ON にしてください</string>
+    <string name="status_not_whitelisted">%1$s: 許可リストにありません</string>
+    <string name="status_waiting_ip">%1$s: IP を待機中…</string>
+    <string name="status_on">%1$s: ワイヤレス デバッグ ON</string>
+    <string name="status_off_manual">%1$s: ワイヤレス デバッグ OFF（手動で OFF）</string>
+    <string name="status_waiting_approval">%1$s: このアクセス ポイントでの承認待ち</string>
+    <string name="status_off">%1$s: ワイヤレス デバッグ OFF</string>
+    <string name="status_enabling">%1$s: ワイヤレス デバッグを ON にしています…</string>
+
+    <string name="alert_title">「%1$s」でワイヤレス デバッグを承認</string>
+    <string name="alert_text">この AP で「このネットワークで常に許可」を承認してください</string>
+    <string name="alert_big_text">このアクセス ポイントのワイヤレス デバッグが Android によりリセットされました。一度 ON にして「このネットワークで常に許可」にチェックを入れてください。メッシュ / デュアルバンドのネットワークでは AP ごとに一度必要な場合があります。</string>
+
+    <string name="tile_setup_needed">セットアップが必要</string>
+    <string name="tile_on">ON</string>
+    <string name="tile_off">OFF</string>
+
+    <string name="error_secure_settings_missing">WRITE_SECURE_SETTINGS が許可されていません。実行: %1$s</string>
+</resources>

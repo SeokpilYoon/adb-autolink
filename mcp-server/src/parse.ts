@@ -1,4 +1,5 @@
 /** Pure parsers for adb output. No I/O here. */
+import { t } from "./i18n.js";
 
 export type DeviceState =
   | "device"
@@ -169,12 +170,12 @@ export function parseWakefulness(dumpsys: string): string | undefined {
 /** Map install failure output to an actionable hint (One UI Auto Blocker, Play Protect...). */
 export function installFailureHint(output: string): string | undefined {
   if (/INSTALL_FAILED_VERIFICATION_FAILURE|Play Protect|INSTALL_FAILED_USER_RESTRICTED|user rejected|INSTALL_FAILED_ABORTED|Auto Blocker/i.test(output)) {
-    return "The phone blocked or did not confirm the install. Check the phone screen for a Play Protect scan prompt, and on One UI turn off Auto Blocker (Settings > Security and privacy > Auto Blocker) which blocks adb/sideload installs.";
+    return t("hint.install.blocked");
   }
   if (/INSTALL_FAILED_UPDATE_INCOMPATIBLE|INSTALL_FAILED_VERSION_DOWNGRADE/.test(output)) {
-    return "An incompatible version is installed (different signature or newer versionCode). Uninstall the existing app first (adb uninstall <package>).";
+    return t("hint.install.incompatible");
   }
-  if (/INSTALL_FAILED_INSUFFICIENT_STORAGE/.test(output)) return "Not enough storage on the phone.";
+  if (/INSTALL_FAILED_INSUFFICIENT_STORAGE/.test(output)) return t("hint.install.storage");
   return undefined;
 }
 
@@ -183,10 +184,10 @@ export function validatePairArgs(address: string, code: string): { address: stri
   const addr = address.trim();
   const hp = splitHostPort(addr);
   if (!hp || !/^[\w.:%-]+$/.test(hp.host)) {
-    throw new Error(`Invalid pairing address "${address}". Use the ip:port shown under "Pair device with pairing code", e.g. 192.168.0.23:37099.`);
+    throw new Error(t("pair.invalidAddress", address));
   }
   const c = code.replace(/[\s-]/g, "");
-  if (!/^\d{6}$/.test(c)) throw new Error(`Invalid pairing code "${code}". It must be the 6-digit Wi-Fi pairing code shown on the phone.`);
+  if (!/^\d{6}$/.test(c)) throw new Error(t("pair.invalidCode", code));
   return { address: addr, code: c };
 }
 

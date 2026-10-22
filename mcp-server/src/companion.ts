@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { COMPANION_APK_URL } from "./config.js";
 import { stateDir } from "./devices.js";
+import { t } from "./i18n.js";
 
 export function companionApkUrl(env: NodeJS.ProcessEnv = process.env): string {
   return env.ADB_AUTOLINK_APK_URL || COMPANION_APK_URL;
@@ -25,10 +26,10 @@ export async function downloadCompanionApk(): Promise<{ file: string; note: stri
     const tmp = `${file}.${process.pid}.tmp`;
     writeFileSync(tmp, buf);
     renameSync(tmp, file);
-    return { file, note: `downloaded ${url} (${(buf.length / 1024 / 1024).toFixed(1)} MB) -> ${file}` };
+    return { file, note: t("companion.downloaded", url, (buf.length / 1024 / 1024).toFixed(1), file) };
   } catch (e) {
     const msg = (e as Error).message;
-    if (existsSync(file)) return { file, note: `download failed (${msg}); using cached ${file}` };
-    throw new Error(`Could not download the companion APK from ${url}: ${msg}\nDownload it manually and pass apk_path.`);
+    if (existsSync(file)) return { file, note: t("companion.cached", msg, file) };
+    throw new Error(t("companion.downloadFailed", url, msg));
   }
 }

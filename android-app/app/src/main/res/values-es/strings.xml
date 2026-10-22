@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_name">Vigilancia de Wi-Fi</string>
+    <string name="channel_alert_name">Aprobación necesaria</string>
+
+    <string name="section_secure_settings">1. Permiso de ajustes seguros</string>
+    <string name="developer_options_on">Opciones para desarrolladores + Depuración por USB: SÍ</string>
+    <string name="developer_options_off">Opciones para desarrolladores / Depuración por USB: NO (se activan automáticamente al habilitar)</string>
+    <string name="permission_ok">Permiso OK</string>
+    <string name="grant_from_pc">Concédelo una vez desde un PC (adb por USB o inalámbrico):</string>
+    <string name="copy_command">Copiar comando</string>
+    <string name="copied">Copiado</string>
+
+    <string name="section_location">2. Ubicación (necesaria para leer el nombre de la Wi-Fi)</string>
+    <string name="grant_precise_location">Conceder ubicación precisa</string>
+    <string name="background_location_hint">Elige «Permitir todo el tiempo» para poder leer el SSID en segundo plano.</string>
+    <string name="allow_all_the_time">Permitir todo el tiempo</string>
+    <string name="app_settings">Ajustes de la app</string>
+    <string name="location_permission_ok">Permiso de ubicación OK</string>
+    <string name="location_services_off">Los servicios de ubicación están desactivados. El SSID permanece oculto hasta que los actives.</string>
+    <string name="open_location_settings">Abrir ajustes de ubicación</string>
+    <string name="allow_notifications">Permitir notificaciones (notificación de estado)</string>
+
+    <string name="section_keep_running">3. Mantener en ejecución (Samsung)</string>
+    <string name="battery_optimization_ignored">Optimización de batería: ignorada (OK)</string>
+    <string name="battery_optimization_on">Optimización de batería: activada - el servicio puede cerrarse</string>
+    <string name="stop_optimizing_battery">Dejar de optimizar batería</string>
+    <string name="samsung_battery_hint">Configura también Información de la aplicación &gt; Batería &gt; «Sin restricciones» y añade esta app en Ajustes &gt; Batería &gt; Límites de uso en segundo plano &gt; «Aplicaciones que nunca entran en suspensión».</string>
+    <string name="open_app_info">Abrir información de la app</string>
+    <string name="auto_revoke_off">Quitar permisos si no se usa la app: desactivado (OK)</string>
+    <string name="auto_revoke_on">Quitar permisos si no se usa la app: activado - puede revocar la ubicación</string>
+    <string name="turn_off_auto_revoke">Desactivar «Quitar permisos si no se usa la app»</string>
+
+    <string name="section_current_network">Red actual</string>
+    <string name="ssid_not_on_wifi">SSID: sin conexión Wi-Fi</string>
+    <string name="ssid_hidden">SSID: &lt;unknown ssid&gt; - Android lo oculta. Concede la ubicación «Permitir todo el tiempo» y activa la ubicación.</string>
+    <string name="ssid_value">SSID: %1$s</string>
+    <string name="ssid_value_bssid">SSID: %1$s  (%2$s)</string>
+    <string name="wireless_debugging_on">Depuración inalámbrica: SÍ</string>
+    <string name="wireless_debugging_off">Depuración inalámbrica: NO</string>
+    <string name="address">Dirección: %1$s:%2$s</string>
+    <string name="retry_port_discovery">Reintentar detección de puerto</string>
+    <string name="turn_off">Desactivar</string>
+    <string name="enable_now">Activar ahora</string>
+    <string name="add_to_whitelist">Añadir a la lista blanca</string>
+    <string name="first_time_approval_hint">La primera vez en cada red, Android pregunta «¿Permitir la depuración inalámbrica en esta red?». Marca «Permitir siempre en esta red» una vez.</string>
+    <string name="open_wireless_debugging_settings">Abrir Opciones para desarrolladores &gt; Depuración inalámbrica</string>
+
+    <string name="section_whitelist">Wi-Fi en la lista blanca</string>
+    <string name="whitelist_empty">Aún no hay redes. Conéctate a tu Wi-Fi y toca «Añadir a la lista blanca».</string>
+    <string name="remove">Quitar</string>
+    <string name="section_auto_enable">Activación automática</string>
+    <string name="auto_enable_label">Activar la depuración inalámbrica en las Wi-Fi de la lista blanca</string>
+
+    <string name="section_auth_timeout">Opcional: caducidad de la autorización</string>
+    <string name="auth_timeout_current">Actual: %1$s</string>
+    <string name="auth_timeout_never">nunca caduca</string>
+    <plurals name="auth_timeout_hours">
+        <item quantity="one">%d hora</item>
+        <item quantity="many">%d horas</item>
+        <item quantity="other">%d horas</item>
+    </plurals>
+    <string name="disable_auth_timeout">Desactivar la caducidad de 7 días</string>
+    <string name="auth_timeout_warning">Android olvida las autorizaciones de PC que no se usan en 7 días. Si lo desactivas, tu PC quedará autorizado para siempre: cualquiera con la clave adb de ese PC podrá conectarse mientras la depuración inalámbrica esté activada. Úsalo solo con PC y redes de confianza.</string>
+
+    <string name="section_language">Idioma</string>
+    <string name="language_label">Idioma de la app</string>
+    <string name="change_language">Cambiar</string>
+
+    <string name="status_watching">Vigilando la Wi-Fi…</string>
+    <string name="status_reset_retrying">%1$s: depuración inalámbrica restablecida, reintentando…</string>
+    <string name="status_no_permission">WRITE_SECURE_SETTINGS no concedido</string>
+    <string name="status_no_wifi">Sin Wi-Fi</string>
+    <string name="status_ssid_hidden">ERROR: SSID oculto (&lt;unknown ssid&gt;). Permite la ubicación «todo el tiempo» y activa la ubicación</string>
+    <string name="status_not_whitelisted">%1$s: no está en la lista blanca</string>
+    <string name="status_waiting_ip">%1$s: esperando IP…</string>
+    <string name="status_on">%1$s: depuración inalámbrica activada</string>
+    <string name="status_off_manual">%1$s: depuración inalámbrica desactivada (manualmente)</string>
+    <string name="status_waiting_approval">%1$s: esperando aprobación en este punto de acceso</string>
+    <string name="status_off">%1$s: depuración inalámbrica desactivada</string>
+    <string name="status_enabling">%1$s: activando la depuración inalámbrica…</string>
+
+    <string name="alert_title">Aprueba la depuración inalámbrica en «%1$s»</string>
+    <string name="alert_text">Aprueba «Permitir siempre en esta red» para este AP</string>
+    <string name="alert_big_text">Android restableció la depuración inalámbrica para este punto de acceso. Actívala una vez y marca «Permitir siempre en esta red». Las redes mesh o de doble banda pueden requerirlo una vez por AP.</string>
+
+    <string name="tile_setup_needed">Requiere configuración</string>
+    <string name="tile_on">Activado</string>
+    <string name="tile_off">Desactivado</string>
+
+    <string name="error_secure_settings_missing">WRITE_SECURE_SETTINGS no concedido. Ejecuta: %1$s</string>
+</resources>
