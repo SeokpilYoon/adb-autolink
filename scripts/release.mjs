@@ -97,7 +97,8 @@ function check() {
   return { version: plugin, notes };
 }
 
-const run = (cmd, args, opts = {}) => execFileSync(cmd, args, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], ...opts }).trim();
+// stdout is null when the caller inherits stdio.
+const run = (cmd, args, opts = {}) => (execFileSync(cmd, args, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], ...opts }) ?? "").trim();
 
 /** aapt2 from ANDROID_HOME / ANDROID_SDK_ROOT / %LOCALAPPDATA%/Android/Sdk (newest build-tools first). */
 function findAapt2() {
@@ -141,12 +142,18 @@ function publish() {
     throw new CheckError(`branch ${branch} has no upstream; push it first`);
   }
   if (run("git", ["rev-parse", "HEAD"]) !== run("git", ["rev-parse", upstream])) throw new CheckError(`HEAD is not pushed to ${upstream}`);
-  if (run("git", ["tag", "--list", tag])) throw new CheckError(`tag ${tag} already exists`);
-  if (run("git", ["ls-remote", "--tags", "origin", `refs/tags/${tag}`])) throw new CheckError(`tag ${tag} already exists on origin`);
-
-  run("git", ["tag", "-a", tag, "-m", `adb-autolink ${tag}`]);
-  run("git", ["push", "origin", tag], { stdio: ["ignore", "inherit", "inherit"] });
-  console.log(`tagged and pushed ${tag}`);
+  const head = run("git", ["rev-parse", "HEAD"]);
+  const remoteTag = run("git", ["ls-remote", "--tags", "origin", `refs/tags/${tag}^{}`]).split(/\s/)[0];
+  if (remoteTag) {
+    // Resume a publish that pushed the tag but did not create the release.
+    if (remoteTag !== head) throw new CheckError(`tag ${tag} already exists on origin at another commit`);
+    console.log(`tag ${tag} already on origin at HEAD; resuming`);
+  } else {
+    if (run("git", ["tag", "--list", tag])) throw new CheckError(`tag ${tag} already exists locally but not on origin`);
+    run("git", ["tag", "-a", tag, "-m", `adb-autolink ${tag}`]);
+    run("git", ["push", "origin", tag], { stdio: ["ignore", "inherit", "inherit"] });
+    console.log(`tagged and pushed ${tag}`);
+  }
 
   const tmp = mkdtempSync(path.join(os.tmpdir(), "adb-autolink-notes-"));
   try {
