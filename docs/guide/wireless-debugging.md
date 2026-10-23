@@ -31,16 +31,18 @@ For Claude on your PC to reach your phone over Wi-Fi, do the steps below on the 
 ## 3. Pair with your PC (once per PC)
 
 1. Tap the words **Wireless debugging** (not the switch) to open its screen.
-2. Tap **Pair device with pairing code**.
-3. Tell Claude the **Wi-Fi pairing code** (6 digits) and the **IP address & Port** shown in the dialog. For example: `pair 192.168.0.10:37099 123456`
+2. ① Note the **IP address & Port** near the top. This is the address Claude **connects** to.
+3. ② Tap **Pair device with pairing code**.
+4. Note the **Wi-Fi pairing code** (6 digits) and the **IP address & Port** (for pairing) shown in the dialog.
+5. Tell Claude **all three values at once**. For example: `connect 192.168.0.10:41235 / pair 192.168.0.10:37099 123456`
 
 <p>
-<img src="img/en/05-wireless.png" width="270" alt="Wireless debugging, Pair device with pairing code highlighted">
-<img src="img/en/06-pair.png" width="270" alt="Pair with device dialog, pairing code and IP address and port highlighted">
+<img src="img/en/05-wireless.png" width="270" alt="Wireless debugging, (1) IP address and Port and (2) Pair device with pairing code highlighted">
+<img src="img/en/06-pair.png" width="270" alt="Pair with device dialog, pairing code and pairing IP address and port highlighted">
 </p>
 
-- **Keep the dialog open** until pairing finishes. The code and port change every time it opens.
-- The dialog's port is **different** from the "IP address & Port" at the top of the Wireless debugging screen. Use the one in the dialog.
+- The connect port (①) and the dialog's pairing port are **different**. Without the connect address, pairing can succeed while the connection still fails. Once the dialog is open, ① stays visible, dimmed, behind it.
+- **Keep the dialog open** until pairing finishes. The code and the pairing port change every time it opens.
 
 ## 4. Done
 
@@ -53,4 +55,5 @@ Once paired, Claude installs the ADB Autolink app and finishes every setting. Fr
 | Tapping Build number does nothing | Developer options may already be on. Check for **Developer options** at the bottom of Settings. |
 | Pairing fails | Make sure the dialog is still open, the code and port are the current ones from the dialog, and the PC and phone share the Wi-Fi. |
 | The app install is blocked | Turn off **Settings > Security and privacy > Auto Blocker**, and check the screen for a Play Protect prompt. |
+| Paired, but not connected | Tell Claude the **IP address & Port** (①) at the top of the Wireless debugging screen. It connects to that address directly. |
 | The phone is not found (Windows) | Set the Wi-Fi network profile to **Private**. On Public, phone discovery (mDNS) is blocked. |

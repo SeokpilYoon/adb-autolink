@@ -11,6 +11,16 @@ All notable changes to adb-autolink are recorded here. Each version must match a
 
 Release pages are generated from these sections.
 
+## v0.3.2 - Pairing asks for the connect address too
+
+**Upgrading from 0.3.1:** run `/plugin update adb-autolink` and restart Claude Code. The phone app is unchanged apart from its version number, so there is no need to reinstall it.
+
+- **Fix: pairing succeeded but the phone did not connect.** The pairing dialog's port only accepts `adb pair`; connecting needs the *IP address & Port* at the top of the Wireless debugging screen. Setup asked only for the dialog's values and relied on mDNS discovery for the rest, so on networks where discovery failed it fell back to an old port and was refused.
+  - `pair_device` takes a new `connect_address` and connects to it right after pairing. A bare port is accepted and uses the pairing address's IP; passing the dialog's address by mistake is rejected with an explanation.
+  - Without `connect_address` it now keeps looking for the phone for about 10 seconds instead of 1.5, then asks for the address at the top of the screen instead of retrying an old port.
+  - `/adb-autolink:setup` asks for all three values (connect address, pairing address, code) in one message.
+- **Guide step 3 updated in all six languages:** note ① the connect address at the top of the screen, then ② open the pairing dialog, and send the three values together. The screenshot marks both with numbers, and a "Paired, but not connected" row was added to troubleshooting ([한국어](https://github.com/SeokpilYoon/adb-autolink/blob/main/docs/guide/wireless-debugging.ko.md), [English](https://github.com/SeokpilYoon/adb-autolink/blob/main/docs/guide/wireless-debugging.md)).
+
 ## v0.3.1 - Illustrated wireless debugging guide
 
 **Upgrading from 0.3.0:** run `/plugin update adb-autolink` and restart Claude Code. The phone app is unchanged apart from its version number, so there is no need to reinstall it.

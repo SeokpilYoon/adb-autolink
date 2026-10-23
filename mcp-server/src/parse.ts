@@ -191,6 +191,20 @@ export function validatePairArgs(address: string, code: string): { address: stri
   return { address: addr, code: c };
 }
 
+/**
+ * The connect address from the top of the Wireless debugging screen. A bare port takes the pairing address's host.
+ * Rejects the pairing dialog's own address, the usual mix-up (that port only accepts `adb pair`).
+ */
+export function validateConnectAddress(input: string, pairAddress: string): string {
+  const raw = input.trim();
+  const pairHost = splitHostPort(pairAddress)?.host;
+  const addr = /^\d{1,5}$/.test(raw) && pairHost ? `${pairHost}:${raw}` : raw;
+  const hp = splitHostPort(addr);
+  if (!hp || !/^[\w.:%-]+$/.test(hp.host)) throw new Error(t("pair.invalidConnectAddress", input));
+  if (addr === pairAddress.trim()) throw new Error(t("pair.connectIsPairing", addr));
+  return addr;
+}
+
 /** Result of `adb pair`: "Successfully paired to 192.168.0.23:37099 [guid=adb-R5CR10ABCDE-Xyz12A]". */
 export function parsePairOutput(output: string): { ok: boolean; serial?: string; message: string } {
   const message = output.trim();

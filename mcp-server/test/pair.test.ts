@@ -31,3 +31,17 @@ describe("parsePairOutput", () => {
     expect(parsePairOutput("Failed: Wrong password or connection was dropped.").ok).toBe(false);
   });
 });
+
+describe("validateConnectAddress", () => {
+  it("accepts the connect ip:port and expands a bare port with the pairing host", async () => {
+    const { validateConnectAddress } = await import("../src/parse.js");
+    expect(validateConnectAddress(" 192.168.0.26:41235 ", "192.168.0.26:39823")).toBe("192.168.0.26:41235");
+    expect(validateConnectAddress("41235", "192.168.0.26:39823")).toBe("192.168.0.26:41235");
+  });
+
+  it("rejects the pairing dialog's address and garbage", async () => {
+    const { validateConnectAddress } = await import("../src/parse.js");
+    expect(() => validateConnectAddress("192.168.0.26:39823", "192.168.0.26:39823")).toThrow(/pairing/i);
+    expect(() => validateConnectAddress("not an address", "192.168.0.26:39823")).toThrow();
+  });
+});

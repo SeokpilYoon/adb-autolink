@@ -24,6 +24,7 @@ import {
   parseKeyguardShowing,
   parsePairOutput,
   parseWakefulness,
+  validateConnectAddress,
   validatePairArgs,
 } from "./parse.js";
 import { assertPackageName, inputTextCommands, normalizeKey, shQuote } from "./shell.js";
@@ -90,6 +91,20 @@ async function adbInstall(serial: string, abs: string, flags: string[]): Promise
     throw new Error(`${t("install.failed", serial)}\n${out}${hint ? `\n\n${t("install.hint", hint)}` : ""}`);
   }
   return out;
+}
+
+/** After `adb pair` the phone can take several seconds to advertise its connect port over mDNS: retry before giving up. */
+async function connectAfterPairing(serial: string | undefined): ReturnType<typeof ensureConnected> {
+  let last: unknown;
+  for (const wait of serial ? [1_500, 3_000, 5_000] : [1_500]) {
+    await new Promise((res) => setTimeout(res, wait));
+    try {
+      return await ensureConnected(serial);
+    } catch (e) {
+      last = e;
+    }
+  }
+  throw last;
 }
 
 /** Launch an app's launcher activity via monkey. */
@@ -407,27 +422,35 @@ export function registerTools(server: McpServer): void {
     {
       description:
         "Pair this PC with a phone for wireless debugging (one-time per phone and PC; runs adb pair). On the phone open Settings > " +
-        "Developer options > Wireless debugging > Pair device with pairing code, then pass the ip:port and the 6-digit code shown in " +
-        "that dialog (keep it open; its port differs from the connect port). After pairing it connects to the phone and remembers it. " +
+        "Developer options > Wireless debugging. Ask the user for THREE values in one message: (1) connect_address, the " +
+        '"IP address & Port" at the top of the Wireless debugging screen; then after tapping "Pair device with pairing code", ' +
+        "(2) the ip:port and (3) the 6-digit code shown in that dialog (keep it open). The two ports differ: the dialog's is for " +
+        "pairing only. After pairing it connects to connect_address (or finds the phone via mDNS) and remembers it. " +
         "If the user does not know how to get there, share the illustrated guide in their language: " +
         `${guideUrl("en")} (English), or the same path ending in .ko.md / .ja.md / .zh-Hans.md / .es.md / .fr.md.`,
       inputSchema: {
         address: z.string().describe('ip:port shown in the "Pair device with pairing code" dialog, e.g. 192.168.0.23:37099'),
         code: z.string().describe("6-digit Wi-Fi pairing code shown in the same dialog"),
+        connect_address: z
+          .string()
+          .optional()
+          .describe(
+            'ip:port shown as "IP address & Port" at the top of the Wireless debugging screen (NOT the pairing dialog\'s). ' +
+              "Strongly recommended: without it the connection depends on mDNS discovery, which some networks block.",
+          ),
         lang: langParam,
       },
     },
-    ({ address, code, lang }) =>
+    ({ address, code, connect_address, lang }) =>
       guardLang(lang, async () => {
         const args = validatePairArgs(address, code);
+        const connectTo = connect_address === undefined ? undefined : validateConnectAddress(connect_address, args.address);
         const r = await runAdb(["pair", args.address, args.code], { timeoutMs: 30_000, allowFailure: true });
         const pair = parsePairOutput(`${r.stdout}\n${r.stderr}`);
         if (!pair.ok) throw new Error(`${t("pair.failed", args.address, pair.message)}\n\n${t("hint.guide", guideUrl())}`);
         const lines = [pair.message];
         try {
-          // The connect port is advertised via mDNS; give the phone a moment to publish it.
-          await new Promise((res) => setTimeout(res, 1_500));
-          const c = await ensureConnected(pair.serial);
+          const c = connectTo ? await ensureConnected(connectTo) : await connectAfterPairing(pair.serial);
           lines.push(t("connected", describeCandidate(c.device, loadAliases())), ...c.log.map((l) => `  ${l}`));
         } catch (e) {
           lines.push(t("pair.notConnectedYet", (e as Error).message.split("\n")[0] ?? ""));

@@ -47,9 +47,11 @@ const en = {
   "pair.invalidAddress":
     'Invalid pairing address "{0}". Use the ip:port shown under "Pair device with pairing code", e.g. 192.168.0.23:37099.',
   "pair.invalidCode": 'Invalid pairing code "{0}". It must be the 6-digit Wi-Fi pairing code shown on the phone.',
+  "pair.invalidConnectAddress": "Invalid connect address \"{0}\". Use the ip:port shown as \"IP address & Port\" at the top of the Wireless debugging screen, e.g. 192.168.0.23:41235.",
+  "pair.connectIsPairing": "{0} is the pairing dialog's address, which only accepts pairing. The connect address is the \"IP address & Port\" at the top of the Wireless debugging screen (a different port).",
   "pair.failed":
     "Pairing with {0} failed:\n{1}\n\nCheck that the pairing dialog is still open on the phone, the code and port are current (they change every time the dialog opens), and the phone is on the same network as this PC.",
-  "pair.notConnectedYet": "Paired, but not connected yet: {0}\nTry connect_device in a few seconds.",
+  "pair.notConnectedYet": "Paired, but not connected yet: {0}\nAsk the user for the \"IP address & Port\" at the top of the Wireless debugging screen (not the pairing dialog's) and call connect_device with it.",
   "hint.guide": "Step-by-step guide with screenshots (Developer options, Wireless debugging, pairing code): {0}",
   "companion.usingLocal": "1. Using local APK {0}",
   "companion.downloaded": "1. Downloaded {0} ({1} MB) -> {2}",
@@ -111,9 +113,11 @@ const ko: Catalog = {
   "pair.invalidAddress":
     '잘못된 페어링 주소 "{0}". "페어링 코드로 기기 페어링" 아래에 표시된 ip:port를 입력하세요. 예: 192.168.0.23:37099',
   "pair.invalidCode": '잘못된 페어링 코드 "{0}". 휴대폰에 표시된 6자리 Wi-Fi 페어링 코드여야 합니다.',
+  "pair.invalidConnectAddress": "잘못된 연결 주소 \"{0}\". 무선 디버깅 화면 맨 위 \"IP 주소 및 포트\"에 표시된 ip:포트를 사용하세요. 예: 192.168.0.23:41235",
+  "pair.connectIsPairing": "{0}은(는) 페어링 창의 주소라서 페어링에만 쓰입니다. 연결 주소는 무선 디버깅 화면 맨 위 \"IP 주소 및 포트\"이며 포트가 다릅니다.",
   "pair.failed":
     "{0}와(과) 페어링하지 못했습니다:\n{1}\n\n휴대폰의 페어링 창이 아직 열려 있는지, 코드와 포트가 최신인지(창을 열 때마다 바뀝니다), 휴대폰이 이 PC와 같은 네트워크에 있는지 확인하세요.",
-  "pair.notConnectedYet": "페어링은 되었지만 아직 연결되지 않았습니다: {0}\n몇 초 뒤 connect_device를 다시 시도하세요.",
+  "pair.notConnectedYet": "페어링은 되었지만 아직 연결되지 않았습니다: {0}\n무선 디버깅 화면 맨 위 \"IP 주소 및 포트\"(페어링 창의 값이 아님)를 알려 주시면 그 주소로 연결합니다.",
   "hint.guide": "스크린샷으로 보는 단계별 가이드 (개발자 옵션, 무선 디버깅, 페어링 코드): {0}",
   "companion.usingLocal": "1. 로컬 APK 사용: {0}",
   "companion.downloaded": "1. 다운로드 완료: {0} ({1} MB) -> {2}",
@@ -172,9 +176,11 @@ const ja: Catalog = {
   "pair.invalidAddress":
     "ペア設定アドレス「{0}」が正しくありません。「ペア設定コードによるデバイスのペア設定」に表示される ip:port を指定してください(例: 192.168.0.23:37099)。",
   "pair.invalidCode": "ペア設定コード「{0}」が正しくありません。スマートフォンに表示される 6 桁の Wi-Fi ペア設定コードを指定してください。",
+  "pair.invalidConnectAddress": "接続アドレス「{0}」が正しくありません。ワイヤレス デバッグ画面上部の「IP アドレスとポート」に表示される ip:ポートを指定してください。例: 192.168.0.23:41235",
+  "pair.connectIsPairing": "{0} はペア設定ダイアログのアドレスで、ペア設定専用です。接続アドレスはワイヤレス デバッグ画面上部の「IP アドレスとポート」で、ポートが異なります。",
   "pair.failed":
     "{0} とのペア設定に失敗しました:\n{1}\n\nスマートフォンのペア設定ダイアログが開いたままか、コードとポートが最新か(ダイアログを開くたびに変わります)、スマートフォンがこの PC と同じネットワークにあるかを確認してください。",
-  "pair.notConnectedYet": "ペア設定は完了しましたが、まだ接続されていません: {0}\n数秒後に connect_device をお試しください。",
+  "pair.notConnectedYet": "ペア設定は完了しましたが、まだ接続されていません: {0}\nワイヤレス デバッグ画面上部の「IP アドレスとポート」(ペア設定ダイアログの値ではありません)を教えてください。そのアドレスに接続します。",
   "hint.guide": "スクリーンショット付きの手順ガイド(開発者向けオプション、ワイヤレス デバッグ、ペア設定コード): {0}",
   "companion.usingLocal": "1. ローカルの APK を使用: {0}",
   "companion.downloaded": "1. ダウンロード完了: {0} ({1} MB) -> {2}",
@@ -233,9 +239,11 @@ const zhHans: Catalog = {
     "警告:锁屏仍在显示(安全锁屏无法通过 adb 解除)。请解锁手机,或设置 Smart Lock / 延长解锁时间(可信地点或可信设备),让手机在家时保持解锁。",
   "pair.invalidAddress": "配对地址“{0}”无效。请使用“使用配对码配对设备”下显示的 ip:port,例如 192.168.0.23:37099。",
   "pair.invalidCode": "配对码“{0}”无效。必须是手机上显示的 6 位 WLAN 配对码。",
+  "pair.invalidConnectAddress": "连接地址“{0}”无效。请使用无线调试页面顶部“IP 地址和端口”中显示的 ip:端口,例如 192.168.0.23:41235。",
+  "pair.connectIsPairing": "{0} 是配对对话框的地址,只能用于配对。连接地址是无线调试页面顶部的“IP 地址和端口”,端口不同。",
   "pair.failed":
     "与 {0} 配对失败:\n{1}\n\n请确认手机上的配对对话框仍处于打开状态、配对码和端口是最新的(每次打开对话框都会变化),并且手机与这台电脑在同一网络中。",
-  "pair.notConnectedYet": "已配对,但尚未连接:{0}\n请过几秒后再试 connect_device。",
+  "pair.notConnectedYet": "已配对,但尚未连接:{0}\n请提供无线调试页面顶部的“IP 地址和端口”(不是配对对话框中的值),将用它进行连接。",
   "hint.guide": "带截图的分步指南(开发者选项、无线调试、配对码):{0}",
   "companion.usingLocal": "1. 使用本地 APK:{0}",
   "companion.downloaded": "1. 已下载 {0}({1} MB)-> {2}",
@@ -294,9 +302,11 @@ const es: Catalog = {
   "pair.invalidAddress":
     'Dirección de vinculación no válida "{0}". Usa la ip:puerto que aparece en "Vincular dispositivo con código de vinculación", p. ej. 192.168.0.23:37099.',
   "pair.invalidCode": 'Código de vinculación no válido "{0}". Debe ser el código de vinculación Wi-Fi de 6 dígitos que aparece en el teléfono.',
+  "pair.invalidConnectAddress": "Dirección de conexión no válida \"{0}\". Usa la ip:puerto que aparece en \"Dirección IP y puerto\" en la parte superior de la pantalla de Depuración inalámbrica, p. ej. 192.168.0.23:41235.",
+  "pair.connectIsPairing": "{0} es la dirección del cuadro de vinculación, que solo sirve para vincular. La dirección de conexión es la \"Dirección IP y puerto\" de la parte superior de la pantalla de Depuración inalámbrica (otro puerto).",
   "pair.failed":
     "No se pudo vincular con {0}:\n{1}\n\nComprueba que el cuadro de vinculación siga abierto en el teléfono, que el código y el puerto sean los actuales (cambian cada vez que se abre) y que el teléfono esté en la misma red que este PC.",
-  "pair.notConnectedYet": "Vinculado, pero aún sin conectar: {0}\nPrueba connect_device dentro de unos segundos.",
+  "pair.notConnectedYet": "Vinculado, pero aún sin conectar: {0}\nIndica la \"Dirección IP y puerto\" de la parte superior de la pantalla de Depuración inalámbrica (no la del cuadro de vinculación) y se conectará a ella.",
   "hint.guide": "Guía paso a paso con capturas (Opciones para desarrolladores, Depuración inalámbrica, código de vinculación): {0}",
   "companion.usingLocal": "1. Usando el APK local {0}",
   "companion.downloaded": "1. Descargado {0} ({1} MB) -> {2}",
@@ -355,9 +365,11 @@ const fr: Catalog = {
   "pair.invalidAddress":
     "Adresse d'association « {0} » non valide. Utilisez l'ip:port affiché sous « Associer l'appareil avec un code d'association », par ex. 192.168.0.23:37099.",
   "pair.invalidCode": "Code d'association « {0} » non valide. Il doit s'agir du code d'association Wi-Fi à 6 chiffres affiché sur le téléphone.",
+  "pair.invalidConnectAddress": "Adresse de connexion « {0} » non valide. Utilisez l'ip:port affiché dans « Adresse IP et port » en haut de l'écran Débogage sans fil, par ex. 192.168.0.23:41235.",
+  "pair.connectIsPairing": "{0} est l'adresse de la boîte d'association, qui ne sert qu'à l'association. L'adresse de connexion est « Adresse IP et port » en haut de l'écran Débogage sans fil (un autre port).",
   "pair.failed":
     "Échec de l'association avec {0} :\n{1}\n\nVérifiez que la fenêtre d'association est toujours ouverte sur le téléphone, que le code et le port sont à jour (ils changent à chaque ouverture) et que le téléphone est sur le même réseau que ce PC.",
-  "pair.notConnectedYet": "Associé, mais pas encore connecté : {0}\nRéessayez connect_device dans quelques secondes.",
+  "pair.notConnectedYet": "Associé, mais pas encore connecté : {0}\nIndiquez l'« Adresse IP et port » en haut de l'écran Débogage sans fil (pas celle de la boîte d'association) pour s'y connecter.",
   "hint.guide": "Guide pas à pas avec captures (Options pour les développeurs, Débogage sans fil, code d'association) : {0}",
   "companion.usingLocal": "1. Utilisation de l'APK local {0}",
   "companion.downloaded": "1. Téléchargé {0} ({1} Mo) -> {2}",

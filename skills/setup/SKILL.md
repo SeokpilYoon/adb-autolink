@@ -7,7 +7,7 @@ description: >-
   pair phone, connect phone over Wi-Fi, 무선 디버깅, 무선 adb, 폰 연결, 휴대폰 연결, 페어링, ワイヤレスデバッグ,
   ワイヤレス デバッグ, スマホ接続, ペア設定, 无线调试, 连接手机, 配对, depuración inalámbrica, vincular teléfono,
   débogage sans fil, associer le téléphone.
-version: 0.3.1
+version: 0.3.2
 license: MIT
 depends_on:
   required_bins:
@@ -34,9 +34,13 @@ Skip if `list_devices` already shows the phone online or discovered.
 0. First give the user the illustrated guide in their language, since most people have never seen these menus:
    `https://github.com/SeokpilYoon/adb-autolink/blob/main/docs/guide/wireless-debugging.md` (English), or the same path ending in
    `.ko.md`, `.ja.md`, `.zh-Hans.md`, `.es.md`, `.fr.md`. It shows each screen with the item to tap highlighted.
-1. Ask the user to open **Settings → Developer options → Wireless debugging** on the phone, turn it on, then tap **Pair device with pairing code**. (Developer options: tap *Build number* 7 times in *About phone → Software information*.)
-2. Ask for the **IP address & port** and the **6-digit code** shown in that dialog.
-3. Call `pair_device` with them. A USB-connected phone can skip pairing.
+1. Ask the user to open **Settings → Developer options → Wireless debugging** on the phone and turn it on. (Developer options: tap *Build number* 7 times in *About phone → Software information*.)
+2. Ask for **three values in one message**, naming both ports explicitly because users confuse them:
+   - **Connect address**: the *IP address & Port* at the top of the Wireless debugging screen (① in the guide).
+   - Then tap **Pair device with pairing code**: the dialog's *IP address & Port* (pairing port) and the **6-digit code**. Keep the dialog open.
+   - Example reply: `connect 192.168.0.10:41235 / pair 192.168.0.10:37099 123456`
+3. Call `pair_device` with `address` (dialog), `code` and `connect_address` (top of the screen). A USB-connected phone can skip pairing.
+4. If the result says paired but not connected, ask only for the connect address (top of the Wireless debugging screen) and call `connect_device` with it. Never retry with an old remembered port.
 
 ## 3. Install the companion app
 Call `install_companion_app` (optionally with `device`). It downloads the latest release APK, installs it, grants `WRITE_SECURE_SETTINGS`, location and notification permissions, exempts the app from battery optimization and permission auto-removal, turns off the 7-day authorization timeout, opens the app, and (when connected wirelessly) allows the current Wi-Fi. Relay each numbered step of the result. If install is blocked, relay the hint (Samsung **Auto Blocker** off, Play Protect prompt on screen).
