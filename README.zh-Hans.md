@@ -64,6 +64,8 @@
 
 Claude 会引导你完成配对并安装配套应用（从最新的 GitHub release 下载）。安装时会通过 adb 设置所有权限和豁免，并在无线连接时允许当前 Wi-Fi，因此应用中无需任何设置。唯一剩下的是 Android 的*“始终允许在此网络上使用”*确认。
 
+第一次使用无线调试？请参阅[图文设置指南](docs/guide/wireless-debugging.zh-Hans.md)，每个画面都标出了要点按的位置。
+
 ### 手动设置（备选）
 
 1. 配对一次：**开发者选项 > 无线调试 > 使用配对码配对设备**，然后运行 `adb pair <ip:port> <code>`（也可以让 Claude 调用 `pair_device`）。

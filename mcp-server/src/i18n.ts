@@ -6,6 +6,7 @@
  * A tool call can override it for its own duration with withLang() (e.g. the `lang` tool parameter).
  */
 import { AsyncLocalStorage } from "node:async_hooks";
+import { GUIDE_URL_BASE } from "./config.js";
 
 export const LOCALES = ["en", "ko", "ja", "zh-Hans", "es", "fr"] as const;
 export type Locale = (typeof LOCALES)[number];
@@ -49,6 +50,7 @@ const en = {
   "pair.failed":
     "Pairing with {0} failed:\n{1}\n\nCheck that the pairing dialog is still open on the phone, the code and port are current (they change every time the dialog opens), and the phone is on the same network as this PC.",
   "pair.notConnectedYet": "Paired, but not connected yet: {0}\nTry connect_device in a few seconds.",
+  "hint.guide": "Step-by-step guide with screenshots (Developer options, Wireless debugging, pairing code): {0}",
   "companion.usingLocal": "1. Using local APK {0}",
   "companion.downloaded": "1. Downloaded {0} ({1} MB) -> {2}",
   "companion.cached": "1. Download failed ({0}); using the cached {1}",
@@ -112,6 +114,7 @@ const ko: Catalog = {
   "pair.failed":
     "{0}와(과) 페어링하지 못했습니다:\n{1}\n\n휴대폰의 페어링 창이 아직 열려 있는지, 코드와 포트가 최신인지(창을 열 때마다 바뀝니다), 휴대폰이 이 PC와 같은 네트워크에 있는지 확인하세요.",
   "pair.notConnectedYet": "페어링은 되었지만 아직 연결되지 않았습니다: {0}\n몇 초 뒤 connect_device를 다시 시도하세요.",
+  "hint.guide": "스크린샷으로 보는 단계별 가이드 (개발자 옵션, 무선 디버깅, 페어링 코드): {0}",
   "companion.usingLocal": "1. 로컬 APK 사용: {0}",
   "companion.downloaded": "1. 다운로드 완료: {0} ({1} MB) -> {2}",
   "companion.cached": "1. 다운로드 실패({0}), 캐시된 파일 사용: {1}",
@@ -172,6 +175,7 @@ const ja: Catalog = {
   "pair.failed":
     "{0} とのペア設定に失敗しました:\n{1}\n\nスマートフォンのペア設定ダイアログが開いたままか、コードとポートが最新か(ダイアログを開くたびに変わります)、スマートフォンがこの PC と同じネットワークにあるかを確認してください。",
   "pair.notConnectedYet": "ペア設定は完了しましたが、まだ接続されていません: {0}\n数秒後に connect_device をお試しください。",
+  "hint.guide": "スクリーンショット付きの手順ガイド(開発者向けオプション、ワイヤレス デバッグ、ペア設定コード): {0}",
   "companion.usingLocal": "1. ローカルの APK を使用: {0}",
   "companion.downloaded": "1. ダウンロード完了: {0} ({1} MB) -> {2}",
   "companion.cached": "1. ダウンロード失敗({0})のため、キャッシュを使用: {1}",
@@ -232,6 +236,7 @@ const zhHans: Catalog = {
   "pair.failed":
     "与 {0} 配对失败:\n{1}\n\n请确认手机上的配对对话框仍处于打开状态、配对码和端口是最新的(每次打开对话框都会变化),并且手机与这台电脑在同一网络中。",
   "pair.notConnectedYet": "已配对,但尚未连接:{0}\n请过几秒后再试 connect_device。",
+  "hint.guide": "带截图的分步指南(开发者选项、无线调试、配对码):{0}",
   "companion.usingLocal": "1. 使用本地 APK:{0}",
   "companion.downloaded": "1. 已下载 {0}({1} MB)-> {2}",
   "companion.cached": "1. 下载失败({0}),改用缓存的 {1}",
@@ -292,6 +297,7 @@ const es: Catalog = {
   "pair.failed":
     "No se pudo vincular con {0}:\n{1}\n\nComprueba que el cuadro de vinculación siga abierto en el teléfono, que el código y el puerto sean los actuales (cambian cada vez que se abre) y que el teléfono esté en la misma red que este PC.",
   "pair.notConnectedYet": "Vinculado, pero aún sin conectar: {0}\nPrueba connect_device dentro de unos segundos.",
+  "hint.guide": "Guía paso a paso con capturas (Opciones para desarrolladores, Depuración inalámbrica, código de vinculación): {0}",
   "companion.usingLocal": "1. Usando el APK local {0}",
   "companion.downloaded": "1. Descargado {0} ({1} MB) -> {2}",
   "companion.cached": "1. Falló la descarga ({0}); se usa la copia en caché {1}",
@@ -352,6 +358,7 @@ const fr: Catalog = {
   "pair.failed":
     "Échec de l'association avec {0} :\n{1}\n\nVérifiez que la fenêtre d'association est toujours ouverte sur le téléphone, que le code et le port sont à jour (ils changent à chaque ouverture) et que le téléphone est sur le même réseau que ce PC.",
   "pair.notConnectedYet": "Associé, mais pas encore connecté : {0}\nRéessayez connect_device dans quelques secondes.",
+  "hint.guide": "Guide pas à pas avec captures (Options pour les développeurs, Débogage sans fil, code d'association) : {0}",
   "companion.usingLocal": "1. Utilisation de l'APK local {0}",
   "companion.downloaded": "1. Téléchargé {0} ({1} Mo) -> {2}",
   "companion.cached": "1. Échec du téléchargement ({0}) ; utilisation de la copie en cache {1}",
@@ -428,4 +435,9 @@ export function format(template: string, args: readonly (string | number)[]): st
 /** Translate `key` into the current locale, substituting {0}, {1}, ... */
 export function t(key: MessageKey, ...args: (string | number)[]): string {
   return format(CATALOGS[currentLocale()][key] ?? en[key], args);
+}
+
+/** The illustrated setup guide in the given (default: current) locale. */
+export function guideUrl(locale: Locale = currentLocale()): string {
+  return `${GUIDE_URL_BASE}${locale === "en" ? "" : `.${locale}`}.md`;
 }

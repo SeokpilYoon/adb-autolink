@@ -68,3 +68,17 @@ describe("locale detection", () => {
     expect(format("{1}-{0}-{2}", ["a", 2])).toBe("2-a-{2}");
   });
 });
+
+describe("guide links", () => {
+  it("points each locale at an existing guide page", async () => {
+    const { existsSync } = await import("node:fs");
+    const { guideUrl } = await import("../src/i18n.js");
+    for (const loc of LOCALES) {
+      const url = guideUrl(loc);
+      const rel = url.split("/blob/main/")[1];
+      expect(existsSync(new URL(`../../${rel}`, import.meta.url)), `${loc}: ${rel}`).toBe(true);
+    }
+    expect(guideUrl("en")).toMatch(/wireless-debugging\.md$/);
+    expect(guideUrl("ko")).toMatch(/wireless-debugging\.ko\.md$/);
+  });
+});

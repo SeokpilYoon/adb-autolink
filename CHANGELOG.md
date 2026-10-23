@@ -11,6 +11,13 @@ All notable changes to adb-autolink are recorded here. Each version must match a
 
 Release pages are generated from these sections.
 
+## v0.3.1 - Illustrated wireless debugging guide
+
+**Upgrading from 0.3.0:** run `/plugin update adb-autolink` and restart Claude Code. The phone app is unchanged apart from its version number, so there is no need to reinstall it.
+
+- **Step-by-step guide with screenshots** for turning on Developer options and Wireless debugging and finding the pairing code: [English](https://github.com/SeokpilYoon/adb-autolink/blob/main/docs/guide/wireless-debugging.md), [한국어](https://github.com/SeokpilYoon/adb-autolink/blob/main/docs/guide/wireless-debugging.ko.md), [日本語](https://github.com/SeokpilYoon/adb-autolink/blob/main/docs/guide/wireless-debugging.ja.md), [简体中文](https://github.com/SeokpilYoon/adb-autolink/blob/main/docs/guide/wireless-debugging.zh-Hans.md), [Español](https://github.com/SeokpilYoon/adb-autolink/blob/main/docs/guide/wireless-debugging.es.md), [Français](https://github.com/SeokpilYoon/adb-autolink/blob/main/docs/guide/wireless-debugging.fr.md). Each screen marks the item to tap; personal details are blurred. Screenshots are from a Galaxy S21 (One UI 7) in Korean and English, and the other languages give their own menu names.
+- **Claude shares the guide in your language:** `/adb-autolink:setup` links it before pairing, and failed pairing or "no reachable device" messages end with the link.
+
 ## v0.3.0 - Nothing to set up in the phone app
 
 **Upgrading from 0.2.x:** run `/plugin update adb-autolink`, restart Claude Code, then call `install_companion_app` once more so it applies the new automatic setup. The app updates in place and keeps your whitelist. If you had whitelisted networks but left *Auto-enable* off, auto mode is now on for them: remove a network from the list to stop it.

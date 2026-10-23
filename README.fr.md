@@ -64,6 +64,8 @@ Redémarrez Claude Code, puis lancez :
 
 Claude vous guide pour l'appairage et installe l'application compagnon (téléchargée depuis la dernière release GitHub). L'installation accorde via adb toutes les autorisations et exemptions et, en connexion sans fil, autorise le Wi-Fi actuel : il n'y a rien à configurer dans l'application. Il ne reste que l'invite Android *« Toujours autoriser sur ce réseau »*.
 
+Première fois avec le débogage sans fil ? Le [guide illustré](docs/guide/wireless-debugging.fr.md) montre chaque écran avec l'élément à toucher mis en évidence.
+
 ### Configuration manuelle (alternative)
 
 1. Appairez une fois : **Options pour les développeurs > Débogage sans fil > Associer l'appareil avec un code d'association**, puis `adb pair <ip:port> <code>` (ou demandez à Claude d'appeler `pair_device`).

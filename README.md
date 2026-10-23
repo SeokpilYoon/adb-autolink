@@ -64,6 +64,8 @@ Restart Claude Code, then run:
 
 Claude walks you through pairing and installs the companion app (downloaded from the latest GitHub release). The install grants every permission and exemption over adb and, when connected wirelessly, allows the current Wi-Fi, so there is nothing to configure in the app. The only prompt left is Android's *"Always allow on this network"*.
 
+New to Wireless debugging? The [illustrated setup guide](docs/guide/wireless-debugging.md) shows each screen with the item to tap highlighted.
+
 ### Manual setup (alternative)
 
 1. Pair once: **Developer options → Wireless debugging → Pair device with pairing code**, then `adb pair <ip:port> <code>` (or ask Claude to call `pair_device`).

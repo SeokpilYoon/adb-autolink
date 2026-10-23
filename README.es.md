@@ -64,6 +64,8 @@ Reinicia Claude Code y ejecuta:
 
 Claude te guía por el emparejamiento e instala la app complementaria (descargada de la última release de GitHub). La instalación concede por adb todos los permisos y exclusiones y, si la conexión es inalámbrica, permite la Wi-Fi actual, así que no hay nada que configurar en la app. Solo queda el aviso de Android *"Permitir siempre en esta red"*.
 
+¿Es tu primera vez con la depuración inalámbrica? La [guía ilustrada](docs/guide/wireless-debugging.es.md) muestra cada pantalla con el elemento que hay que tocar resaltado.
+
 ### Configuración manual (alternativa)
 
 1. Empareja una vez: **Opciones para desarrolladores > Depuración inalámbrica > Vincular dispositivo con código de vinculación**, y luego `adb pair <ip:port> <code>` (o pide a Claude que llame a `pair_device`).

@@ -7,7 +7,7 @@ description: >-
   pair phone, connect phone over Wi-Fi, 무선 디버깅, 무선 adb, 폰 연결, 휴대폰 연결, 페어링, ワイヤレスデバッグ,
   ワイヤレス デバッグ, スマホ接続, ペア設定, 无线调试, 连接手机, 配对, depuración inalámbrica, vincular teléfono,
   débogage sans fil, associer le téléphone.
-version: 0.3.0
+version: 0.3.1
 license: MIT
 depends_on:
   required_bins:
@@ -31,6 +31,9 @@ Work through the steps in order, one at a time, and confirm each with the user b
 
 ## 2. Pair (once per phone)
 Skip if `list_devices` already shows the phone online or discovered.
+0. First give the user the illustrated guide in their language, since most people have never seen these menus:
+   `https://github.com/SeokpilYoon/adb-autolink/blob/main/docs/guide/wireless-debugging.md` (English), or the same path ending in
+   `.ko.md`, `.ja.md`, `.zh-Hans.md`, `.es.md`, `.fr.md`. It shows each screen with the item to tap highlighted.
 1. Ask the user to open **Settings → Developer options → Wireless debugging** on the phone, turn it on, then tap **Pair device with pairing code**. (Developer options: tap *Build number* 7 times in *About phone → Software information*.)
 2. Ask for the **IP address & port** and the **6-digit code** shown in that dialog.
 3. Call `pair_device` with them. A USB-connected phone can skip pairing.

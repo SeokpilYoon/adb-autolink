@@ -25,7 +25,7 @@ import {
   serialFromInstance,
   splitHostPort,
 } from "./parse.js";
-import { t } from "./i18n.js";
+import { guideUrl, t } from "./i18n.js";
 
 /** ip:port → ro.serialno (ports change per session, so this never goes stale for a live address). */
 const addressSerialCache = new Map<string, string>();
@@ -107,7 +107,7 @@ export async function discoverMdns(): Promise<DeviceInfo[]> {
 const online = (d: DeviceInfo) => d.state === "device";
 
 export function troubleshootingHint(): string {
-  return t("hint.troubleshoot", COMPANION_APP_NAME);
+  return `${t("hint.troubleshoot", COMPANION_APP_NAME)}\n${t("hint.guide", guideUrl())}`;
 }
 
 async function adbConnect(address: string, timeoutMs = 10_000): Promise<{ ok: boolean; message: string }> {

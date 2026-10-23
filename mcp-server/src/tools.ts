@@ -15,7 +15,7 @@ import {
 import { COMPANION_APP_NAME, COMPANION_PACKAGE } from "./config.js";
 import { adbDisconnect, ensureConnected, formatSnapshot, listAdbDevices, snapshot } from "./connector.js";
 import { describeCandidate, loadAliases, resolveDevice, setAlias } from "./devices.js";
-import { LOCALES, t, withLang } from "./i18n.js";
+import { LOCALES, guideUrl, t, withLang } from "./i18n.js";
 import { decodePng, downscale, encodeJpeg, isAllBlack } from "./image.js";
 import {
   installFailureHint,
@@ -408,7 +408,9 @@ export function registerTools(server: McpServer): void {
       description:
         "Pair this PC with a phone for wireless debugging (one-time per phone and PC; runs adb pair). On the phone open Settings > " +
         "Developer options > Wireless debugging > Pair device with pairing code, then pass the ip:port and the 6-digit code shown in " +
-        "that dialog (keep it open; its port differs from the connect port). After pairing it connects to the phone and remembers it.",
+        "that dialog (keep it open; its port differs from the connect port). After pairing it connects to the phone and remembers it. " +
+        "If the user does not know how to get there, share the illustrated guide in their language: " +
+        `${guideUrl("en")} (English), or the same path ending in .ko.md / .ja.md / .zh-Hans.md / .es.md / .fr.md.`,
       inputSchema: {
         address: z.string().describe('ip:port shown in the "Pair device with pairing code" dialog, e.g. 192.168.0.23:37099'),
         code: z.string().describe("6-digit Wi-Fi pairing code shown in the same dialog"),
@@ -420,7 +422,7 @@ export function registerTools(server: McpServer): void {
         const args = validatePairArgs(address, code);
         const r = await runAdb(["pair", args.address, args.code], { timeoutMs: 30_000, allowFailure: true });
         const pair = parsePairOutput(`${r.stdout}\n${r.stderr}`);
-        if (!pair.ok) throw new Error(t("pair.failed", args.address, pair.message));
+        if (!pair.ok) throw new Error(`${t("pair.failed", args.address, pair.message)}\n\n${t("hint.guide", guideUrl())}`);
         const lines = [pair.message];
         try {
           // The connect port is advertised via mDNS; give the phone a moment to publish it.
