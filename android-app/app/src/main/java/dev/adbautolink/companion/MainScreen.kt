@@ -73,7 +73,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 private data class Status(
     val secureSettings: Boolean,
@@ -171,11 +173,17 @@ fun MainScreen() {
         }
     }
     val ip = wifi?.ipv4
-    LifecycleStartEffect(status.adbWifi, ip, refreshKey) {
+    LaunchedEffect(status.adbWifi, ip, refreshKey) {
         port = null
-        val discovery = AdbPortDiscovery(context) { port = it }
-        if (status.adbWifi) discovery.start(ip)
-        onStopOrDispose { discovery.stop() }
+        // adbd opens its port a moment after the setting flips; look a few times before showing "retry".
+        repeat(3) { attempt ->
+            if (!status.adbWifi || ip == null) return@LaunchedEffect
+            withContext(Dispatchers.IO) { AdbPortLocator.find(context, ip) }?.let {
+                port = it
+                return@LaunchedEffect
+            }
+            if (attempt < 2) delay(1_500)
+        }
     }
 
     val ssid = wifi?.ssid

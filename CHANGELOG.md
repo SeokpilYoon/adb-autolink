@@ -11,6 +11,15 @@ All notable changes to adb-autolink are recorded here. Each version must match a
 
 Release pages are generated from these sections.
 
+## v0.4.0 - Reconnects even where mDNS is blocked
+
+**Upgrading from 0.3.x:** run `/plugin update adb-autolink`, restart Claude Code, then call `install_companion_app` once per phone. The reinstall hands the app this PC's beacon token; until then the phone cannot use the new reconnect path. The app updates in place and keeps your whitelist.
+
+- **Fix: after Wi-Fi off/on the phone was not found again.** Android gives Wireless debugging a new random port every time it turns on, and the PC learned the new port only from mDNS. mDNS is often blocked: Windows drops inbound multicast on networks with the Public profile (the default for a new Wi-Fi) or without a firewall rule for adb, and many routers filter it. The PC then retried the old port and was refused.
+- **Port beacon:** on an allowed Wi-Fi the companion app answers on TCP 47383 (Wi-Fi address only) with its current port. It answers only requests that carry the token this PC gave it during `install_companion_app`. The PC asks the phone's last IP, then scans its own private /24 subnets in case the phone got a new address, and only then falls back to mDNS. In testing with mDNS blocked, a phone whose port had just changed was reconnected in about 3 seconds with no input.
+- **Correct port on the phone:** the phone's own mDNS can return the previous port from its cache right after Wireless debugging restarts, which also made the app screen show a stale port. Every candidate port is now confirmed with the adb handshake (adbd answers `CNXN` with `STLS` on its TLS port), and a full scan of open ports remains as a slow last resort.
+- **Clearer failure:** when the phone answers but Wireless debugging is off, the error says so and points at the "Always allow on this network" prompt, instead of a generic "no device found".
+
 ## v0.3.2 - Pairing asks for the connect address too
 
 **Upgrading from 0.3.1:** run `/plugin update adb-autolink` and restart Claude Code. The phone app is unchanged apart from its version number, so there is no need to reinstall it.

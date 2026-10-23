@@ -23,9 +23,19 @@ describe("companion setup", () => {
   });
 
   it("builds an explicit broadcast to the DUMP-protected receiver", () => {
-    expect(setupBroadcastCommand(true, "x.y")).toBe(
+    expect(setupBroadcastCommand({ addCurrentWifi: true }, "x.y")).toBe(
       "am broadcast -n x.y/.SetupReceiver -a x.y.action.SETUP --ez add_current_wifi true",
     );
+    const token = "0123456789abcdef0123456789abcdef";
+    expect(setupBroadcastCommand({ addCurrentWifi: false, beaconToken: token, serial: "R3CX40C2YKL" }, "x.y")).toBe(
+      `am broadcast -n x.y/.SetupReceiver -a x.y.action.SETUP --ez add_current_wifi false --es beacon_token ${token} --es serial R3CX40C2YKL`,
+    );
+  });
+
+  it("drops extras that are not in their plain format (they reach the device shell unquoted)", () => {
+    const cmd = setupBroadcastCommand({ addCurrentWifi: true, beaconToken: "x; reboot", serial: "a b" }, "x.y");
+    expect(cmd).not.toContain("reboot");
+    expect(cmd).not.toContain("--es");
   });
 
   it("parses the receiver result", () => {

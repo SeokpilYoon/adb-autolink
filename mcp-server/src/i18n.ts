@@ -52,6 +52,7 @@ const en = {
   "pair.failed":
     "Pairing with {0} failed:\n{1}\n\nCheck that the pairing dialog is still open on the phone, the code and port are current (they change every time the dialog opens), and the phone is on the same network as this PC.",
   "pair.notConnectedYet": "Paired, but not connected yet: {0}\nAsk the user for the \"IP address & Port\" at the top of the Wireless debugging screen (not the pairing dialog's) and call connect_device with it.",
+  "beacon.adbOff": "Found {0} through the ADB Autolink app, but Wireless debugging is OFF on it. On the phone, check for a prompt \"Allow wireless debugging on this network?\" and choose \"Always allow on this network\", or turn Wireless debugging on from the app's Quick Settings tile.",
   "hint.guide": "Step-by-step guide with screenshots (Developer options, Wireless debugging, pairing code): {0}",
   "companion.usingLocal": "1. Using local APK {0}",
   "companion.downloaded": "1. Downloaded {0} ({1} MB) -> {2}",
@@ -118,6 +119,7 @@ const ko: Catalog = {
   "pair.failed":
     "{0}와(과) 페어링하지 못했습니다:\n{1}\n\n휴대폰의 페어링 창이 아직 열려 있는지, 코드와 포트가 최신인지(창을 열 때마다 바뀝니다), 휴대폰이 이 PC와 같은 네트워크에 있는지 확인하세요.",
   "pair.notConnectedYet": "페어링은 되었지만 아직 연결되지 않았습니다: {0}\n무선 디버깅 화면 맨 위 \"IP 주소 및 포트\"(페어링 창의 값이 아님)를 알려 주시면 그 주소로 연결합니다.",
+  "beacon.adbOff": "ADB Autolink 앱으로 {0}을(를) 찾았지만 무선 디버깅이 꺼져 있습니다. 폰에 \"이 네트워크에서 무선 디버깅을 허용하시겠습니까?\" 창이 떠 있으면 \"이 네트워크에서 항상 허용\"을 선택하거나, 빠른 설정 타일로 무선 디버깅을 켜 주세요.",
   "hint.guide": "스크린샷으로 보는 단계별 가이드 (개발자 옵션, 무선 디버깅, 페어링 코드): {0}",
   "companion.usingLocal": "1. 로컬 APK 사용: {0}",
   "companion.downloaded": "1. 다운로드 완료: {0} ({1} MB) -> {2}",
@@ -181,6 +183,7 @@ const ja: Catalog = {
   "pair.failed":
     "{0} とのペア設定に失敗しました:\n{1}\n\nスマートフォンのペア設定ダイアログが開いたままか、コードとポートが最新か(ダイアログを開くたびに変わります)、スマートフォンがこの PC と同じネットワークにあるかを確認してください。",
   "pair.notConnectedYet": "ペア設定は完了しましたが、まだ接続されていません: {0}\nワイヤレス デバッグ画面上部の「IP アドレスとポート」(ペア設定ダイアログの値ではありません)を教えてください。そのアドレスに接続します。",
+  "beacon.adbOff": "ADB Autolink アプリ経由で {0} が見つかりましたが、ワイヤレス デバッグがオフです。スマートフォンに「このネットワークでワイヤレス デバッグを許可しますか?」が表示されていたら「このネットワークで常に許可」を選ぶか、クイック設定タイルからワイヤレス デバッグをオンにしてください。",
   "hint.guide": "スクリーンショット付きの手順ガイド(開発者向けオプション、ワイヤレス デバッグ、ペア設定コード): {0}",
   "companion.usingLocal": "1. ローカルの APK を使用: {0}",
   "companion.downloaded": "1. ダウンロード完了: {0} ({1} MB) -> {2}",
@@ -244,6 +247,7 @@ const zhHans: Catalog = {
   "pair.failed":
     "与 {0} 配对失败:\n{1}\n\n请确认手机上的配对对话框仍处于打开状态、配对码和端口是最新的(每次打开对话框都会变化),并且手机与这台电脑在同一网络中。",
   "pair.notConnectedYet": "已配对,但尚未连接:{0}\n请提供无线调试页面顶部的“IP 地址和端口”(不是配对对话框中的值),将用它进行连接。",
+  "beacon.adbOff": "已通过 ADB Autolink 应用找到 {0},但其无线调试已关闭。请查看手机上是否有“要在此网络上允许无线调试吗?”提示并选择“始终允许在此网络上使用”,或通过快捷设置图块开启无线调试。",
   "hint.guide": "带截图的分步指南(开发者选项、无线调试、配对码):{0}",
   "companion.usingLocal": "1. 使用本地 APK:{0}",
   "companion.downloaded": "1. 已下载 {0}({1} MB)-> {2}",
@@ -307,6 +311,7 @@ const es: Catalog = {
   "pair.failed":
     "No se pudo vincular con {0}:\n{1}\n\nComprueba que el cuadro de vinculación siga abierto en el teléfono, que el código y el puerto sean los actuales (cambian cada vez que se abre) y que el teléfono esté en la misma red que este PC.",
   "pair.notConnectedYet": "Vinculado, pero aún sin conectar: {0}\nIndica la \"Dirección IP y puerto\" de la parte superior de la pantalla de Depuración inalámbrica (no la del cuadro de vinculación) y se conectará a ella.",
+  "beacon.adbOff": "Se encontró {0} a través de la app ADB Autolink, pero tiene la Depuración inalámbrica desactivada. En el teléfono, busca el aviso \"¿Permitir la depuración inalámbrica en esta red?\" y elige \"Permitir siempre en esta red\", o actívala desde el mosaico de Ajustes rápidos.",
   "hint.guide": "Guía paso a paso con capturas (Opciones para desarrolladores, Depuración inalámbrica, código de vinculación): {0}",
   "companion.usingLocal": "1. Usando el APK local {0}",
   "companion.downloaded": "1. Descargado {0} ({1} MB) -> {2}",
@@ -370,6 +375,7 @@ const fr: Catalog = {
   "pair.failed":
     "Échec de l'association avec {0} :\n{1}\n\nVérifiez que la fenêtre d'association est toujours ouverte sur le téléphone, que le code et le port sont à jour (ils changent à chaque ouverture) et que le téléphone est sur le même réseau que ce PC.",
   "pair.notConnectedYet": "Associé, mais pas encore connecté : {0}\nIndiquez l'« Adresse IP et port » en haut de l'écran Débogage sans fil (pas celle de la boîte d'association) pour s'y connecter.",
+  "beacon.adbOff": "{0} a été trouvé via l'application ADB Autolink, mais son débogage sans fil est désactivé. Sur le téléphone, cherchez l'invite « Autoriser le débogage sans fil sur ce réseau ? » et choisissez « Toujours autoriser sur ce réseau », ou activez-le depuis la vignette des réglages rapides.",
   "hint.guide": "Guide pas à pas avec captures (Options pour les développeurs, Débogage sans fil, code d'association) : {0}",
   "companion.usingLocal": "1. Utilisation de l'APK local {0}",
   "companion.downloaded": "1. Téléchargé {0} ({1} Mo) -> {2}",

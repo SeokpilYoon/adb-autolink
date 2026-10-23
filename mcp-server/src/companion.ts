@@ -58,9 +58,21 @@ export function setupCommandOk(output: string): boolean {
   return !/exception|error|unknown|not found|bad argument/i.test(output);
 }
 
+export interface SetupOptions {
+  addCurrentWifi: boolean;
+  /** This PC's port-beacon token; the app answers beacon requests only with a token it was given here. */
+  beaconToken?: string;
+  /** ro.serialno, echoed in beacon replies (apps cannot read it themselves). */
+  serial?: string;
+}
+
 /** Broadcast to the app's SetupReceiver (protected by DUMP, which only adb shell holds). */
-export function setupBroadcastCommand(addCurrentWifi: boolean, pkg = COMPANION_PACKAGE): string {
-  return `am broadcast -n ${pkg}/.SetupReceiver -a ${pkg}.action.SETUP --ez add_current_wifi ${addCurrentWifi}`;
+export function setupBroadcastCommand(o: SetupOptions, pkg = COMPANION_PACKAGE): string {
+  const extras = [`--ez add_current_wifi ${o.addCurrentWifi}`];
+  // Both go through the device shell unquoted, so only accept their plain formats.
+  if (o.beaconToken && /^[0-9a-f]{32}$/.test(o.beaconToken)) extras.push(`--es beacon_token ${o.beaconToken}`);
+  if (o.serial && /^[\w.-]{1,64}$/.test(o.serial)) extras.push(`--es serial ${o.serial}`);
+  return `am broadcast -n ${pkg}/.SetupReceiver -a ${pkg}.action.SETUP ${extras.join(" ")}`;
 }
 
 export type SetupResult =

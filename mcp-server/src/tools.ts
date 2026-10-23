@@ -4,6 +4,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { runAdb, runAdbBinary } from "./adb.js";
+import { beaconToken } from "./beacon.js";
 import {
   AUTH_TIMEOUT_OFF_COMMAND,
   companionSetupCommands,
@@ -521,7 +522,9 @@ export function registerTools(server: McpServer): void {
         // Installed over wireless adb: the phone is on a development network right now, so allow it.
         const wireless = isAddressSerial(serial) || isMdnsSerial(serial);
         try {
-          const r = parseSetupBroadcast(await shell(serial, setupBroadcastCommand(wireless), 15_000));
+          const physical = (await shell(serial, "getprop ro.serialno", 10_000).catch(() => "")).trim();
+          const cmd = setupBroadcastCommand({ addCurrentWifi: wireless, beaconToken: beaconToken(), serial: physical });
+          const r = parseSetupBroadcast(await shell(serial, cmd, 15_000));
           if (r.kind === "whitelisted") steps.push(t("companion.wifiAdded", r.ssid));
           else if (r.kind === "no_ssid") steps.push(t("companion.wifiNoSsid"));
           else if (r.kind === "ok") steps.push(t("companion.wifiUsb"));

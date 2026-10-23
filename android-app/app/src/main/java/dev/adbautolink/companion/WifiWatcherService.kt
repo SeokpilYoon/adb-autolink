@@ -18,6 +18,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import java.util.concurrent.Executors
 
 /**
  * Foreground service that enables Wireless debugging when a whitelisted Wi-Fi is connected.
@@ -39,6 +40,16 @@ class WifiWatcherService : Service() {
     private var networkKey: String? = null
     private var state = State.IDLE
     private var retried = false
+    /** Current Wireless debugging port, found by [AdbPortLocator]; read by the beacon thread. */
+    @Volatile private var adbPort: Int? = null
+    private val locator = Executors.newSingleThreadExecutor()
+    /** Bumped whenever Wireless debugging restarts, so a search started before it cannot report a stale port. */
+    private var locateGeneration = 0
+    private var locating = false
+    private var locateAttempts = 0
+    /** Last confirmed port: Wireless debugging sometimes comes back on the same one, which is the cheapest check. */
+    private var lastAdbPort: Int? = null
+    private val beacon = PortBeacon(tokens = { prefs.beaconTokens }, reply = ::beaconReply)
     private val adbObserver = object : ContentObserver(handler) {
         override fun onChange(selfChange: Boolean) = onAdbWifiChanged()
     }
@@ -92,6 +103,8 @@ class WifiWatcherService : Service() {
         contentResolver.unregisterContentObserver(adbObserver)
         // Fields may be uninitialized if startForeground threw in onCreate.
         if (::monitor.isInitialized) monitor.stop()
+        locator.shutdownNow()
+        beacon.stop()
         if (::multicastLock.isInitialized && multicastLock.isHeld) multicastLock.release()
         super.onDestroy()
     }
@@ -102,6 +115,10 @@ class WifiWatcherService : Service() {
     }
 
     private fun onAdbWifiChanged() {
+        // Every restart of Wireless debugging picks a new port: forget the old one, evaluate() looks again.
+        adbPort = null
+        locateGeneration++
+        locateAttempts = 0
         // A pending evaluation or the verify step will refresh the notification itself.
         if (state == State.VERIFYING || handler.hasCallbacks(evaluateRunnable)) return
         val ssid = snapshot?.ssid
@@ -128,6 +145,7 @@ class WifiWatcherService : Service() {
 
         val enabled = AdbWifiController.isEnabled(this)
         if (enabled) notifications.cancel(ALERT_ID)
+        updateBeacon(if (whitelisted) snap?.ipv4 else null, enabled)
         val text = when {
             !AdbWifiController.hasPermission(this) -> getString(R.string.status_no_permission)
             snap == null -> getString(R.string.status_no_wifi)
@@ -151,6 +169,44 @@ class WifiWatcherService : Service() {
             else -> getString(R.string.status_off, ssid)
         }
         notifications.notify(STATUS_ID, statusNotification(text))
+    }
+
+    /** Serve the port beacon on whitelisted Wi-Fi once a PC has set it up, and keep the port it reports current. */
+    private fun updateBeacon(ipv4: String?, enabled: Boolean) {
+        if (ipv4 == null || prefs.beaconTokens.isEmpty()) {
+            beacon.stop()
+            return
+        }
+        beacon.start(ipv4)
+        if (!enabled) adbPort = null else if (adbPort == null) locatePort(ipv4)
+    }
+
+    /** adbd opens its port a moment after the setting flips, so an empty search is retried a few times. */
+    private fun locatePort(ipv4: String) {
+        if (locating || locateAttempts >= MAX_LOCATE_ATTEMPTS) return
+        locating = true
+        val attempt = ++locateAttempts
+        val generation = locateGeneration
+        val lastPort = lastAdbPort
+        locator.execute {
+            // The slow full scan only as the last resort, once the cheap candidates kept failing.
+            val port = AdbPortLocator.find(this, ipv4, lastPort, allowScan = attempt == MAX_LOCATE_ATTEMPTS)
+            handler.post {
+                locating = false
+                if (generation != locateGeneration) return@post // Wireless debugging restarted meanwhile
+                if (port != null) {
+                    adbPort = port
+                    lastAdbPort = port
+                }
+                else handler.postDelayed({ if (generation == locateGeneration && adbPort == null) evaluate() }, LOCATE_RETRY_MS)
+            }
+        }
+    }
+
+    private fun beaconReply(): String? {
+        val serial = prefs.deviceSerial ?: return null
+        val on = AdbWifiController.isEnabled(this)
+        return "ADBAL1 serial=$serial port=${if (on) adbPort ?: 0 else 0} adb=${if (on) "on" else "off"}"
     }
 
     private fun enable(ssid: String): String {
@@ -202,6 +258,8 @@ class WifiWatcherService : Service() {
         private const val DEBOUNCE_MS = 1_500L
         private const val VERIFY_MS = 3_000L
         private const val RETRY_MS = 2_000L
+        private const val LOCATE_RETRY_MS = 2_000L
+        private const val MAX_LOCATE_ATTEMPTS = 5
 
         /** Returns false if the system refused to start the service (e.g. background FGS limits). */
         fun start(context: Context): Boolean = try {

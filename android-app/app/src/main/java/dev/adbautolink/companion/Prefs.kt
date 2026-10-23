@@ -24,9 +24,21 @@ class Prefs(context: Context) {
         get() = sp.getString(KEY_SUGGESTED, null)
         set(value) = sp.edit { putString(KEY_SUGGESTED, value) }
 
+    /** Port-beacon tokens handed over by PCs at setup (install_companion_app), one per PC. */
+    var beaconTokens: Set<String>
+        get() = sp.getStringSet(KEY_BEACON_TOKENS, null)?.toSet() ?: emptySet()
+        set(value) = sp.edit { putStringSet(KEY_BEACON_TOKENS, value) }
+
+    /** ro.serialno from the PC setup (apps cannot read it themselves), echoed in beacon replies. */
+    var deviceSerial: String?
+        get() = sp.getString(KEY_SERIAL, null)
+        set(value) = sp.edit { putString(KEY_SERIAL, value) }
+
     private companion object {
         const val KEY_USER_OFF = "user_disabled"
         const val KEY_WHITELIST = "whitelist"
         const val KEY_SUGGESTED = "suggested_ssid"
+        const val KEY_BEACON_TOKENS = "beacon_tokens"
+        const val KEY_SERIAL = "device_serial"
     }
 }

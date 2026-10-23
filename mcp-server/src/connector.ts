@@ -1,4 +1,5 @@
 import { runAdb } from "./adb.js";
+import { type BeaconReply, beaconToken, queryBeacon, scanBeacons, subnetHosts } from "./beacon.js";
 import { COMPANION_APP_NAME } from "./config.js";
 import {
   type AliasMap,
@@ -236,6 +237,10 @@ async function ensureConnectedUnlocked(selector?: string): Promise<EnsureResult>
     if (hit) return { serial: hit.serial, device: hit, log };
   }
 
+  // Port beacon: ask the companion app for its current port. Unicast TCP, so it works where mDNS is blocked.
+  const beacon = await connectViaBeacon(selector, devices, aliases, log);
+  if (beacon.hit) return { serial: beacon.hit.serial, device: beacon.hit, log };
+
   const backoff = [0, 700, 1500, 2500];
   const attempted = new Set<string>();
   let lastDiscovered: DeviceInfo[] = [];
@@ -286,10 +291,71 @@ async function ensureConnectedUnlocked(selector?: string): Promise<EnsureResult>
   if (lastDiscovered.length)
     parts.push(`${t("connect.discovered")}\n${lastDiscovered.map((d) => `  - ${d.mdns?.instance} ${d.address}`).join("\n")}`);
   if (log.length) parts.push(`${t("connect.attempts")}\n${log.map((l) => `  - ${l}`).join("\n")}`);
+  if (beacon.off.length) parts.push(t("beacon.adbOff", beacon.off.map((r) => `${r.serial} (${r.host})`).join(", ")));
   const unauthorized = devices.filter((d) => d.state === "unauthorized");
   if (unauthorized.length) parts.push(t("connect.unauthorized", unauthorized.map((d) => d.serial).join(", ")));
   parts.push(troubleshootingHint());
   throw new DeviceSelectionError(parts.join("\n\n"));
+}
+
+/**
+ * Ask remembered phones' companion apps for their current connect port: first at their last known IP,
+ * then across this PC's private /24 subnets (DHCP may have moved them). `off` lists phones that answered
+ * but have Wireless debugging off, which usually means the "Always allow on this network" prompt is waiting.
+ */
+async function connectViaBeacon(
+  selector: string | undefined,
+  devices: DeviceInfo[],
+  aliases: AliasMap,
+  log: string[],
+): Promise<{ hit?: DeviceInfo; off: BeaconReply[] }> {
+  const off: BeaconReply[] = [];
+  if (selector && splitHostPort(selector.trim())) return { off };
+  const known = knownCandidates();
+  const targets = (selector ? matchSelector(selector, known, aliases) : known) as DeviceInfo[];
+  const onlinePhys = new Set(devices.filter(online).map((d) => d.physicalSerial));
+  const wanted = new Set(targets.map((t) => t.physicalSerial).filter((s): s is string => !!s && !onlinePhys.has(s)));
+  if (wanted.size === 0) return { off };
+
+  const token = beaconToken();
+  const lastHosts = [...new Set(targets.map((t) => (t.address ? splitHostPort(t.address)?.host : undefined)).filter((h): h is string => !!h))];
+  const ask = async (hosts: string[], scan: boolean) => {
+    const replies = scan ? await scanBeacons(hosts, token) : (await Promise.all(hosts.map((h) => queryBeacon(h, token)))).filter((r) => !!r);
+    return replies.filter((r): r is BeaconReply => !!r && wanted.has(r.serial));
+  };
+  let mine = await ask(lastHosts, false);
+  if (mine.length === 0) {
+    const hosts = subnetHosts().filter((h) => !lastHosts.includes(h));
+    mine = await ask(hosts, true);
+    log.push(`beacon: scanned ${hosts.length} hosts on the local subnets, ${mine.length} remembered phone(s) answered`);
+  }
+  // Wireless debugging just came back on: the app needs a few seconds to confirm its new port.
+  for (let i = 0; i < 4 && mine.some((r) => r.adbOn && !r.port); i++) {
+    await sleep(1_500);
+    mine = await ask([...new Set(mine.map((r) => r.host))], false);
+  }
+
+  const connected: DeviceInfo[] = [];
+  for (const r of mine) {
+    if (!r.adbOn || !r.port) {
+      log.push(`beacon ${r.host}: ${r.serial} answered, Wireless debugging ${r.adbOn ? "on but port unknown" : "OFF"}`);
+      if (!r.adbOn) off.push(r);
+      continue;
+    }
+    const address = `${r.host}:${r.port}`;
+    const target: DeviceInfo = { serial: "", physicalSerial: r.serial, address, state: "known" };
+    await cleanupStale(devices, target, log);
+    const c = await adbConnect(address);
+    log.push(`adb connect ${address} (beacon, ${r.serial}): ${c.message}`);
+    if (c.ok) {
+      rememberDevice(r.serial, { lastAddress: address });
+      connected.push(target);
+    }
+  }
+  if (connected.length === 0) return { off };
+  let current = devices;
+  current = await waitForOnline(() => pick(selector, current, aliases), (d) => (current = d), isTargetOf(connected));
+  return { hit: await pickLive(selector, current, aliases, log), off };
 }
 
 /** Poll `adb devices` briefly until the predicate selects a device (connect can take a moment to settle). */
