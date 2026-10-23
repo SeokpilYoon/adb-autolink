@@ -26,10 +26,6 @@ object AdbWifiController {
 
     val enabledUri: Uri get() = Settings.Global.getUriFor(ADB_WIFI_ENABLED)
 
-    fun isDeveloperOptionsEnabled(context: Context): Boolean =
-        global(context, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED) == 1 &&
-            global(context, Settings.Global.ADB_ENABLED) == 1
-
     /** Returns null on success, otherwise an error message. */
     fun setEnabled(context: Context, enabled: Boolean): String? = write(context) {
         val cr = context.contentResolver

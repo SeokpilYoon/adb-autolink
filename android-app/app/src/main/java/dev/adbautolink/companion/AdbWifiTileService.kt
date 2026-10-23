@@ -35,8 +35,10 @@ class AdbWifiTileService : TileService() {
             openApp()
             return
         }
-        AdbWifiController.setEnabledByUser(this, !AdbWifiController.isEnabled(this))
-            ?.let { Toast.makeText(this, it, Toast.LENGTH_LONG).show() }
+        val enable = !AdbWifiController.isEnabled(this)
+        val error = AdbWifiController.setEnabledByUser(this, enable)
+        if (error != null) Toast.makeText(this, error, Toast.LENGTH_LONG).show()
+        else if (enable) WifiMonitor.currentSsid(this)?.let { WhitelistSuggestion.maybeSuggest(this, it) }
         refresh()
     }
 

@@ -132,7 +132,10 @@ class WifiWatcherService : Service() {
             !AdbWifiController.hasPermission(this) -> getString(R.string.status_no_permission)
             snap == null -> getString(R.string.status_no_wifi)
             ssid == null -> getString(R.string.status_ssid_hidden)
-            !whitelisted -> getString(R.string.status_not_whitelisted, ssid)
+            !whitelisted -> {
+                if (enabled) WhitelistSuggestion.maybeSuggest(this, ssid)
+                getString(R.string.status_not_whitelisted, ssid)
+            }
             snap.ipv4 == null -> getString(R.string.status_waiting_ip, ssid)
             enabled -> {
                 state = State.DONE
@@ -212,6 +215,17 @@ class WifiWatcherService : Service() {
 
         fun stop(context: Context) {
             context.stopService(Intent(context, WifiWatcherService::class.java))
+        }
+
+        /** Starts or stops background watching to match [Prefs.autoEnabled] (a non-empty whitelist). */
+        fun sync(context: Context) {
+            if (Prefs(context).autoEnabled) {
+                WifiTriggerReceiver.register(context)
+                start(context)
+            } else {
+                WifiTriggerReceiver.unregister(context)
+                stop(context)
+            }
         }
     }
 }

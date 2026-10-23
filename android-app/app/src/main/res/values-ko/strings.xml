@@ -2,57 +2,50 @@
 <resources>
     <string name="channel_name">Wi-Fi 감시</string>
     <string name="channel_alert_name">승인 필요</string>
+    <string name="channel_suggest_name">Wi-Fi 추천</string>
 
-    <string name="section_secure_settings">1. 보안 설정 권한</string>
-    <string name="developer_options_on">개발자 옵션 + USB 디버깅: 켜짐</string>
-    <string name="developer_options_off">개발자 옵션 / USB 디버깅: 꺼짐 (활성화할 때 자동으로 켜짐)</string>
-    <string name="permission_ok">권한 OK</string>
     <string name="grant_from_pc">PC에서 한 번만 권한을 부여하세요 (USB 또는 무선 adb):</string>
     <string name="copy_command">명령어 복사</string>
     <string name="copied">복사됨</string>
+    <string name="status_card_issues">설정 필요</string>
+    <string name="setup_from_pc_hint">PC에서 install_companion_app으로 설치하면 아래 항목이 모두 자동으로 설정됩니다.</string>
+    <string name="issue_location">Wi-Fi 이름을 읽으려면 위치 권한이 필요합니다.</string>
 
-    <string name="section_location">2. 위치 (Wi-Fi 이름을 읽는 데 필요)</string>
     <string name="grant_precise_location">정확한 위치 권한 허용</string>
     <string name="background_location_hint">백그라운드에서 SSID를 읽을 수 있도록 “항상 허용”을 선택하세요.</string>
     <string name="allow_all_the_time">항상 허용</string>
     <string name="app_settings">앱 설정</string>
-    <string name="location_permission_ok">위치 권한 OK</string>
     <string name="location_services_off">위치 서비스가 꺼져 있습니다. 켜기 전까지 SSID가 숨겨집니다.</string>
     <string name="open_location_settings">위치 설정 열기</string>
     <string name="allow_notifications">알림 허용 (상태 알림)</string>
 
-    <string name="section_keep_running">3. 계속 실행 (삼성)</string>
-    <string name="battery_optimization_ignored">배터리 최적화: 제외됨 (OK)</string>
     <string name="battery_optimization_on">배터리 최적화: 켜짐 - 감시 서비스가 종료될 수 있음</string>
     <string name="stop_optimizing_battery">배터리 최적화 중지</string>
     <string name="samsung_battery_hint">애플리케이션 정보 &gt; 배터리 &gt; “제한 없음”으로 설정하고, 설정 &gt; 배터리 &gt; 백그라운드 사용 제한 &gt; “절전 예외 앱”에 이 앱을 추가하세요.</string>
     <string name="open_app_info">애플리케이션 정보 열기</string>
-    <string name="auto_revoke_off">앱을 사용하지 않으면 권한 삭제: 꺼짐 (OK)</string>
     <string name="auto_revoke_on">앱을 사용하지 않으면 권한 삭제: 켜짐 - 위치 권한이 회수될 수 있음</string>
     <string name="turn_off_auto_revoke">“앱을 사용하지 않으면 권한 삭제” 끄기</string>
 
+    <string name="hero_linked">지금 PC에서 연결할 수 있습니다</string>
+    <string name="hero_setup">설정을 마치면 자동으로 연결됩니다</string>
+    <string name="hero_off_allowed">이 Wi-Fi에서 무선 디버깅이 꺼져 있습니다</string>
+    <string name="hero_not_allowed">허용되지 않은 Wi-Fi입니다</string>
+    <string name="hero_no_wifi">Wi-Fi에 연결되어 있지 않습니다</string>
     <string name="section_current_network">현재 네트워크</string>
-    <string name="ssid_not_on_wifi">SSID: Wi-Fi에 연결되지 않음</string>
     <string name="ssid_hidden">SSID: &lt;unknown ssid&gt; - Android가 숨기고 있습니다. 위치 권한을 “항상 허용”으로 설정하고 위치를 켜세요.</string>
-    <string name="ssid_value">SSID: %1$s</string>
-    <string name="ssid_value_bssid">SSID: %1$s  (%2$s)</string>
-    <string name="wireless_debugging_on">무선 디버깅: 켜짐</string>
-    <string name="wireless_debugging_off">무선 디버깅: 꺼짐</string>
-    <string name="address">주소: %1$s:%2$s</string>
     <string name="retry_port_discovery">포트 다시 찾기</string>
     <string name="turn_off">끄기</string>
     <string name="enable_now">지금 켜기</string>
-    <string name="add_to_whitelist">허용 목록에 추가</string>
+    <string name="add_to_whitelist">이 Wi-Fi 허용</string>
     <string name="first_time_approval_hint">네트워크마다 처음에 Android가 “이 네트워크에서 무선 디버깅을 허용하시겠습니까?”라고 묻습니다. “이 네트워크에서 항상 허용”을 한 번 체크하세요.</string>
     <string name="open_wireless_debugging_settings">개발자 옵션 &gt; 무선 디버깅 열기</string>
 
     <string name="section_whitelist">허용된 Wi-Fi</string>
-    <string name="whitelist_empty">아직 네트워크가 없습니다. Wi-Fi에 연결한 뒤 “허용 목록에 추가”를 누르세요.</string>
+    <string name="whitelist_empty">아직 없습니다. Wi-Fi에 연결한 뒤 “이 Wi-Fi 허용”을 누르세요.</string>
     <string name="remove">삭제</string>
-    <string name="section_auto_enable">자동 켜기</string>
-    <string name="auto_enable_label">허용된 Wi-Fi에서 무선 디버깅 자동으로 켜기</string>
+    <string name="section_advanced">고급</string>
+    <string name="manual_toggle_label">무선 디버깅 (수동)</string>
 
-    <string name="section_auth_timeout">선택: 승인 만료</string>
     <string name="auth_timeout_current">현재: %1$s</string>
     <string name="auth_timeout_never">만료 안 됨</string>
     <plurals name="auth_timeout_hours">
@@ -61,7 +54,6 @@
     <string name="disable_auth_timeout">7일 승인 만료 사용 안 함</string>
     <string name="auth_timeout_warning">Android는 7일 동안 사용하지 않은 PC 승인을 삭제합니다. 이 옵션을 끄면 PC가 영구적으로 승인되어, 무선 디버깅이 켜져 있는 동안 해당 PC의 adb 키를 가진 누구나 연결할 수 있습니다. 신뢰할 수 있는 PC와 네트워크에서만 사용하세요.</string>
 
-    <string name="section_language">언어</string>
     <string name="language_label">앱 언어</string>
     <string name="change_language">변경</string>
 
@@ -81,6 +73,9 @@
     <string name="alert_title">“%1$s”에서 무선 디버깅 승인</string>
     <string name="alert_text">이 AP에서 “이 네트워크에서 항상 허용”을 승인하세요</string>
     <string name="alert_big_text">Android가 이 액세스 포인트의 무선 디버깅을 초기화했습니다. 한 번 켜고 “이 네트워크에서 항상 허용”을 체크하세요. 메시/듀얼 밴드 네트워크는 AP마다 한 번씩 필요할 수 있습니다.</string>
+    <string name="suggest_title">“%1$s”를 자동 연결에 허용할까요?</string>
+    <string name="suggest_text">여기서 무선 디버깅이 켜져 있습니다. 이 Wi-Fi를 허용하면 다음부터 자동으로 켜집니다.</string>
+    <string name="suggest_action">허용</string>
 
     <string name="tile_setup_needed">설정 필요</string>
     <string name="tile_on">켜짐</string>

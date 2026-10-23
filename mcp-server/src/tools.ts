@@ -4,7 +4,14 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { runAdb, runAdbBinary } from "./adb.js";
-import { downloadCompanionApk } from "./companion.js";
+import {
+  AUTH_TIMEOUT_OFF_COMMAND,
+  companionSetupCommands,
+  downloadCompanionApk,
+  parseSetupBroadcast,
+  setupBroadcastCommand,
+  setupCommandOk,
+} from "./companion.js";
 import { COMPANION_APP_NAME, COMPANION_PACKAGE } from "./config.js";
 import { adbDisconnect, ensureConnected, formatSnapshot, listAdbDevices, snapshot } from "./connector.js";
 import { describeCandidate, loadAliases, resolveDevice, setAlias } from "./devices.js";
@@ -433,8 +440,10 @@ export function registerTools(server: McpServer): void {
       description:
         `Install the ${COMPANION_APP_NAME} companion app (${COMPANION_PACKAGE}) on a phone. The app turns Wireless debugging on ` +
         "automatically whenever the phone joins a whitelisted Wi-Fi, so it reconnects without touching the phone. Downloads the latest " +
-        "release APK from GitHub unless apk_path is given, installs it, grants WRITE_SECURE_SETTINGS, launches it, and lists the setup " +
-        "steps left to do on the phone. The phone must already be reachable over adb (USB, or paired via pair_device).",
+        "release APK from GitHub unless apk_path is given, installs it, grants WRITE_SECURE_SETTINGS, location and notification " +
+        "permissions, exempts it from battery optimization and unused-app permission removal, turns off the 7-day adb authorization " +
+        "timeout, launches it, and when connected wirelessly whitelists the phone's current Wi-Fi. Nothing is left to set up in the " +
+        "app except allowing more Wi-Fi networks. The phone must already be reachable over adb (USB, or paired via pair_device).",
       inputSchema: {
         device: deviceParam,
         apk_path: z.string().optional().describe("Local companion .apk to install instead of downloading the latest release"),
@@ -467,6 +476,16 @@ export function registerTools(server: McpServer): void {
             ? t("companion.granted")
             : t("companion.grantFailed", grantOut),
         );
+        // Everything the app would otherwise ask for screen by screen.
+        const sdk = Number.parseInt(await shell(serial, "getprop ro.build.version.sdk", 10_000).catch(() => ""), 10) || 0;
+        const failed: string[] = [];
+        for (const cmd of companionSetupCommands(sdk)) {
+          const out = await shell(serial, cmd, 15_000).catch((e: Error) => e.message);
+          if (!setupCommandOk(out)) failed.push(cmd);
+        }
+        steps.push(failed.length ? t("companion.setupPartial", failed.join(", ")) : t("companion.setupDone"));
+        const timeout = await shell(serial, AUTH_TIMEOUT_OFF_COMMAND, 10_000).catch((e: Error) => e.message);
+        steps.push(setupCommandOk(timeout) ? t("companion.authTimeoutOff") : t("companion.authTimeoutFailed", timeout));
         try {
           await ensureAwake(serial);
           await launchPackage(serial, COMPANION_PACKAGE);
@@ -474,7 +493,18 @@ export function registerTools(server: McpServer): void {
         } catch (e) {
           steps.push(t("companion.launchFailed", (e as Error).message));
         }
-        return text([...steps, "", t("companion.nextSteps", COMPANION_APP_NAME)].join("\n"));
+        // Installed over wireless adb: the phone is on a development network right now, so allow it.
+        const wireless = isAddressSerial(serial) || isMdnsSerial(serial);
+        try {
+          const r = parseSetupBroadcast(await shell(serial, setupBroadcastCommand(wireless), 15_000));
+          if (r.kind === "whitelisted") steps.push(t("companion.wifiAdded", r.ssid));
+          else if (r.kind === "no_ssid") steps.push(t("companion.wifiNoSsid"));
+          else if (r.kind === "ok") steps.push(t("companion.wifiUsb"));
+          else steps.push(t("companion.wifiFailed", r.raw));
+        } catch (e) {
+          steps.push(t("companion.wifiFailed", (e as Error).message));
+        }
+        return text([...steps, "", t("companion.nextSteps")].join("\n"));
       }),
   );
 

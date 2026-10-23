@@ -78,5 +78,20 @@
         <receiver
             android:name=".WifiTriggerReceiver"
             android:exported="false" />
+
+        <receiver
+            android:name=".AddWifiReceiver"
+            android:exported="false" />
+
+        <!-- DUMP is held by adb shell, never by third-party apps: only the PC setup can send this. -->
+        <receiver
+            android:name=".SetupReceiver"
+            android:exported="true"
+            android:permission="android.permission.DUMP"
+            tools:ignore="ProtectedPermissions">
+            <intent-filter>
+                <action android:name="dev.adbautolink.companion.action.SETUP" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

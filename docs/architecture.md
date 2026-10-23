@@ -38,7 +38,7 @@ Every device tool goes through `ensureConnected`, and only one connection attemp
 
 | Where | What |
 |---|---|
-| Phone: app SharedPreferences | Whitelist, the auto-enable switch, and the user-off flag |
+| Phone: app SharedPreferences | Whitelist (auto mode is on while it is non-empty), the user-off flag, and the last suggested SSID |
 | PC: `~/.adb-autolink/` (`ADB_AUTOLINK_HOME`) | `aliases.json` and remembered devices (serial → model, last address) |
 | PC: `~/.adb-autolink/cache/` | The downloaded companion APK |
 

@@ -57,16 +57,17 @@ const en = {
   "companion.granted": "3. Granted WRITE_SECURE_SETTINGS (lets the app toggle Wireless debugging)",
   "companion.grantFailed":
     '3. FAILED to grant WRITE_SECURE_SETTINGS: {0}\n   (Xiaomi/MIUI: enable "USB debugging (Security settings)" in Developer options, then run this again.)',
-  "companion.launched": "4. Launched the app",
-  "companion.launchFailed": "4. Could not launch the app: {0}",
-  "companion.nextSteps":
-    "Next steps on the phone, in the {0} app:\n" +
-    '  a. Location permission: choose "Allow all the time" and keep Location on (needed to read the Wi-Fi name in the background).\n' +
-    "  b. Allow notifications.\n" +
-    '  c. Battery: set the app to "Unrestricted" so the system does not kill it (Samsung: also keep it out of "Sleeping apps").\n' +
-    '  d. While on your home/office Wi-Fi, tap "Add current Wi-Fi" to whitelist it, then turn auto mode on.\n' +
-    '  e. The first time Wireless debugging turns on for a network, the phone asks to allow it: check "Always allow on this network".\n' +
-    "     Trust is per router (BSSID), so mesh nodes or separate 2.4/5 GHz networks each need one approval.",
+  "companion.setupDone": "4. Granted location and notification permissions, and exempted the app from battery optimization and unused-app permission removal",
+  "companion.setupPartial": "4. Some permissions could not be set ({0}). The app shows what is left to fix.",
+  "companion.authTimeoutOff": "5. Turned off the 7-day adb authorization timeout so this PC stays authorized (undo in the app under Advanced)",
+  "companion.authTimeoutFailed": "5. Could not turn off the adb authorization timeout: {0}",
+  "companion.launched": "6. Launched the app",
+  "companion.launchFailed": "6. Could not launch the app: {0}",
+  "companion.wifiAdded": "7. Allowed the current Wi-Fi \"{0}\": Wireless debugging now turns on automatically there",
+  "companion.wifiNoSsid": "7. Could not read the current Wi-Fi name (is Location on?). Tap \"Allow this Wi-Fi\" in the app.",
+  "companion.wifiUsb": "7. Connected over USB, so no Wi-Fi was allowed yet. On your home/office Wi-Fi, tap \"Allow this Wi-Fi\" in the app.",
+  "companion.wifiFailed": "7. Could not finish the Wi-Fi setup: {0}\n   Tap \"Allow this Wi-Fi\" in the app.",
+  "companion.nextSteps": "The only step left on the phone: the first time Wireless debugging turns on for a network, the phone asks to allow it. Check \"Always allow on this network\".\nTrust is per router (BSSID), so mesh nodes or separate 2.4/5 GHz networks each need one approval. Other Wi-Fi networks can be allowed in the app, or from the notification it shows when you turn Wireless debugging on there.",
 };
 
 export type MessageKey = keyof typeof en;
@@ -119,16 +120,17 @@ const ko: Catalog = {
   "companion.granted": "3. WRITE_SECURE_SETTINGS 권한 부여 완료 (앱이 무선 디버깅을 켜고 끌 수 있게 됩니다)",
   "companion.grantFailed":
     "3. WRITE_SECURE_SETTINGS 권한 부여 실패: {0}\n   (샤오미/MIUI: 개발자 옵션에서 \"USB 디버깅(보안 설정)\"을 켠 다음 다시 실행하세요.)",
-  "companion.launched": "4. 앱 실행 완료",
-  "companion.launchFailed": "4. 앱을 실행하지 못했습니다: {0}",
-  "companion.nextSteps":
-    "이제 휴대폰의 {0} 앱에서 할 일:\n" +
-    '  a. 위치 권한: "항상 허용"을 선택하고 위치를 켜 두세요 (백그라운드에서 Wi-Fi 이름을 읽는 데 필요합니다).\n' +
-    "  b. 알림을 허용하세요.\n" +
-    '  c. 배터리: 시스템이 앱을 종료하지 않도록 "제한 없음"으로 설정하세요 (삼성: "절전 상태 앱"에서도 제외).\n' +
-    '  d. 집/사무실 Wi-Fi에 연결된 상태에서 "현재 Wi-Fi 추가"를 눌러 등록한 뒤 자동 모드를 켜세요.\n' +
-    '  e. 네트워크에서 처음 무선 디버깅이 켜질 때 허용 여부를 묻습니다: "이 네트워크에서 항상 허용"을 체크하세요.\n' +
-    "     신뢰는 공유기(BSSID) 단위라서 메시 노드나 2.4/5GHz가 분리된 네트워크는 각각 한 번씩 허용해야 합니다.",
+  "companion.setupDone": "4. 위치·알림 권한을 부여하고, 배터리 최적화와 미사용 앱 권한 삭제에서 제외했습니다",
+  "companion.setupPartial": "4. 일부 권한을 설정하지 못했습니다 ({0}). 남은 항목은 앱 화면에 표시됩니다.",
+  "companion.authTimeoutOff": "5. 이 PC의 승인이 유지되도록 7일 adb 승인 만료를 껐습니다 (앱의 고급 메뉴에서 되돌릴 수 있음)",
+  "companion.authTimeoutFailed": "5. adb 승인 만료를 끄지 못했습니다: {0}",
+  "companion.launched": "6. 앱 실행 완료",
+  "companion.launchFailed": "6. 앱을 실행하지 못했습니다: {0}",
+  "companion.wifiAdded": "7. 현재 Wi-Fi \"{0}\"를 허용했습니다: 이제 이 Wi-Fi에서 무선 디버깅이 자동으로 켜집니다",
+  "companion.wifiNoSsid": "7. 현재 Wi-Fi 이름을 읽지 못했습니다 (위치가 켜져 있나요?). 앱에서 \"이 Wi-Fi 허용\"을 누르세요.",
+  "companion.wifiUsb": "7. USB로 연결되어 있어 아직 허용한 Wi-Fi가 없습니다. 집/사무실 Wi-Fi에 연결한 뒤 앱에서 \"이 Wi-Fi 허용\"을 누르세요.",
+  "companion.wifiFailed": "7. Wi-Fi 설정을 마치지 못했습니다: {0}\n   앱에서 \"이 Wi-Fi 허용\"을 누르세요.",
+  "companion.nextSteps": "휴대폰에서 남은 일은 하나뿐입니다: 네트워크에서 처음 무선 디버깅이 켜질 때 허용 여부를 묻습니다. \"이 네트워크에서 항상 허용\"을 체크하세요.\n승인은 공유기(BSSID)마다 따로라서, 메시 노드나 2.4/5GHz로 나뉜 네트워크는 각각 한 번씩 승인이 필요합니다. 다른 Wi-Fi는 앱에서 허용하거나, 그곳에서 무선 디버깅을 켰을 때 뜨는 알림에서 허용할 수 있습니다.",
 };
 
 const ja: Catalog = {
@@ -179,16 +181,17 @@ const ja: Catalog = {
   "companion.granted": "3. WRITE_SECURE_SETTINGS を付与しました(アプリがワイヤレス デバッグを切り替えられるようになります)",
   "companion.grantFailed":
     "3. WRITE_SECURE_SETTINGS の付与に失敗しました: {0}\n   (Xiaomi/MIUI: 開発者向けオプションで「USB デバッグ(セキュリティ設定)」をオンにしてから再実行してください。)",
-  "companion.launched": "4. アプリを起動しました",
-  "companion.launchFailed": "4. アプリを起動できませんでした: {0}",
-  "companion.nextSteps":
-    "次に、スマートフォンの {0} アプリで以下を行ってください:\n" +
-    "  a. 位置情報の権限:「常に許可」を選び、位置情報をオンのままにします(バックグラウンドで Wi-Fi 名を取得するために必要)。\n" +
-    "  b. 通知を許可します。\n" +
-    "  c. バッテリー: システムに終了されないよう「制限なし」に設定します(Galaxy は「スリープ中のアプリ」からも除外)。\n" +
-    "  d. 自宅/オフィスの Wi-Fi に接続した状態で「現在の Wi-Fi を追加」をタップして登録し、自動モードをオンにします。\n" +
-    "  e. そのネットワークで初めてワイヤレス デバッグがオンになると許可を求められます:「このネットワークで常に許可する」にチェックしてください。\n" +
-    "     信頼はルーター(BSSID)ごとなので、メッシュの各ノードや 2.4/5 GHz が別のネットワークはそれぞれ一度ずつ許可が必要です。",
+  "companion.setupDone": "4. 位置情報と通知の権限を付与し、バッテリーの最適化と未使用アプリの権限削除の対象外にしました",
+  "companion.setupPartial": "4. 一部の権限を設定できませんでした({0})。残りの項目はアプリに表示されます。",
+  "companion.authTimeoutOff": "5. この PC の承認が維持されるよう、7 日間の adb 承認タイムアウトをオフにしました(アプリの詳細設定で戻せます)",
+  "companion.authTimeoutFailed": "5. adb 承認タイムアウトをオフにできませんでした: {0}",
+  "companion.launched": "6. アプリを起動しました",
+  "companion.launchFailed": "6. アプリを起動できませんでした: {0}",
+  "companion.wifiAdded": "7. 現在の Wi-Fi「{0}」を許可しました: この Wi-Fi ではワイヤレス デバッグが自動でオンになります",
+  "companion.wifiNoSsid": "7. 現在の Wi-Fi 名を読み取れませんでした(位置情報はオンですか?)。アプリで「この Wi-Fi を許可」をタップしてください。",
+  "companion.wifiUsb": "7. USB 接続のため、まだ Wi-Fi は許可されていません。自宅やオフィスの Wi-Fi に接続して、アプリで「この Wi-Fi を許可」をタップしてください。",
+  "companion.wifiFailed": "7. Wi-Fi の設定を完了できませんでした: {0}\n   アプリで「この Wi-Fi を許可」をタップしてください。",
+  "companion.nextSteps": "スマートフォンで残っている作業は 1 つだけです: ネットワークで初めてワイヤレス デバッグがオンになるとき、許可を求められます。「このネットワークで常に許可」にチェックを入れてください。\n信頼はルーター(BSSID)ごとなので、メッシュ ノードや 2.4/5 GHz で分かれたネットワークはそれぞれ 1 回の承認が必要です。ほかの Wi-Fi はアプリで許可するか、そこでワイヤレス デバッグをオンにしたときに表示される通知から許可できます。",
 };
 
 const zhHans: Catalog = {
@@ -237,16 +240,17 @@ const zhHans: Catalog = {
   "companion.granted": "3. 已授予 WRITE_SECURE_SETTINGS(使应用可以开关无线调试)",
   "companion.grantFailed":
     "3. 授予 WRITE_SECURE_SETTINGS 失败:{0}\n   (小米/MIUI:请在开发者选项中开启“USB 调试(安全设置)”,然后重新运行。)",
-  "companion.launched": "4. 已启动应用",
-  "companion.launchFailed": "4. 无法启动应用:{0}",
-  "companion.nextSteps":
-    "接下来请在手机上的 {0} 应用中完成:\n" +
-    "  a. 位置权限:选择“始终允许”,并保持位置信息开启(用于在后台读取 Wi-Fi 名称)。\n" +
-    "  b. 允许通知。\n" +
-    "  c. 电池:设为“不受限制”,以免被系统关闭(三星:同时将其移出“休眠应用”)。\n" +
-    "  d. 连接家里/办公室的 Wi-Fi 时,点按“添加当前 Wi-Fi”将其加入白名单,然后开启自动模式。\n" +
-    "  e. 某个网络首次开启无线调试时,手机会询问是否允许:请勾选“始终允许在此网络上使用”。\n" +
-    "     信任按路由器(BSSID)计算,因此 Mesh 的每个节点或分开的 2.4/5 GHz 网络都需要各确认一次。",
+  "companion.setupDone": "4. 已授予位置和通知权限,并将应用排除在电池优化和未使用应用权限移除之外",
+  "companion.setupPartial": "4. 部分权限未能设置({0})。剩余项目会显示在应用中。",
+  "companion.authTimeoutOff": "5. 已关闭 7 天的 adb 授权超时,使此 PC 保持授权(可在应用的“高级”中恢复)",
+  "companion.authTimeoutFailed": "5. 无法关闭 adb 授权超时:{0}",
+  "companion.launched": "6. 已启动应用",
+  "companion.launchFailed": "6. 无法启动应用:{0}",
+  "companion.wifiAdded": "7. 已允许当前 Wi-Fi“{0}”:在此 Wi-Fi 上会自动开启无线调试",
+  "companion.wifiNoSsid": "7. 无法读取当前 Wi-Fi 名称(位置信息是否已开启?)。请在应用中点按“允许此 Wi-Fi”。",
+  "companion.wifiUsb": "7. 通过 USB 连接,因此尚未允许任何 Wi-Fi。连接到家里或办公室的 Wi-Fi 后,在应用中点按“允许此 Wi-Fi”。",
+  "companion.wifiFailed": "7. 未能完成 Wi-Fi 设置:{0}\n   请在应用中点按“允许此 Wi-Fi”。",
+  "companion.nextSteps": "手机上只剩一步:某个网络第一次开启无线调试时,手机会询问是否允许。请勾选“始终允许在此网络上使用”。\n信任按路由器(BSSID)区分,因此 Mesh 节点或分开的 2.4/5 GHz 网络各需批准一次。其他 Wi-Fi 可在应用中允许,或在那里开启无线调试时通过弹出的通知允许。",
 };
 
 const es: Catalog = {
@@ -296,16 +300,17 @@ const es: Catalog = {
   "companion.granted": "3. Concedido WRITE_SECURE_SETTINGS (permite a la app activar y desactivar la Depuración inalámbrica)",
   "companion.grantFailed":
     '3. No se pudo conceder WRITE_SECURE_SETTINGS: {0}\n   (Xiaomi/MIUI: activa "Depuración USB (ajustes de seguridad)" en Opciones para desarrolladores y vuelve a ejecutarlo.)',
-  "companion.launched": "4. App abierta",
-  "companion.launchFailed": "4. No se pudo abrir la app: {0}",
-  "companion.nextSteps":
-    "Siguientes pasos en el teléfono, en la app {0}:\n" +
-    '  a. Permiso de ubicación: elige "Permitir todo el tiempo" y deja la ubicación activada (necesario para leer el nombre de la Wi-Fi en segundo plano).\n' +
-    "  b. Permite las notificaciones.\n" +
-    '  c. Batería: ponla en "Sin restricciones" para que el sistema no la cierre (Samsung: sácala también de "Aplicaciones en suspensión").\n' +
-    '  d. Conectado a la Wi-Fi de casa u oficina, toca "Añadir Wi-Fi actual" para añadirla a la lista y activa el modo automático.\n' +
-    '  e. La primera vez que se active la Depuración inalámbrica en una red, el teléfono pedirá permiso: marca "Permitir siempre en esta red".\n' +
-    "     La confianza es por router (BSSID), así que cada nodo mesh o red 2,4/5 GHz separada necesita una aprobación.",
+  "companion.setupDone": "4. Concedidos los permisos de ubicación y notificaciones, y la app quedó excluida de la optimización de batería y de la eliminación de permisos de apps sin usar",
+  "companion.setupPartial": "4. No se pudieron configurar algunos permisos ({0}). La app muestra lo que falta.",
+  "companion.authTimeoutOff": "5. Desactivado el vencimiento de 7 días de la autorización adb para que este PC siga autorizado (se puede revertir en la app, en Avanzado)",
+  "companion.authTimeoutFailed": "5. No se pudo desactivar el vencimiento de la autorización adb: {0}",
+  "companion.launched": "6. App abierta",
+  "companion.launchFailed": "6. No se pudo abrir la app: {0}",
+  "companion.wifiAdded": "7. Permitida la Wi-Fi actual \"{0}\": la Depuración inalámbrica se activará automáticamente en ella",
+  "companion.wifiNoSsid": "7. No se pudo leer el nombre de la Wi-Fi actual (¿está activada la ubicación?). Toca \"Permitir esta Wi-Fi\" en la app.",
+  "companion.wifiUsb": "7. Conectado por USB, así que aún no hay ninguna Wi-Fi permitida. En la Wi-Fi de casa u oficina, toca \"Permitir esta Wi-Fi\" en la app.",
+  "companion.wifiFailed": "7. No se pudo terminar la configuración de Wi-Fi: {0}\n   Toca \"Permitir esta Wi-Fi\" en la app.",
+  "companion.nextSteps": "Solo queda un paso en el teléfono: la primera vez que la Depuración inalámbrica se activa en una red, el teléfono pide permiso. Marca \"Permitir siempre en esta red\".\nLa confianza es por router (BSSID), así que los nodos mesh o las redes separadas de 2,4/5 GHz necesitan una aprobación cada uno. Puedes permitir otras Wi-Fi en la app, o desde la notificación que aparece al activar allí la Depuración inalámbrica.",
 };
 
 const fr: Catalog = {
@@ -356,16 +361,17 @@ const fr: Catalog = {
   "companion.granted": "3. WRITE_SECURE_SETTINGS accordé (permet à l'application d'activer ou désactiver le débogage sans fil)",
   "companion.grantFailed":
     "3. ÉCHEC de l'octroi de WRITE_SECURE_SETTINGS : {0}\n   (Xiaomi/MIUI : activez « Débogage USB (paramètres de sécurité) » dans les Options pour les développeurs, puis relancez.)",
-  "companion.launched": "4. Application lancée",
-  "companion.launchFailed": "4. Impossible de lancer l'application : {0}",
-  "companion.nextSteps":
-    "Étapes suivantes sur le téléphone, dans l'application {0} :\n" +
-    "  a. Autorisation de localisation : choisissez « Toujours autoriser » et laissez la localisation activée (nécessaire pour lire le nom du Wi-Fi en arrière-plan).\n" +
-    "  b. Autorisez les notifications.\n" +
-    "  c. Batterie : choisissez « Non restreinte » pour que le système ne ferme pas l'application (Samsung : retirez-la aussi des « Applications en veille »).\n" +
-    "  d. Connecté au Wi-Fi de la maison ou du bureau, appuyez sur « Ajouter le Wi-Fi actuel » pour l'ajouter à la liste, puis activez le mode automatique.\n" +
-    "  e. La première fois que le débogage sans fil s'active sur un réseau, le téléphone demande l'autorisation : cochez « Toujours autoriser sur ce réseau ».\n" +
-    "     La confiance est accordée par routeur (BSSID) : chaque nœud mesh ou réseau 2,4/5 GHz séparé demande une approbation.",
+  "companion.setupDone": "4. Autorisations de localisation et de notification accordées, et application exclue de l'optimisation de la batterie et de la suppression des autorisations des applications inutilisées",
+  "companion.setupPartial": "4. Certaines autorisations n'ont pas pu être définies ({0}). L'application indique ce qu'il reste à corriger.",
+  "companion.authTimeoutOff": "5. Expiration de 7 jours de l'autorisation adb désactivée pour que ce PC reste autorisé (réversible dans l'application, section Avancé)",
+  "companion.authTimeoutFailed": "5. Impossible de désactiver l'expiration de l'autorisation adb : {0}",
+  "companion.launched": "6. Application lancée",
+  "companion.launchFailed": "6. Impossible de lancer l'application : {0}",
+  "companion.wifiAdded": "7. Wi-Fi actuel « {0} » autorisé : le débogage sans fil s'y activera automatiquement",
+  "companion.wifiNoSsid": "7. Impossible de lire le nom du Wi-Fi actuel (la localisation est-elle activée ?). Touchez « Autoriser ce Wi-Fi » dans l'application.",
+  "companion.wifiUsb": "7. Connecté en USB : aucun Wi-Fi n'est encore autorisé. Sur le Wi-Fi de la maison ou du bureau, touchez « Autoriser ce Wi-Fi » dans l'application.",
+  "companion.wifiFailed": "7. Impossible de terminer la configuration Wi-Fi : {0}\n   Touchez « Autoriser ce Wi-Fi » dans l'application.",
+  "companion.nextSteps": "Il ne reste qu'une étape sur le téléphone : la première fois que le débogage sans fil s'active sur un réseau, le téléphone demande l'autorisation. Cochez « Toujours autoriser sur ce réseau ».\nLa confiance est accordée par routeur (BSSID) : les nœuds mesh ou les réseaux 2,4/5 GHz séparés nécessitent chacun une approbation. D'autres Wi-Fi peuvent être autorisés dans l'application, ou depuis la notification affichée quand vous y activez le débogage sans fil.",
 };
 
 export const CATALOGS: Record<Locale, Catalog> = { en, ko, ja, "zh-Hans": zhHans, es, fr };

@@ -62,7 +62,7 @@ Redémarrez Claude Code, puis lancez :
 /adb-autolink:setup
 ```
 
-Claude vous guide pour l'appairage, l'installation de l'application compagnon (téléchargée depuis la dernière release GitHub) et les réglages sur le téléphone.
+Claude vous guide pour l'appairage et installe l'application compagnon (téléchargée depuis la dernière release GitHub). L'installation accorde via adb toutes les autorisations et exemptions et, en connexion sans fil, autorise le Wi-Fi actuel : il n'y a rien à configurer dans l'application. Il ne reste que l'invite Android *« Toujours autoriser sur ce réseau »*.
 
 ### Configuration manuelle (alternative)
 
@@ -76,7 +76,8 @@ Claude vous guide pour l'appairage, l'installation de l'application compagnon (t
    - Localisation → **Toujours autoriser** et services de localisation activés (nécessaire pour lire le nom du Wi-Fi en arrière-plan)
    - Autoriser les notifications
    - Batterie → **Sans restriction** (Samsung : l'exclure aussi des applications en veille)
-   - **Ajouter le Wi-Fi actuel** et activer **Activation automatique**
+   - Touchez **Autoriser ce Wi-Fi** (le mode automatique est actif tant qu'au moins un Wi-Fi est autorisé)
+   - La carte *Configuration requise* de l'application n'affiche que ce qui manque encore.
 4. La première fois sur chaque réseau, Android demande *« Autoriser le débogage sans fil sur ce réseau ? »* : cochez **Toujours autoriser sur ce réseau**. La confiance est accordée par point d'accès (BSSID) ; les routeurs mesh ou bi-bande peuvent donc le demander une fois par AP. L'application vous envoie une notification quand cette approbation est nécessaire.
 
 ## Outils MCP

@@ -7,7 +7,6 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.net.wifi.WifiManager
 import android.util.Log
 
 /**
@@ -19,8 +18,7 @@ class WifiTriggerReceiver : BroadcastReceiver() {
         val prefs = Prefs(context)
         if (!prefs.autoEnabled || WifiWatcherService.start(context)) return
         // Service could not start from the background: enable directly (best-effort).
-        @Suppress("DEPRECATION") // Still returns the SSID with location permission; used only as fallback.
-        val ssid = WifiMonitor.normalizeSsid(context.getSystemService(WifiManager::class.java)?.connectionInfo?.ssid)
+        val ssid = WifiMonitor.currentSsid(context)
         if (ssid != null && ssid in prefs.whitelist && !AdbWifiController.isEnabled(context)) {
             AdbWifiController.setEnabled(context, true)?.let { Log.w(TAG, it) }
         }

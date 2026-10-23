@@ -11,6 +11,17 @@ All notable changes to adb-autolink are recorded here. Each version must match a
 
 Release pages are generated from these sections.
 
+## v0.3.0 - Nothing to set up in the phone app
+
+**Upgrading from 0.2.x:** run `/plugin update adb-autolink`, restart Claude Code, then call `install_companion_app` once more so it applies the new automatic setup. The app updates in place and keeps your whitelist. If you had whitelisted networks but left *Auto-enable* off, auto mode is now on for them: remove a network from the list to stop it.
+
+- **`install_companion_app` does the whole setup over adb.** Besides `WRITE_SECURE_SETTINGS` it now grants location (including *Allow all the time*) and notification permissions, exempts the app from battery optimization and from removal of unused apps' permissions, and turns off the 7-day adb authorization timeout so the PC is not forgotten after a week away (undo in the app under *Advanced*). Each step is reported, and a failed one only leaves that item for the app to fix.
+- **The current Wi-Fi is allowed automatically** when the app is installed over wireless adb, since that network is your development network. Over USB the result tells you to tap *Allow this Wi-Fi* instead.
+- **No auto-enable switch:** auto mode is on while at least one Wi-Fi is allowed.
+- **"Allow this Wi-Fi?" notification** when Wireless debugging is turned on by hand (tile or system settings) on a network that is not allowed yet. Each network is offered once.
+- **Redesigned app screen.** One panel colored by link state (ultramarine: the PC can connect now; amber: needs attention; slate: not an allowed Wi-Fi) leads with the current port in large type, the number that used to be typed by hand. Below it: fixes only for what is missing, the allowed Wi-Fi list, and a collapsed *Advanced* section (manual toggle, authorization timeout, language). The app now uses its own palette instead of wallpaper colors, and bundles the Archivo font (SIL OFL 1.1, see `android-app/third_party/archivo/OFL.txt`).
+- The setup broadcast is received by a receiver protected by `android.permission.DUMP`, so only adb shell can trigger it.
+
 ## v0.2.1 - Cloning the repository no longer adds a broken project MCP server
 
 **Upgrading from 0.2.0:** run `/plugin update adb-autolink` and restart Claude Code. If you opened Claude Code inside a clone of this repository and approved the project server `adb-autolink` it offered, remove that approval with `/mcp` or `claude mcp reset-project-choices`. The plugin server (`plugin:adb-autolink:adb-autolink`) is not affected, and the phone app is unchanged apart from its version number.

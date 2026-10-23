@@ -2,57 +2,50 @@
 <resources>
     <string name="channel_name">WLAN 监控</string>
     <string name="channel_alert_name">需要批准</string>
+    <string name="channel_suggest_name">Wi-Fi 建议</string>
 
-    <string name="section_secure_settings">1. 安全设置权限</string>
-    <string name="developer_options_on">开发者选项 + USB 调试：已开启</string>
-    <string name="developer_options_off">开发者选项 / USB 调试：已关闭（启用时会自动开启）</string>
-    <string name="permission_ok">权限正常</string>
     <string name="grant_from_pc">请在电脑上授权一次（USB 或无线 adb）：</string>
     <string name="copy_command">复制命令</string>
     <string name="copied">已复制</string>
+    <string name="status_card_issues">需要设置</string>
+    <string name="setup_from_pc_hint">在 PC 上通过 install_companion_app 安装时,以下各项都会自动设置。</string>
+    <string name="issue_location">需要位置权限才能读取 Wi-Fi 名称。</string>
 
-    <string name="section_location">2. 位置信息（读取 WLAN 名称所需）</string>
     <string name="grant_precise_location">授予精确位置权限</string>
     <string name="background_location_hint">请选择“始终允许”，以便在后台读取 SSID。</string>
     <string name="allow_all_the_time">始终允许</string>
     <string name="app_settings">应用设置</string>
-    <string name="location_permission_ok">位置权限正常</string>
     <string name="location_services_off">位置信息服务已关闭。开启前 SSID 将被隐藏。</string>
     <string name="open_location_settings">打开位置信息设置</string>
     <string name="allow_notifications">允许通知（状态通知）</string>
 
-    <string name="section_keep_running">3. 保持运行（三星）</string>
-    <string name="battery_optimization_ignored">电池优化：已忽略（正常）</string>
     <string name="battery_optimization_on">电池优化：已开启 - 监控服务可能被终止</string>
     <string name="stop_optimizing_battery">停止电池优化</string>
     <string name="samsung_battery_hint">另请将 应用信息 &gt; 电池 设为“不受限制”，并将此应用添加到 设置 &gt; 电池 &gt; 后台使用限制 &gt; “永不休眠的应用”。</string>
     <string name="open_app_info">打开应用信息</string>
-    <string name="auto_revoke_off">移除未使用应用的权限：已关闭（正常）</string>
     <string name="auto_revoke_on">移除未使用应用的权限：已开启 - 可能撤销位置权限</string>
     <string name="turn_off_auto_revoke">关闭“移除未使用应用的权限”</string>
 
+    <string name="hero_linked">PC 现在可以连接</string>
+    <string name="hero_setup">完成设置后即可自动连接</string>
+    <string name="hero_off_allowed">此 Wi-Fi 上的无线调试已关闭</string>
+    <string name="hero_not_allowed">不是允许的 Wi-Fi</string>
+    <string name="hero_no_wifi">未连接 Wi-Fi</string>
     <string name="section_current_network">当前网络</string>
-    <string name="ssid_not_on_wifi">SSID：未连接 WLAN</string>
     <string name="ssid_hidden">SSID：&lt;unknown ssid&gt; - 已被 Android 隐藏。请将位置权限设为“始终允许”并开启位置信息。</string>
-    <string name="ssid_value">SSID：%1$s</string>
-    <string name="ssid_value_bssid">SSID：%1$s  (%2$s)</string>
-    <string name="wireless_debugging_on">无线调试：已开启</string>
-    <string name="wireless_debugging_off">无线调试：已关闭</string>
-    <string name="address">地址：%1$s:%2$s</string>
     <string name="retry_port_discovery">重新查找端口</string>
     <string name="turn_off">关闭</string>
     <string name="enable_now">立即开启</string>
-    <string name="add_to_whitelist">加入白名单</string>
+    <string name="add_to_whitelist">允许此 Wi-Fi</string>
     <string name="first_time_approval_hint">首次连接每个网络时，Android 会询问“要允许在此网络上进行无线调试吗？”，请勾选一次“始终允许在此网络上使用”。</string>
     <string name="open_wireless_debugging_settings">打开 开发者选项 &gt; 无线调试</string>
 
-    <string name="section_whitelist">白名单 WLAN</string>
-    <string name="whitelist_empty">暂无网络。请连接 WLAN 后点按“加入白名单”。</string>
+    <string name="section_whitelist">已允许的 Wi-Fi</string>
+    <string name="whitelist_empty">暂无。连接 Wi-Fi 后点按“允许此 Wi-Fi”。</string>
     <string name="remove">移除</string>
-    <string name="section_auto_enable">自动开启</string>
-    <string name="auto_enable_label">在白名单 WLAN 上自动开启无线调试</string>
+    <string name="section_advanced">高级</string>
+    <string name="manual_toggle_label">无线调试(手动)</string>
 
-    <string name="section_auth_timeout">可选：授权过期</string>
     <string name="auth_timeout_current">当前：%1$s</string>
     <string name="auth_timeout_never">永不过期</string>
     <plurals name="auth_timeout_hours">
@@ -61,7 +54,6 @@
     <string name="disable_auth_timeout">停用 7 天授权过期</string>
     <string name="auth_timeout_warning">Android 会撤销 7 天内未使用的电脑授权。停用后电脑将永久保持授权：在无线调试开启期间，任何持有该电脑 adb 密钥的人都能连接。请仅在可信的电脑和网络上使用。</string>
 
-    <string name="section_language">语言</string>
     <string name="language_label">应用语言</string>
     <string name="change_language">更改</string>
 
@@ -81,6 +73,9 @@
     <string name="alert_title">批准在“%1$s”上进行无线调试</string>
     <string name="alert_text">请在此 AP 上批准“始终允许在此网络上使用”</string>
     <string name="alert_big_text">Android 已重置此接入点的无线调试。请手动开启一次并勾选“始终允许在此网络上使用”。Mesh/双频网络可能需要对每个 AP 各操作一次。</string>
+    <string name="suggest_title">允许“%1$s”自动连接吗?</string>
+    <string name="suggest_text">此网络上已开启无线调试。允许此 Wi-Fi 后,下次会自动开启。</string>
+    <string name="suggest_action">允许</string>
 
     <string name="tile_setup_needed">需要设置</string>
     <string name="tile_on">开启</string>

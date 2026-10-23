@@ -62,7 +62,7 @@ Restart Claude Code, then run:
 /adb-autolink:setup
 ```
 
-Claude walks you through pairing, installing the companion app (downloaded from the latest GitHub release) and the on-phone settings.
+Claude walks you through pairing and installs the companion app (downloaded from the latest GitHub release). The install grants every permission and exemption over adb and, when connected wirelessly, allows the current Wi-Fi, so there is nothing to configure in the app. The only prompt left is Android's *"Always allow on this network"*.
 
 ### Manual setup (alternative)
 
@@ -76,7 +76,8 @@ Claude walks you through pairing, installing the companion app (downloaded from 
    - Location → **Allow all the time** and Location services ON (needed to read the Wi-Fi name in the background)
    - Allow notifications
    - Battery → **Unrestricted** (Samsung: also exclude it from sleeping apps)
-   - **Add current Wi-Fi** and turn **Auto-enable** on
+   - Tap **Allow this Wi-Fi** (auto mode is on while at least one Wi-Fi is allowed)
+   - The app's *Setup needed* card lists only what is still missing.
 4. The first time on each network Android asks *"Allow wireless debugging on this network?"*: tick **Always allow on this network**. Trust is per access point (BSSID), so mesh or dual-band routers may ask once per AP. The app notifies you when this approval is needed.
 
 ## MCP tools

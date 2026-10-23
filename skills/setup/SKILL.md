@@ -7,7 +7,7 @@ description: >-
   pair phone, connect phone over Wi-Fi, 무선 디버깅, 무선 adb, 폰 연결, 휴대폰 연결, 페어링, ワイヤレスデバッグ,
   ワイヤレス デバッグ, スマホ接続, ペア設定, 无线调试, 连接手机, 配对, depuración inalámbrica, vincular teléfono,
   débogage sans fil, associer le téléphone.
-version: 0.2.1
+version: 0.3.0
 license: MIT
 depends_on:
   required_bins:
@@ -36,16 +36,14 @@ Skip if `list_devices` already shows the phone online or discovered.
 3. Call `pair_device` with them. A USB-connected phone can skip pairing.
 
 ## 3. Install the companion app
-Call `install_companion_app` (optionally with `device`). It downloads the latest release APK, installs it, grants `WRITE_SECURE_SETTINGS` and opens the app. If install is blocked, relay the hint (Samsung **Auto Blocker** off, Play Protect prompt on screen).
+Call `install_companion_app` (optionally with `device`). It downloads the latest release APK, installs it, grants `WRITE_SECURE_SETTINGS`, location and notification permissions, exempts the app from battery optimization and permission auto-removal, turns off the 7-day authorization timeout, opens the app, and (when connected wirelessly) allows the current Wi-Fi. Relay each numbered step of the result. If install is blocked, relay the hint (Samsung **Auto Blocker** off, Play Protect prompt on screen).
 
-## 4. On-phone settings (user does these in the ADB Autolink app)
-Walk through, one by one:
-1. Location permission → **Allow all the time**, and Location services ON (needed to read the Wi-Fi name in the background).
-2. Allow notifications.
-3. Battery → **Unrestricted** (Samsung: also exclude from *Sleeping apps*).
-4. While on the home/office Wi-Fi tap **Add current Wi-Fi**, then turn **Auto-enable** on.
-5. When Android asks *"Allow wireless debugging on this network?"* tick **Always allow on this network**. Mesh or dual-band routers may ask once per access point.
-6. Optional: *Disable 7-day authorization timeout* so the PC stays authorized.
+## 4. On the phone (usually nothing)
+The install already did the settings, so don't walk the user through the app. Only act on what the result reports:
+- Step 4 lists failed commands: ask the user to open the app; its *Setup needed* card shows a button for each missing item.
+- Step 7 did not allow a Wi-Fi (USB install, or the Wi-Fi name was unreadable): on the home/office Wi-Fi, tap **Allow this Wi-Fi** in the app. Location services must be ON for the name to be readable.
+- When Android asks *"Allow wireless debugging on this network?"* tick **Always allow on this network**. Mesh or dual-band routers may ask once per access point.
+- More networks: tap **Allow this Wi-Fi** there, or the **Allow** action in the notification that appears when Wireless debugging is turned on by hand on a new network.
 
 ## 5. Verify
 - Ask the user to toggle Wi-Fi off and on (or step out and back). Then call `connect_device` and `screenshot` without any manual input.

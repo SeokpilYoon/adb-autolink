@@ -94,5 +94,10 @@ class WifiMonitor(context: Context, private val onChange: (WifiSnapshot?) -> Uni
         /** Strips quotes; returns null for blank or "<unknown ssid>" (location permission/services missing). */
         fun normalizeSsid(raw: String?): String? =
             raw?.removeSurrounding("\"")?.takeUnless { it.isBlank() || it == "<unknown ssid>" }
+
+        /** One-shot SSID read for receivers and the tile, which cannot wait for a network callback. */
+        @Suppress("DEPRECATION") // Still returns the SSID with location permission; callbacks are preferred elsewhere.
+        fun currentSsid(context: Context): String? =
+            normalizeSsid(context.applicationContext.getSystemService(WifiManager::class.java)?.connectionInfo?.ssid)
     }
 }

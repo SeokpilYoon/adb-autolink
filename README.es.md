@@ -62,7 +62,7 @@ Reinicia Claude Code y ejecuta:
 /adb-autolink:setup
 ```
 
-Claude te guía por el emparejamiento, la instalación de la app complementaria (descargada de la última release de GitHub) y los ajustes del teléfono.
+Claude te guía por el emparejamiento e instala la app complementaria (descargada de la última release de GitHub). La instalación concede por adb todos los permisos y exclusiones y, si la conexión es inalámbrica, permite la Wi-Fi actual, así que no hay nada que configurar en la app. Solo queda el aviso de Android *"Permitir siempre en esta red"*.
 
 ### Configuración manual (alternativa)
 
@@ -76,7 +76,8 @@ Claude te guía por el emparejamiento, la instalación de la app complementaria 
    - Ubicación → **Permitir siempre** y servicios de ubicación activados (necesario para leer el nombre del Wi-Fi en segundo plano)
    - Permitir notificaciones
    - Batería → **Sin restricciones** (Samsung: exclúyela también de las apps en suspensión)
-   - **Añadir Wi-Fi actual** y activar **Activación automática**
+   - Toca **Permitir esta Wi-Fi** (el modo automático está activo mientras haya al menos una Wi-Fi permitida)
+   - La tarjeta *Falta configuración* de la app solo muestra lo que aún falta.
 4. La primera vez en cada red, Android pregunta *"¿Permitir la depuración inalámbrica en esta red?"*: marca **Permitir siempre en esta red**. La confianza es por punto de acceso (BSSID), así que los routers mesh o de doble banda pueden preguntar una vez por cada AP. La app te avisa con una notificación cuando hace falta esta aprobación.
 
 ## Herramientas MCP
