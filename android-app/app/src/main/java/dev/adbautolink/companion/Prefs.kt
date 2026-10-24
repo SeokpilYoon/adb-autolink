@@ -6,8 +6,13 @@ import androidx.core.content.edit
 class Prefs(context: Context) {
     private val sp = context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
 
-    /** Auto mode has no switch of its own: it is on while at least one Wi-Fi is whitelisted. */
-    val autoEnabled: Boolean get() = whitelist.isNotEmpty()
+    /** Background watching runs unless the user paused auto-connect, and only once a Wi-Fi is whitelisted. */
+    val autoEnabled: Boolean get() = !paused && whitelist.isNotEmpty()
+
+    /** The "Auto-connect" main switch (app and Quick Settings tile) is off. Keeps the whitelist. */
+    var paused: Boolean
+        get() = sp.getBoolean(KEY_PAUSED, false)
+        set(value) = sp.edit { putBoolean(KEY_PAUSED, value) }
 
     /** Whitelisted SSIDs, stored without surrounding quotes. */
     var whitelist: Set<String>
@@ -40,5 +45,6 @@ class Prefs(context: Context) {
         const val KEY_SUGGESTED = "suggested_ssid"
         const val KEY_BEACON_TOKENS = "beacon_tokens"
         const val KEY_SERIAL = "device_serial"
+        const val KEY_PAUSED = "paused"
     }
 }

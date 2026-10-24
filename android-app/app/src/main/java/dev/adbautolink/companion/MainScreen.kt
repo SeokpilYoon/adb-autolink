@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
@@ -46,6 +47,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -63,6 +65,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -98,7 +101,7 @@ private data class Status(
 private val FlushLeft = PaddingValues(start = 0.dp, end = 12.dp, top = 8.dp, bottom = 8.dp)
 
 /** What the hero panel says, in priority order. */
-private enum class Link { SETUP, LINKED, OFF_ALLOWED, NOT_ALLOWED, NO_WIFI }
+private enum class Link { PAUSED, SETUP, LINKED, OFF_ALLOWED, NOT_ALLOWED, NO_WIFI }
 
 private fun Context.granted(permission: String) =
     checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
@@ -139,11 +142,17 @@ fun MainScreen() {
     var wifi by remember { mutableStateOf<WifiSnapshot?>(null) }
     var port by remember { mutableStateOf<Int?>(null) }
     var whitelist by remember { mutableStateOf(prefs.whitelist) }
+    var autoOn by remember { mutableStateOf(AutoConnect.isOn(context)) }
     var refreshKey by remember { mutableIntStateOf(0) }
-    // The whitelist can also change from the PC setup or the suggestion notification.
+    // The whitelist and the main switch can also change from the PC setup, a notification or the tile.
     val refresh = {
         status = readStatus(context)
         whitelist = prefs.whitelist
+        autoOn = AutoConnect.isOn(context)
+    }
+    val setAuto = { on: Boolean ->
+        context.toastIfError(AutoConnect.set(context, on))
+        refresh()
     }
 
     // Refresh on resume, then slowly (location/battery can change from the shade without pausing us).
@@ -188,6 +197,7 @@ fun MainScreen() {
 
     val ssid = wifi?.ssid
     val link = when {
+        !autoOn -> Link.PAUSED
         !status.complete -> Link.SETUP
         status.adbWifi && ip != null -> Link.LINKED
         wifi == null -> Link.NO_WIFI
@@ -212,19 +222,24 @@ fun MainScreen() {
                 modifier = Modifier.padding(top = 8.dp),
             )
 
-            Hero(
-                link = link,
-                address = if (status.adbWifi) ip else null,
-                port = port,
-                ssid = ssid,
-                ssidHidden = wifi != null && ssid == null,
-                showAllow = ssid != null && ssid !in whitelist,
-                onAllow = {
-                    Whitelist.add(context, ssid!!)
-                    refresh()
-                },
-                onRetryPort = { refreshKey++ },
-            )
+            // The switch reads as the caption of the panel below it, so the two sit together.
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                MainSwitch(on = autoOn, enabled = status.secureSettings, onChange = setAuto)
+                Hero(
+                    link = link,
+                    address = if (status.adbWifi && autoOn) ip else null,
+                    port = port,
+                    ssid = ssid,
+                    ssidHidden = autoOn && wifi != null && ssid == null,
+                    showAllow = autoOn && ssid != null && ssid !in whitelist,
+                    onAllow = {
+                        Whitelist.add(context, ssid!!)
+                        refresh()
+                    },
+                    onResume = { setAuto(true) },
+                    onRetryPort = { refreshKey++ },
+                )
+            }
 
             if (!status.complete) SetupFixes(status, refresh)
 
@@ -267,6 +282,52 @@ private fun Heading(text: String) {
     )
 }
 
+/**
+ * The app's main switch, shaped like One UI's own "On" bar at the top of a settings page. Off stops all
+ * background work and turns Wireless debugging off; the whitelist stays.
+ */
+@Composable
+private fun MainSwitch(on: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
+    val c = LocalAppColors.current
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(c.surface)
+                .toggleable(value = on, enabled = enabled, role = Role.Switch, onValueChange = onChange)
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                stringResource(R.string.auto_switch_label),
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Medium,
+                color = c.ink,
+                modifier = Modifier.weight(1f),
+            )
+            // Off must still read as a control, not as disabled: outline and thumb in the muted ink.
+            Switch(
+                checked = on,
+                onCheckedChange = null,
+                enabled = enabled,
+                colors = SwitchDefaults.colors(
+                    uncheckedThumbColor = c.muted,
+                    uncheckedTrackColor = c.paper,
+                    uncheckedBorderColor = c.muted,
+                ),
+            )
+        }
+        Text(
+            stringResource(if (on) R.string.auto_switch_on_hint else R.string.auto_switch_off_hint),
+            fontSize = 13.sp,
+            lineHeight = 18.sp,
+            color = c.muted,
+            modifier = Modifier.padding(horizontal = 20.dp),
+        )
+    }
+}
+
 /** The one loud element: a panel colored by link state, led by the current port in large type. */
 @Composable
 private fun Hero(
@@ -277,18 +338,20 @@ private fun Hero(
     ssidHidden: Boolean,
     showAllow: Boolean,
     onAllow: () -> Unit,
+    onResume: () -> Unit,
     onRetryPort: () -> Unit,
 ) {
     val c = LocalAppColors.current
     val (bgTarget, fgTarget) = when (link) {
         Link.LINKED -> c.linked to c.onLinked
         Link.SETUP, Link.OFF_ALLOWED -> c.attention to c.onAttention
-        Link.NOT_ALLOWED, Link.NO_WIFI -> c.idle to c.onIdle
+        Link.PAUSED, Link.NOT_ALLOWED, Link.NO_WIFI -> c.idle to c.onIdle
     }
     val bg by animateColorAsState(bgTarget, tween(450), label = "heroBg")
     val fg by animateColorAsState(fgTarget, tween(450), label = "heroFg")
     val title = stringResource(
         when (link) {
+            Link.PAUSED -> R.string.hero_paused
             Link.SETUP -> R.string.hero_setup
             Link.LINKED -> R.string.hero_linked
             Link.OFF_ALLOWED -> R.string.hero_off_allowed
@@ -330,7 +393,7 @@ private fun Hero(
                 }
                 if (ssid != null) Text(ssid, fontFamily = AppType.text, fontSize = 16.sp, color = fg.copy(alpha = 0.85f))
             }
-            ssid != null -> {
+            ssid != null && link != Link.PAUSED -> {
                 Spacer(Modifier.height(20.dp))
                 Text(ssid, fontFamily = AppType.wideHeavy, fontSize = 34.sp, lineHeight = 40.sp, color = fg)
             }
@@ -338,6 +401,15 @@ private fun Hero(
         if (ssidHidden) {
             Spacer(Modifier.height(12.dp))
             Text(stringResource(R.string.ssid_hidden), fontSize = 14.sp, color = fg)
+        }
+        if (link == Link.PAUSED) {
+            Spacer(Modifier.height(12.dp))
+            Text(stringResource(R.string.hero_paused_body), fontSize = 14.sp, lineHeight = 20.sp, color = fg.copy(alpha = 0.85f))
+            Spacer(Modifier.height(20.dp))
+            Button(
+                onClick = onResume,
+                colors = ButtonDefaults.buttonColors(containerColor = fg, contentColor = bg),
+            ) { Text(stringResource(R.string.resume_auto), fontWeight = FontWeight.SemiBold) }
         }
         if (link == Link.OFF_ALLOWED) {
             Spacer(Modifier.height(12.dp))

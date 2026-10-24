@@ -3,6 +3,7 @@ package dev.adbautolink.companion
 import android.content.Context
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.util.Log
 import java.io.IOException
@@ -49,6 +50,20 @@ object AdbPortLocator {
     @Suppress("DEPRECATION") // resolveService: fine for a one-shot resolution on every supported API level.
     private fun fromMdns(context: Context, host: InetAddress, ipv4: String?, timeoutMs: Long = 4_000): Int? {
         val nsd = context.getSystemService(NsdManager::class.java) ?: return null
+        // Held only for this lookup (seconds) instead of all the time: it keeps the Wi-Fi chip from filtering
+        // multicast, which is what costs battery. The port beacon makes a permanent lock unnecessary.
+        val lock = context.applicationContext.getSystemService(WifiManager::class.java)
+            ?.createMulticastLock(TAG)?.apply { setReferenceCounted(false) }
+        runCatching { lock?.acquire() }
+        try {
+            return fromMdns(nsd, host, ipv4, timeoutMs)
+        } finally {
+            if (lock?.isHeld == true) lock.release()
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun fromMdns(nsd: NsdManager, host: InetAddress, ipv4: String?, timeoutMs: Long): Int? {
         val found = LinkedBlockingQueue<NsdServiceInfo>()
         val listener = object : NsdManager.DiscoveryListener {
             override fun onDiscoveryStarted(serviceType: String) = Unit

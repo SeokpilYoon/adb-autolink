@@ -18,6 +18,7 @@ class SetupReceiver : BroadcastReceiver() {
         if (intent.action != ACTION_SETUP) return
         // Before the watcher (re)starts below, so it opens the port beacon right away.
         val prefs = Prefs(context)
+        prefs.paused = false // setting up from the PC means the user wants auto-connect running
         intent.getStringExtra(EXTRA_SERIAL)?.let { prefs.deviceSerial = it }
         intent.getStringExtra(EXTRA_BEACON_TOKEN)?.let { token ->
             val others = prefs.beaconTokens - token

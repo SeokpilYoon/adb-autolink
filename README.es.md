@@ -131,7 +131,7 @@ Consulta [docs/](docs/README.md): [arquitectura](docs/architecture.md), [soluci�
 
 - La depuración inalámbrica solo se activa automáticamente en los SSID de tu lista blanca, y Android sigue exigiendo confianza por punto de acceso y emparejamiento basado en claves. No añadas Wi-Fi públicas a la lista blanca.
 - El servidor MCP solo se conecta automáticamente a teléfonos a los que ya se haya conectado antes. La primera ejecución es la única excepción.
-- El mosaico de Ajustes rápidos requiere el teléfono desbloqueado.
+- El mosaico de Ajustes rápidos activa y desactiva la conexión automática. Al desactivarla se detienen el trabajo en segundo plano y la depuración inalámbrica; para activarla, el teléfono debe estar desbloqueado.
 - Activar la depuración inalámbrica también activa las Opciones para desarrolladores y la depuración USB; desactivarla no revierte esos cambios.
 - La salida de Logcat y el contenido de la pantalla se pasan al modelo, así que trata los logs de apps no fiables como entrada no fiable.
 

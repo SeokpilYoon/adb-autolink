@@ -26,6 +26,12 @@
     <string name="auto_revoke_on">移除未使用应用的权限：已开启 - 可能撤销位置权限</string>
     <string name="turn_off_auto_revoke">关闭“移除未使用应用的权限”</string>
 
+    <string name="auto_switch_label">自动连接</string>
+    <string name="auto_switch_on_hint">关闭后无线调试也会一并关闭。</string>
+    <string name="auto_switch_off_hint">关闭期间不会在后台运行任何内容。已允许的 Wi-Fi 列表会保留。</string>
+    <string name="hero_paused">自动连接已关闭</string>
+    <string name="hero_paused_body">开启后,在允许的 Wi-Fi 上会重新开启无线调试。也可以通过快捷设置图块切换。</string>
+    <string name="resume_auto">开启自动连接</string>
     <string name="hero_linked">PC 现在可以连接</string>
     <string name="hero_setup">完成设置后即可自动连接</string>
     <string name="hero_off_allowed">此 Wi-Fi 上的无线调试已关闭</string>
@@ -78,7 +84,8 @@
     <string name="suggest_action">允许</string>
 
     <string name="tile_setup_needed">需要设置</string>
-    <string name="tile_on">开启</string>
+    <string name="tile_ready">可连接</string>
+    <string name="tile_waiting">等待中</string>
     <string name="tile_off">关闭</string>
 
     <string name="error_secure_settings_missing">未授予 WRITE_SECURE_SETTINGS。请运行：%1$s</string>

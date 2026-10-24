@@ -11,6 +11,10 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import android.widget.Toast
 
+/**
+ * Quick Settings tile for the "Auto-connect" main switch: the fastest way to stop everything when the
+ * phone is not being used for development, and to bring it back. Long-press opens the app.
+ */
 class AdbWifiTileService : TileService() {
     private val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
         override fun onChange(selfChange: Boolean) = refresh()
@@ -26,31 +30,30 @@ class AdbWifiTileService : TileService() {
     }
 
     override fun onClick() {
-        // Don't let a locked phone enable wireless debugging from the shade.
-        if (isLocked) unlockAndRun { toggle() } else toggle()
-    }
-
-    private fun toggle() {
         if (!AdbWifiController.hasPermission(this)) {
             openApp()
             return
         }
-        val enable = !AdbWifiController.isEnabled(this)
-        val error = AdbWifiController.setEnabledByUser(this, enable)
-        if (error != null) Toast.makeText(this, error, Toast.LENGTH_LONG).show()
-        else if (enable) WifiMonitor.currentSsid(this)?.let { WhitelistSuggestion.maybeSuggest(this, it) }
+        // Turning off is always safe; turning on may enable Wireless debugging, so not from a locked phone.
+        if (AutoConnect.isOn(this)) toggle(on = false)
+        else if (isLocked) unlockAndRun { toggle(on = true) } else toggle(on = true)
+    }
+
+    private fun toggle(on: Boolean) {
+        AutoConnect.set(this, on)?.let { Toast.makeText(this, it, Toast.LENGTH_LONG).show() }
         refresh()
     }
 
     private fun refresh() {
         val tile = qsTile ?: return
-        val on = AdbWifiController.isEnabled(this)
+        val on = AutoConnect.isOn(this)
         tile.state = if (on) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
         tile.subtitle = getString(
             when {
                 !AdbWifiController.hasPermission(this) -> R.string.tile_setup_needed
-                on -> R.string.tile_on
-                else -> R.string.tile_off
+                !on -> R.string.tile_off
+                AdbWifiController.isEnabled(this) -> R.string.tile_ready
+                else -> R.string.tile_waiting
             }
         )
         tile.updateTile()

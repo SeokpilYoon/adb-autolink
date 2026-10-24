@@ -131,7 +131,7 @@ Voir [docs/](docs/README.md) : [architecture](docs/architecture.md), [dépannage
 
 - Le débogage sans fil n'est activé automatiquement que sur les SSID de votre liste blanche, et Android continue d'imposer la confiance par point d'accès ainsi que l'appairage par clés. N'ajoutez pas de Wi-Fi public à la liste blanche.
 - Le serveur MCP ne se connecte automatiquement qu'aux téléphones auxquels il s'est déjà connecté. La première exécution est la seule exception.
-- La tuile des Réglages rapides nécessite un téléphone déverrouillé.
+- La tuile des réglages rapides active et désactive la connexion automatique. La désactiver arrête tout travail en arrière-plan et le débogage sans fil ; l'activer nécessite un téléphone déverrouillé.
 - Activer le débogage sans fil active aussi les Options pour les développeurs et le débogage USB ; le désactiver ne les rétablit pas.
 - La sortie de Logcat et le contenu de l'écran sont transmis au modèle : traitez donc les logs d'applications non fiables comme une entrée non fiable.
 

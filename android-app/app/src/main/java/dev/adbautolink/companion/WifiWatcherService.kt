@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.database.ContentObserver
-import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -36,7 +35,6 @@ class WifiWatcherService : Service() {
     private val evaluateRunnable = Runnable { evaluate() }
     private lateinit var prefs: Prefs
     private lateinit var monitor: WifiMonitor
-    private lateinit var multicastLock: WifiManager.MulticastLock
     private lateinit var notifications: NotificationManager
     private var snapshot: WifiSnapshot? = null
     private var networkKey: String? = null
@@ -76,7 +74,6 @@ class WifiWatcherService : Service() {
             this, STATUS_ID, statusNotification(getString(R.string.status_watching)),
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE else 0,
         )
-        multicastLock = getSystemService(WifiManager::class.java).createMulticastLock(TAG).apply { setReferenceCounted(false) }
         monitor = WifiMonitor(this) { snap ->
             if (snap == snapshot) return@WifiMonitor // e.g. signal-strength-only capability change
             snapshot = snap
@@ -109,7 +106,8 @@ class WifiWatcherService : Service() {
         if (::monitor.isInitialized) monitor.stop()
         locator.shutdownNow()
         beacon.stop()
-        if (::multicastLock.isInitialized && multicastLock.isHeld) multicastLock.release()
+        // A notify() racing with the stop would otherwise outlive the service.
+        if (::notifications.isInitialized) notifications.cancel(STATUS_ID)
         super.onDestroy()
     }
 
@@ -119,6 +117,12 @@ class WifiWatcherService : Service() {
     }
 
     private fun onAdbWifiChanged() {
+        // Switching auto-connect off turns Wireless debugging off just before this service stops:
+        // that drop is intended, not a reset to retry.
+        if (!prefs.autoEnabled) {
+            stopSelf()
+            return
+        }
         // Every restart of Wireless debugging picks a new port: forget the old one, evaluate() looks again.
         adbPort = null
         locateGeneration++
@@ -144,12 +148,13 @@ class WifiWatcherService : Service() {
     }
 
     private fun evaluate() {
+        if (!prefs.autoEnabled) {
+            stopSelf()
+            return
+        }
         val snap = snapshot
         val ssid = snap?.ssid
         val whitelisted = ssid != null && ssid in prefs.whitelist
-        // Keeps mDNS (adb's _adb-tls-connect advertisement) responsive while the screen is off.
-        if (whitelisted && !multicastLock.isHeld) multicastLock.acquire()
-        if (!whitelisted && multicastLock.isHeld) multicastLock.release()
 
         val enabled = AdbWifiController.isEnabled(this)
         if (enabled) notifications.cancel(ALERT_ID)

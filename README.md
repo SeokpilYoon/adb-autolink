@@ -131,7 +131,7 @@ See [docs/](docs/README.md): [architecture](docs/architecture.md), [troubleshoot
 
 - Wireless debugging is only auto-enabled on SSIDs you whitelist, and Android still enforces per-access-point trust plus key-based pairing. Don't whitelist public Wi-Fi.
 - The MCP server auto-connects only to phones it has connected to before. The first run is the only exception.
-- The Quick Settings tile requires an unlocked phone.
+- The Quick Settings tile switches auto-connect on and off. Turning it off stops all background work and Wireless debugging; turning it on requires an unlocked phone.
 - Enabling wireless debugging also turns on Developer options and USB debugging; turning it off does not revert those.
 - Logcat output and screen content are passed to the model, so treat logs from untrusted apps as untrusted input.
 

@@ -11,6 +11,17 @@ All notable changes to adb-autolink are recorded here. Each version must match a
 
 Release pages are generated from these sections.
 
+## v0.4.2 - Auto-connect on/off switch, lighter on battery
+
+**Upgrading from 0.4.1:** run `/plugin update adb-autolink`, restart Claude Code, then call `install_companion_app` once per phone. The app updates in place and keeps its whitelist and beacon token.
+
+- **Auto-connect switch:** turn the app off when you are not developing, without losing your allowed Wi-Fi list. Off stops the background service, the Wi-Fi trigger and the port beacon and turns Wireless debugging off, so the app's notification disappears and nothing runs or listens. On brings Wireless debugging back on an allowed Wi-Fi, and Claude reconnects through the port beacon as usual.
+  - **In the app:** a main switch bar above the status panel, with a one-line note on what off and on do. While off, the panel says "Auto-connect is off" with a **Turn on auto-connect** button.
+  - **Quick Settings tile:** now switches auto-connect instead of Wireless debugging alone. Its subtitle shows Ready, Waiting, Off or Setup needed. Turning it off works on a locked phone, turning it on needs an unlocked one, and a long press opens the app.
+  - `install_companion_app` switches auto-connect back on, and when no phone is found the PC's hint now mentions the switch.
+- **Battery:** the app no longer holds a multicast lock all the time on an allowed Wi-Fi, which kept the Wi-Fi chip from filtering multicast traffic. It takes the lock only for the few seconds it looks up a new port. With the port beacon, PCs no longer need the phone to answer mDNS while its screen is off.
+- **Fix:** switching auto-connect off could leave a "Wireless debugging reset, retrying…" notification behind. The drop it causes is no longer treated as a reset, and the service clears its notification when it stops.
+
 ## v0.4.1 - Saved connection checks, and a second drop on the same Wi-Fi is retried
 
 **Upgrading from 0.4.0:** run `/plugin update adb-autolink`, restart Claude Code, then call `install_companion_app` once per phone to get the app fix. The app updates in place and keeps its whitelist and beacon token.

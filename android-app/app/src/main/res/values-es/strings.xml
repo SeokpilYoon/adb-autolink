@@ -26,6 +26,12 @@
     <string name="auto_revoke_on">Quitar permisos si no se usa la app: activado - puede revocar la ubicación</string>
     <string name="turn_off_auto_revoke">Desactivar «Quitar permisos si no se usa la app»</string>
 
+    <string name="auto_switch_label">Conexión automática</string>
+    <string name="auto_switch_on_hint">Al desactivarla también se desactiva la depuración inalámbrica.</string>
+    <string name="auto_switch_off_hint">Mientras está desactivada no se ejecuta nada en segundo plano. Tu lista de Wi-Fi permitidas se conserva.</string>
+    <string name="hero_paused">La conexión automática está desactivada</string>
+    <string name="hero_paused_body">Actívala para volver a encender la depuración inalámbrica en tus Wi-Fi permitidas. También puedes cambiarla desde el mosaico de Ajustes rápidos.</string>
+    <string name="resume_auto">Activar conexión automática</string>
     <string name="hero_linked">Tu PC ya puede conectarse</string>
     <string name="hero_setup">Termina la configuración para conectarte automáticamente</string>
     <string name="hero_off_allowed">La depuración inalámbrica está desactivada en esta Wi-Fi</string>
@@ -80,7 +86,8 @@
     <string name="suggest_action">Permitir</string>
 
     <string name="tile_setup_needed">Requiere configuración</string>
-    <string name="tile_on">Activado</string>
+    <string name="tile_ready">Lista</string>
+    <string name="tile_waiting">En espera</string>
     <string name="tile_off">Desactivado</string>
 
     <string name="error_secure_settings_missing">WRITE_SECURE_SETTINGS no concedido. Ejecuta: %1$s</string>

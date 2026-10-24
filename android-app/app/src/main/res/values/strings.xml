@@ -32,6 +32,12 @@
     <string name="turn_off_auto_revoke">Turn off \"Remove permissions if unused\"</string>
 
     <!-- Main screen: hero (link state) and current network -->
+    <string name="auto_switch_label">Auto-connect</string>
+    <string name="auto_switch_on_hint">Turning it off also turns Wireless debugging off.</string>
+    <string name="auto_switch_off_hint">Nothing runs in the background while it is off. Your allowed Wi-Fi list is kept.</string>
+    <string name="hero_paused">Auto-connect is off</string>
+    <string name="hero_paused_body">Turn it on to bring Wireless debugging back on your allowed Wi-Fi. You can also switch it from the Quick Settings tile.</string>
+    <string name="resume_auto">Turn on auto-connect</string>
     <string name="hero_linked">Your PC can connect now</string>
     <string name="hero_setup">Finish setup to connect automatically</string>
     <string name="hero_off_allowed">Wireless debugging is off on this Wi-Fi</string>
@@ -90,7 +96,8 @@
 
     <!-- Quick Settings tile -->
     <string name="tile_setup_needed">Setup needed</string>
-    <string name="tile_on">On</string>
+    <string name="tile_ready">Ready</string>
+    <string name="tile_waiting">Waiting</string>
     <string name="tile_off">Off</string>
 
     <!-- Errors -->

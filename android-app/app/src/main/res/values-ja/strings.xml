@@ -26,6 +26,12 @@
     <string name="auto_revoke_on">使用されていないアプリの権限を削除: ON - 位置情報の権限が取り消される可能性あり</string>
     <string name="turn_off_auto_revoke">「使用されていないアプリの権限を削除」を OFF にする</string>
 
+    <string name="auto_switch_label">自動接続</string>
+    <string name="auto_switch_on_hint">オフにするとワイヤレス デバッグもオフになります。</string>
+    <string name="auto_switch_off_hint">オフの間はバックグラウンドで何も動作しません。許可した Wi-Fi の一覧はそのまま残ります。</string>
+    <string name="hero_paused">自動接続はオフです</string>
+    <string name="hero_paused_body">オンにすると、許可した Wi-Fi でワイヤレス デバッグが再びオンになります。クイック設定タイルからも切り替えられます。</string>
+    <string name="resume_auto">自動接続をオンにする</string>
     <string name="hero_linked">PC から接続できます</string>
     <string name="hero_setup">設定を完了すると自動で接続されます</string>
     <string name="hero_off_allowed">この Wi-Fi ではワイヤレス デバッグがオフです</string>
@@ -78,7 +84,8 @@
     <string name="suggest_action">許可</string>
 
     <string name="tile_setup_needed">セットアップが必要</string>
-    <string name="tile_on">ON</string>
+    <string name="tile_ready">接続可能</string>
+    <string name="tile_waiting">待機中</string>
     <string name="tile_off">OFF</string>
 
     <string name="error_secure_settings_missing">WRITE_SECURE_SETTINGS が許可されていません。実行: %1$s</string>

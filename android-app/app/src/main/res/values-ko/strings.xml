@@ -26,6 +26,12 @@
     <string name="auto_revoke_on">앱을 사용하지 않으면 권한 삭제: 켜짐 - 위치 권한이 회수될 수 있음</string>
     <string name="turn_off_auto_revoke">“앱을 사용하지 않으면 권한 삭제” 끄기</string>
 
+    <string name="auto_switch_label">자동 연결</string>
+    <string name="auto_switch_on_hint">끄면 무선 디버깅도 함께 꺼집니다.</string>
+    <string name="auto_switch_off_hint">꺼져 있는 동안은 백그라운드에서 아무것도 동작하지 않습니다. 허용된 Wi-Fi 목록은 그대로 남습니다.</string>
+    <string name="hero_paused">자동 연결이 꺼져 있습니다</string>
+    <string name="hero_paused_body">켜면 허용된 Wi-Fi에서 무선 디버깅이 다시 켜집니다. 빠른 설정 타일로도 켜고 끌 수 있습니다.</string>
+    <string name="resume_auto">자동 연결 켜기</string>
     <string name="hero_linked">지금 PC에서 연결할 수 있습니다</string>
     <string name="hero_setup">설정을 마치면 자동으로 연결됩니다</string>
     <string name="hero_off_allowed">이 Wi-Fi에서 무선 디버깅이 꺼져 있습니다</string>
@@ -78,7 +84,8 @@
     <string name="suggest_action">허용</string>
 
     <string name="tile_setup_needed">설정 필요</string>
-    <string name="tile_on">켜짐</string>
+    <string name="tile_ready">연결 가능</string>
+    <string name="tile_waiting">대기 중</string>
     <string name="tile_off">꺼짐</string>
 
     <string name="error_secure_settings_missing">WRITE_SECURE_SETTINGS 권한이 없습니다. 실행: %1$s</string>

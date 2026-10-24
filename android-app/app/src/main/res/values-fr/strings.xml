@@ -26,6 +26,12 @@
     <string name="auto_revoke_on">Supprimer les autorisations si l’appli n’est pas utilisée : ACTIVÉ - peut révoquer la localisation</string>
     <string name="turn_off_auto_revoke">Désactiver « Supprimer les autorisations si l’appli n’est pas utilisée »</string>
 
+    <string name="auto_switch_label">Connexion automatique</string>
+    <string name="auto_switch_on_hint">La désactiver coupe aussi le débogage sans fil.</string>
+    <string name="auto_switch_off_hint">Tant qu\'elle est désactivée, rien ne tourne en arrière-plan. Votre liste de Wi-Fi autorisés est conservée.</string>
+    <string name="hero_paused">La connexion automatique est désactivée</string>
+    <string name="hero_paused_body">Activez-la pour rallumer le débogage sans fil sur vos Wi-Fi autorisés. Vous pouvez aussi la basculer depuis la vignette des réglages rapides.</string>
+    <string name="resume_auto">Activer la connexion automatique</string>
     <string name="hero_linked">Votre PC peut se connecter</string>
     <string name="hero_setup">Terminez la configuration pour vous connecter automatiquement</string>
     <string name="hero_off_allowed">Le débogage sans fil est désactivé sur ce Wi-Fi</string>
@@ -80,7 +86,8 @@
     <string name="suggest_action">Autoriser</string>
 
     <string name="tile_setup_needed">Configuration requise</string>
-    <string name="tile_on">Activé</string>
+    <string name="tile_ready">Prêt</string>
+    <string name="tile_waiting">En attente</string>
     <string name="tile_off">Désactivé</string>
 
     <string name="error_secure_settings_missing">WRITE_SECURE_SETTINGS non accordée. Exécutez : %1$s</string>

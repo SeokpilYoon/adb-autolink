@@ -31,7 +31,7 @@ const en = {
   "hint.troubleshoot":
     "No reachable device found over wireless adb. Check:\n" +
     "  1. The phone is on a Wi-Fi network whitelisted in the {0} app, on the same LAN as this PC.\n" +
-    "  2. Wireless debugging is ON (the app turns it on automatically; check its notification / Quick Settings tile).\n" +
+    "  2. Auto-connect is ON in the {0} app (if it was switched off, tap its Quick Settings tile), so Wireless debugging is on.\n" +
     "  3. The phone was paired with this PC once (pair_device tool, or Developer options > Wireless debugging > Pair device with pairing code).\n" +
     "  4. The PC firewall allows adb inbound UDP 5353 (mDNS) on this network (Windows: allow adb.exe on the Private profile).\n" +
     "  5. `adb mdns check` reports an mdns daemon; try `adb kill-server` if discovery is stuck.",
@@ -109,7 +109,7 @@ const ko: Catalog = {
   "hint.troubleshoot":
     "무선 adb로 연결할 수 있는 기기를 찾지 못했습니다. 다음을 확인하세요:\n" +
     "  1. 휴대폰이 {0} 앱에 등록한 Wi-Fi에 연결되어 있고, 이 PC와 같은 네트워크에 있는지.\n" +
-    "  2. 무선 디버깅이 켜져 있는지 (앱이 자동으로 켭니다. 알림이나 빠른 설정 타일을 확인하세요).\n" +
+    "  2. {0} 앱의 자동 연결이 켜져 있어 무선 디버깅이 켜져 있는지 (꺼 두었다면 빠른 설정 타일을 눌러 켜세요).\n" +
     "  3. 이 PC와 한 번 페어링했는지 (pair_device 도구, 또는 개발자 옵션 > 무선 디버깅 > 페어링 코드로 기기 페어링).\n" +
     "  4. PC 방화벽이 이 네트워크에서 adb의 UDP 5353(mDNS) 수신을 허용하는지 (Windows: 개인 프로필에서 adb.exe 허용).\n" +
     "  5. `adb mdns check`에서 mdns 데몬이 보이는지. 검색이 멈춘 것 같으면 `adb kill-server`를 실행해 보세요.",
@@ -184,7 +184,7 @@ const ja: Catalog = {
   "hint.troubleshoot":
     "ワイヤレス adb で接続できるデバイスが見つかりません。次を確認してください:\n" +
     "  1. スマートフォンが {0} アプリに登録した Wi-Fi に接続され、この PC と同じネットワークにあること。\n" +
-    "  2. ワイヤレス デバッグがオンになっていること(アプリが自動でオンにします。通知またはクイック設定タイルを確認してください)。\n" +
+    "  2. {0} アプリの自動接続がオンで、ワイヤレス デバッグがオンになっていること(オフにした場合はクイック設定タイルをタップしてオンにしてください)。\n" +
     "  3. この PC と一度ペア設定済みであること(pair_device ツール、または 開発者向けオプション > ワイヤレス デバッグ > ペア設定コードによるデバイスのペア設定)。\n" +
     "  4. PC のファイアウォールがこのネットワークで adb の UDP 5353(mDNS)受信を許可していること(Windows: プライベート プロファイルで adb.exe を許可)。\n" +
     "  5. `adb mdns check` で mdns デーモンが表示されること。検出が止まっている場合は `adb kill-server` を試してください。",
@@ -260,7 +260,7 @@ const zhHans: Catalog = {
   "hint.troubleshoot":
     "未找到可通过无线 adb 连接的设备。请检查:\n" +
     "  1. 手机已连接到在 {0} 应用中加入白名单的 Wi-Fi,并与这台电脑处于同一局域网。\n" +
-    "  2. 无线调试已开启(应用会自动开启;请查看其通知或快捷设置图块)。\n" +
+    "  2. {0} 应用的自动连接已开启,因此无线调试已开启(如果关闭过,请点按其快捷设置图块重新开启)。\n" +
     "  3. 手机已与这台电脑配对过一次(pair_device 工具,或 开发者选项 > 无线调试 > 使用配对码配对设备)。\n" +
     "  4. 电脑防火墙允许 adb 在此网络上接收 UDP 5353(mDNS)入站流量(Windows:在专用网络配置文件中允许 adb.exe)。\n" +
     "  5. `adb mdns check` 能看到 mdns 守护进程;如果发现过程卡住,请尝试 `adb kill-server`。",
@@ -334,7 +334,7 @@ const es: Catalog = {
   "hint.troubleshoot":
     "No se encontró ningún dispositivo accesible por adb inalámbrico. Comprueba:\n" +
     "  1. Que el teléfono esté en una red Wi-Fi añadida a la lista de la app {0}, en la misma red local que este PC.\n" +
-    "  2. Que la Depuración inalámbrica esté activada (la app la activa sola; revisa su notificación o el icono de Ajustes rápidos).\n" +
+    "  2. Que la conexión automática esté activada en la app {0} y, con ella, la Depuración inalámbrica (si la desactivaste, toca su mosaico de Ajustes rápidos).\n" +
     "  3. Que el teléfono se haya vinculado una vez con este PC (herramienta pair_device, u Opciones para desarrolladores > Depuración inalámbrica > Vincular dispositivo con código de vinculación).\n" +
     "  4. Que el firewall del PC permita a adb recibir UDP 5353 (mDNS) en esta red (Windows: permite adb.exe en el perfil Privado).\n" +
     "  5. Que `adb mdns check` muestre un daemon mdns; si la detección se atasca, prueba `adb kill-server`.",
@@ -409,7 +409,7 @@ const fr: Catalog = {
   "hint.troubleshoot":
     "Aucun appareil joignable en adb sans fil. Vérifiez que :\n" +
     "  1. Le téléphone est connecté à un réseau Wi-Fi ajouté à la liste de l'application {0}, sur le même réseau local que ce PC.\n" +
-    "  2. Le débogage sans fil est activé (l'application l'active automatiquement ; voyez sa notification ou sa vignette des Réglages rapides).\n" +
+    "  2. La connexion automatique est activée dans l'application {0}, et avec elle le débogage sans fil (si vous l'avez désactivée, touchez sa vignette des réglages rapides).\n" +
     "  3. Le téléphone a été associé une fois à ce PC (outil pair_device, ou Options pour les développeurs > Débogage sans fil > Associer l'appareil avec un code d'association).\n" +
     "  4. Le pare-feu du PC autorise adb à recevoir l'UDP 5353 (mDNS) sur ce réseau (Windows : autorisez adb.exe pour le profil Privé).\n" +
     "  5. `adb mdns check` signale un démon mdns ; si la découverte est bloquée, essayez `adb kill-server`.",
