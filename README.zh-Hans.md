@@ -88,7 +88,7 @@ Claude 会引导你完成配对并安装配套应用（从最新的 GitHub relea
 
 | 工具 | 说明 |
 |---|---|
-| `list_devices` | 已连接的设备，以及通过 mDNS 发现的手机 |
+| `list_devices` | 已连接的设备、通过 mDNS 发现的手机，以及所有已保存手机的表格（别名、机型、上次地址、当前是否在线） |
 | `connect_device` / `disconnect_device` | 显式连接 / 断开（通常不需要） |
 | `pair_device` | 使用 6 位配对码进行首次配对 |
 | `install_companion_app` | 下载并安装 ADB Autolink 应用，并授予其权限 |
@@ -99,7 +99,7 @@ Claude 会引导你完成配对并安装配套应用（从最新的 GitHub relea
 | `tap` / `swipe` / `input_text` / `key_event` | 输入（`input_text` 仅支持 ASCII，这是 Android `input` 的限制） |
 | `wake_device` | 唤醒屏幕并解除非安全锁屏 |
 | `logcat` | 按包名、标签或优先级过滤，限制行数，崩溃缓冲区 |
-| `set_device_alias` | 为设备命名，例如 `test`、`main` |
+| `set_device_alias` | 添加或删除别名。每台手机会自动以机型命名（`S21`，同机型第二台为 `S21-2`） |
 
 CLI：`node mcp-server/dist/cli.js devices` · `node mcp-server/dist/cli.js connect S21`
 

@@ -176,3 +176,15 @@ export function saveCheckpoint(i: SaveInput): { png: string; report: string; ses
   for (const old of sessions(deviceDir).slice(0, -KEEP_SESSIONS)) rmSync(path.join(deviceDir, old), { recursive: true, force: true });
   return { png: path.join(dir, file), report, sessionDir: dir, entry };
 }
+
+/** The newest report.md recorded for a phone, if any (device folders end in "_<serial>"). */
+export function latestReport(serial: string, root?: string): string | undefined {
+  const dir = checksDir(root);
+  if (!existsSync(dir)) return undefined;
+  const reports = readdirSync(dir)
+    .filter((d) => d.endsWith(`_${serial}`))
+    .flatMap((d) => sessions(path.join(dir, d)).map((s) => path.join(dir, d, s, "report.md")))
+    .filter((f) => existsSync(f))
+    .sort((a, b) => path.basename(path.dirname(a)).localeCompare(path.basename(path.dirname(b))));
+  return reports.at(-1);
+}

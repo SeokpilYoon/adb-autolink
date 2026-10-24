@@ -11,6 +11,16 @@ All notable changes to adb-autolink are recorded here. Each version must match a
 
 Release pages are generated from these sections.
 
+## v0.4.3 - Saved phones table and model-name aliases
+
+**Upgrading from 0.4.2:** run `/plugin update adb-autolink` and restart Claude Code. The phone app is unchanged apart from its version number, so there is no need to reinstall it. Phones you connected before get their model-name alias the next time you list devices.
+
+- **Model-name aliases, automatically:** a phone gets its model as alias on its first connection (`S24+`, `S21`), and a second phone of the same model gets `S21-2`, then `S21-3`. Each phone is named once: an alias you remove is not added back, and a phone that already has an alias you chose keeps it.
+- **Aliases match the way you say them:** case, spaces, `-` and `_` are ignored, so "s21 2" finds `S21-2`.
+- **Remove aliases:** `set_device_alias` takes `remove: true`.
+- **Saved phones table:** `list_devices` (and `adb-autolink devices`) ends with a table of every phone this PC remembers (alias, model, serial, last address, last connected, online now) and each phone's latest connection check report. `/adb-autolink:setup` finishes by showing it.
+- **Fix:** a phone's "last connected" time was not updated while its address stayed the same; it is now refreshed at least every 10 minutes.
+
 ## v0.4.2 - Auto-connect on/off switch, lighter on battery
 
 **Upgrading from 0.4.1:** run `/plugin update adb-autolink`, restart Claude Code, then call `install_companion_app` once per phone. The app updates in place and keeps its whitelist and beacon token.

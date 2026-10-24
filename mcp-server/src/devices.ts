@@ -85,7 +85,7 @@ export function matchSelector(selector: string, cands: DeviceCandidate[], aliase
     (c) => c.serial.toLowerCase() === lower || (c.physicalSerial?.toLowerCase() ?? "") === lower,
     (c) => splitHostPort(sel) !== undefined && (c.address === sel || c.serial === sel),
     (c) => {
-      const entry = Object.entries(aliases).find(([a]) => a.toLowerCase() === lower);
+      const entry = Object.entries(aliases).find(([a]) => aliasKey(a) === aliasKey(sel));
       if (!entry) return false;
       const target = entry[1].toLowerCase();
       return (c.physicalSerial?.toLowerCase() ?? c.serial.toLowerCase()) === target || c.serial.toLowerCase() === target;
@@ -189,18 +189,76 @@ export function loadAliases(): AliasMap {
   return readJson<AliasMap>("aliases.json", {});
 }
 
+/** Aliases compare ignoring case, spaces, "_" and "-", so "S21-2", "s21 2" and "S21_2" are the same. */
+export function aliasKey(alias: string): string {
+  return alias.toLowerCase().replace(/[\s_\-]+/g, "");
+}
+
+function saveAliases(aliases: AliasMap, alias: string): void {
+  try {
+    writeJson("aliases.json", aliases);
+  } catch (e) {
+    throw new Error(`Could not save alias "${alias}" to ${path.join(stateDir(), "aliases.json")}: ${(e as Error).message}`);
+  }
+}
+
 export function setAlias(alias: string, physicalSerial: string): AliasMap {
   const a = alias.trim();
   if (!a || /[:\s]/.test(a)) throw new Error(`Invalid alias "${alias}" (must be non-empty, no spaces or colons)`);
   const aliases = loadAliases();
-  for (const key of Object.keys(aliases)) if (key.toLowerCase() === a.toLowerCase()) delete aliases[key];
+  for (const key of Object.keys(aliases)) if (aliasKey(key) === aliasKey(a)) delete aliases[key];
   aliases[a] = physicalSerial;
-  try {
-    writeJson("aliases.json", aliases);
-  } catch (e) {
-    throw new Error(`Could not save alias "${a}" to ${path.join(stateDir(), "aliases.json")}: ${(e as Error).message}`);
-  }
+  saveAliases(aliases, a);
   return aliases;
+}
+
+/** Removes an alias (matched like a selector). Throws if there is no such alias. */
+export function removeAlias(alias: string): AliasMap {
+  const aliases = loadAliases();
+  const key = Object.keys(aliases).find((k) => aliasKey(k) === aliasKey(alias));
+  if (!key) throw new Error(`No alias "${alias}". Saved aliases: ${Object.keys(aliases).join(", ") || "(none)"}`);
+  delete aliases[key];
+  saveAliases(aliases, key);
+  return aliases;
+}
+
+/** "Galaxy S24+" -> "S24+", "Galaxy S24 Ultra" -> "S24Ultra"; models without a market name use their code. */
+export function autoAliasBase(model: string): string {
+  const market = marketNameForModel(model);
+  return market ? market.replace(/^Galaxy\s+/, "").replace(/\s+/g, "") : normalizeModelCode(model);
+}
+
+/** base, then base-2, base-3, ... : the first one no other phone uses. */
+export function nextAutoAlias(base: string, aliases: AliasMap): string {
+  const taken = new Set(Object.keys(aliases).map(aliasKey));
+  let alias = base;
+  for (let n = 2; taken.has(aliasKey(alias)); n++) alias = `${base}-${n}`;
+  return alias;
+}
+
+/**
+ * Gives a newly seen phone its model name as alias ("S21", then "S21-2" for a second S21), once:
+ * a phone that already has an alias, or whose auto alias the user removed, is left alone.
+ */
+export function ensureAutoAlias(physicalSerial: string): void {
+  const all = loadKnownDevices();
+  const known = all[physicalSerial];
+  if (!known?.model || known.autoAlias) return;
+  const aliases = loadAliases();
+  if (!Object.values(aliases).includes(physicalSerial)) {
+    aliases[nextAutoAlias(autoAliasBase(known.model), aliases)] = physicalSerial;
+    try {
+      writeJson("aliases.json", aliases);
+    } catch {
+      return; // try again next time
+    }
+  }
+  all[physicalSerial] = { ...known, autoAlias: true };
+  try {
+    writeJson("devices.json", all);
+  } catch {
+    // best effort
+  }
 }
 
 /** Remembered device facts so model/alias selectors work before the device is connected. */
@@ -209,6 +267,8 @@ export interface KnownDevice {
   product?: string;
   lastAddress?: string;
   lastSeen?: string;
+  /** The automatic model-name alias was handled (given, or the phone already had one). Never redone. */
+  autoAlias?: boolean;
 }
 
 export function loadKnownDevices(): Record<string, KnownDevice> {
@@ -219,15 +279,22 @@ export function rememberDevice(physicalSerial: string, info: KnownDevice): void 
   const all = loadKnownDevices();
   const prev = all[physicalSerial] ?? {};
   const next = { ...prev, ...Object.fromEntries(Object.entries(info).filter(([, v]) => v !== undefined)) };
-  if (JSON.stringify(prev) === JSON.stringify({ ...next, lastSeen: prev.lastSeen })) return;
-  next.lastSeen = new Date().toISOString();
-  all[physicalSerial] = next;
-  try {
-    writeJson("devices.json", all);
-  } catch {
-    // best effort
+  const unchanged = JSON.stringify(prev) === JSON.stringify({ ...next, lastSeen: prev.lastSeen });
+  // Unchanged facts still refresh lastSeen now and then, so "last connected" stays meaningful.
+  const fresh = !!prev.lastSeen && Date.now() - Date.parse(prev.lastSeen) < LAST_SEEN_REFRESH_MS;
+  if (!unchanged || !fresh) {
+    next.lastSeen = new Date().toISOString();
+    all[physicalSerial] = next;
+    try {
+      writeJson("devices.json", all);
+    } catch {
+      // best effort
+    }
   }
+  ensureAutoAlias(physicalSerial);
 }
+
+const LAST_SEEN_REFRESH_MS = 10 * 60 * 1000;
 
 /**
  * Decide which discovered, not-online mDNS entries to `adb connect` (pure).

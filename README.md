@@ -88,7 +88,7 @@ Every device tool auto-connects first. Select a device by serial, `ip:port`, ali
 
 | Tool | Description |
 |---|---|
-| `list_devices` | Connected devices plus phones discovered via mDNS |
+| `list_devices` | Connected devices, phones discovered via mDNS, and a table of every saved phone (alias, model, last address, online now) |
 | `connect_device` / `disconnect_device` | Explicit connect / disconnect (usually not needed) |
 | `pair_device` | First-time pairing with a 6-digit code |
 | `install_companion_app` | Download + install the ADB Autolink app and grant its permission |
@@ -99,7 +99,7 @@ Every device tool auto-connects first. Select a device by serial, `ip:port`, ali
 | `tap` / `swipe` / `input_text` / `key_event` | Input (`input_text` is ASCII only, an Android `input` limitation) |
 | `wake_device` | Wake the screen and dismiss a non-secure keyguard |
 | `logcat` | Filter by package, tag or priority, limit lines, crash buffer |
-| `set_device_alias` | Name devices, e.g. `test`, `main` |
+| `set_device_alias` | Add or remove aliases. Each phone is named after its model automatically (`S21`, a second one `S21-2`) |
 
 CLI: `node mcp-server/dist/cli.js devices` · `node mcp-server/dist/cli.js connect S21`
 

@@ -88,7 +88,7 @@ Claude がペアリングを案内し、コンパニオンアプリをインス�
 
 | ツール | 説明 |
 |---|---|
-| `list_devices` | 接続中のデバイスと、mDNS で見つかったスマートフォン |
+| `list_devices` | 接続中のデバイス、mDNS で見つかったスマートフォン、保存済みの全スマートフォンの表 (別名、機種、前回のアドレス、現在オンラインか) |
 | `connect_device` / `disconnect_device` | 明示的な接続 / 切断(通常は不要) |
 | `pair_device` | 6 桁のコードによる初回ペアリング |
 | `install_companion_app` | ADB Autolink アプリをダウンロードしてインストールし、権限を付与 |
@@ -99,7 +99,7 @@ Claude がペアリングを案内し、コンパニオンアプリをインス�
 | `tap` / `swipe` / `input_text` / `key_event` | 入力(`input_text` は ASCII のみ。Android の `input` の制限) |
 | `wake_device` | 画面を点灯し、セキュアでないキーガードを解除 |
 | `logcat` | パッケージ、タグ、優先度でフィルタ、行数の制限、クラッシュバッファ |
-| `set_device_alias` | デバイスに `test`、`main` などの名前を付ける |
+| `set_device_alias` | 別名の追加と削除。各スマートフォンには機種名が自動で付く (`S21`、同じ機種の 2 台目は `S21-2`) |
 
 CLI: `node mcp-server/dist/cli.js devices` · `node mcp-server/dist/cli.js connect S21`
 

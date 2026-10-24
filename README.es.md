@@ -88,7 +88,7 @@ Todas las herramientas de dispositivo se conectan automáticamente primero. Sele
 
 | Herramienta | Descripción |
 |---|---|
-| `list_devices` | Dispositivos conectados y teléfonos descubiertos por mDNS |
+| `list_devices` | Dispositivos conectados, teléfonos descubiertos por mDNS y una tabla de todos los teléfonos guardados (alias, modelo, última dirección, si está en línea) |
 | `connect_device` / `disconnect_device` | Conexión / desconexión explícita (normalmente no hace falta) |
 | `pair_device` | Primer emparejamiento con un código de 6 dígitos |
 | `install_companion_app` | Descarga e instala la app ADB Autolink y le concede su permiso |
@@ -99,7 +99,7 @@ Todas las herramientas de dispositivo se conectan automáticamente primero. Sele
 | `tap` / `swipe` / `input_text` / `key_event` | Entrada (`input_text` solo admite ASCII, una limitación de `input` de Android) |
 | `wake_device` | Enciende la pantalla y descarta un bloqueo de pantalla no seguro |
 | `logcat` | Filtra por paquete, etiqueta o prioridad, limita líneas, búfer de fallos |
-| `set_device_alias` | Pon nombre a los dispositivos, p. ej. `test`, `main` |
+| `set_device_alias` | Añade o quita alias. Cada teléfono recibe automáticamente el nombre de su modelo (`S21`, un segundo `S21-2`) |
 
 CLI: `node mcp-server/dist/cli.js devices` · `node mcp-server/dist/cli.js connect S21`
 

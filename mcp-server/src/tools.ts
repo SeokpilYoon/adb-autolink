@@ -16,7 +16,7 @@ import {
 } from "./companion.js";
 import { COMPANION_APP_NAME, COMPANION_PACKAGE, VERSION } from "./config.js";
 import { adbDisconnect, ensureConnected, formatSnapshot, listAdbDevices, snapshot } from "./connector.js";
-import { describeCandidate, loadAliases, marketNameForModel, resolveDevice, setAlias } from "./devices.js";
+import { describeCandidate, loadAliases, marketNameForModel, removeAlias, resolveDevice, setAlias } from "./devices.js";
 import { LOCALES, guideUrl, t, withLang } from "./i18n.js";
 import { decodePng, downscale, encodeJpeg, isAllBlack } from "./image.js";
 import {
@@ -144,10 +144,13 @@ export function registerTools(server: McpServer): void {
   server.registerTool(
     "list_devices",
     {
-      description: "List Android devices known to adb (online, offline, unauthorized) plus phones advertising Wireless debugging via mDNS that are not connected yet, with model, alias and serial. Start here to see what is available.",
-      inputSchema: {},
+      description:
+        "List Android devices known to adb (online, offline, unauthorized) plus phones advertising Wireless debugging via mDNS that are " +
+        "not connected yet, then a table of every phone this PC remembers (alias, model, serial, last address, last connected, online " +
+        "now) and each one's latest connection check report. Start here to see what is available; show the table to the user as is.",
+      inputSchema: { lang: langParam },
     },
-    () => guard(async () => text(formatSnapshot(await snapshot()))),
+    ({ lang }) => guardLang(lang, async () => text(formatSnapshot(await snapshot()))),
   );
 
   server.registerTool(
@@ -606,19 +609,31 @@ export function registerTools(server: McpServer): void {
   server.registerTool(
     "set_device_alias",
     {
-      description: 'Save a friendly alias (e.g. "test", "main") for a device. The alias works as the device parameter of every tool, even before the device is connected.',
-      inputSchema: { alias: z.string().min(1), device: z.string().optional().describe("Device to alias (serial, ip:port, model)") },
+      description:
+        "Add or remove an alias for a device. Every phone automatically gets its model name as alias on first connection " +
+        '("S21", then "S21-2" for a second S21); add others (e.g. "test") or remove one with remove=true. Aliases work as the ' +
+        "device parameter of every tool, even before the device is connected, and match ignoring case, spaces, - and _.",
+      inputSchema: {
+        alias: z.string().min(1),
+        device: z.string().optional().describe("Device to alias (serial, ip:port, model); not needed with remove"),
+        remove: z.boolean().default(false).describe("Remove this alias instead of adding it"),
+      },
     },
-    ({ alias, device }) =>
+    ({ alias, device, remove }) =>
       guard(async () => {
-        const r = await ensureConnected(device);
-        const phys = r.device.physicalSerial ?? r.serial;
-        const all = setAlias(alias, phys);
-        return text(
-          `Alias "${alias}" → ${phys}\nAll aliases:\n${Object.entries(all)
-            .map(([a, s]) => `  ${a} → ${s}`)
-            .join("\n")}`,
-        );
+        let head: string;
+        let all: Record<string, string>;
+        if (remove) {
+          all = removeAlias(alias);
+          head = `Removed alias "${alias}"`;
+        } else {
+          const r = await ensureConnected(device);
+          const phys = r.device.physicalSerial ?? r.serial;
+          all = setAlias(alias, phys);
+          head = `Alias "${alias}" → ${phys}`;
+        }
+        const list = Object.entries(all).map(([a, s]) => `  ${a} → ${s}`);
+        return text(`${head}\nAll aliases:\n${list.join("\n") || "  (none)"}`);
       }),
   );
 }

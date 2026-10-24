@@ -7,7 +7,7 @@ description: >-
   pair phone, connect phone over Wi-Fi, 무선 디버깅, 무선 adb, 폰 연결, 휴대폰 연결, 페어링, ワイヤレスデバッグ,
   ワイヤレス デバッグ, スマホ接続, ペア設定, 无线调试, 连接手机, 配对, depuración inalámbrica, vincular teléfono,
   débogage sans fil, associer le téléphone.
-version: 0.4.2
+version: 0.4.3
 license: MIT
 depends_on:
   required_bins:
@@ -57,6 +57,8 @@ The install already did the settings, so don't walk the user through the app. On
 2. Ask the user to toggle Wi-Fi off and on (or step out and back).
 3. Call `save_checkpoint` with `stage: "reconnect"`. It reconnects without any input, records how (normally the port beacon) and how long it took, and adds the second screenshot to the same report. Give the user both paths, and point out that the port changed while the connection still came back.
    - If it fails saying Wireless debugging is OFF, the phone is waiting on *"Always allow on this network"*; ask the user to approve it and call `save_checkpoint` again.
-4. Suggest `set_device_alias` (e.g. "test", "main") if they have several phones.
+4. Finish by calling `list_devices` and showing its **saved phones** table as is: alias, model, serial, last address, last connected, online now, plus the latest check report paths.
+   - Each phone already has its model name as alias (`S24+`, `S21`; a second phone of the same model gets `S21-2`), which works as the `device` of every tool. Tell the user they can say e.g. "install it on S21".
+   - Offer `set_device_alias` only if they want another name; `remove: true` deletes one.
 
 Records live in `~/.adb-autolink/checks/<device>_<serial>/<date_time>/` (`1-first-connect.png`, `2-reconnect.png`, `report.md`); the five newest sessions per device are kept.

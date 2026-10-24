@@ -88,7 +88,7 @@ Claude가 페어링을 안내하고 컴패니언 앱을 설치합니다(최신 G
 
 | 도구 | 설명 |
 |---|---|
-| `list_devices` | 연결된 기기와 mDNS로 발견된 폰 |
+| `list_devices` | 연결된 기기, mDNS로 발견된 폰, 저장된 모든 폰의 표 (별칭, 기종, 마지막 주소, 지금 온라인 여부) |
 | `connect_device` / `disconnect_device` | 명시적 연결 / 연결 해제 (보통은 필요 없음) |
 | `pair_device` | 6자리 코드로 최초 페어링 |
 | `install_companion_app` | ADB Autolink 앱을 다운로드해 설치하고 권한 부여 |
@@ -99,7 +99,7 @@ Claude가 페어링을 안내하고 컴패니언 앱을 설치합니다(최신 G
 | `tap` / `swipe` / `input_text` / `key_event` | 입력 (`input_text`는 ASCII만 가능, Android `input`의 제한) |
 | `wake_device` | 화면을 깨우고 보안이 없는 잠금 화면 해제 |
 | `logcat` | 패키지, 태그, 우선순위로 필터링, 줄 수 제한, 크래시 버퍼 |
-| `set_device_alias` | 기기에 `test`, `main` 같은 이름 지정 |
+| `set_device_alias` | 별칭 추가·삭제. 폰마다 기종 이름이 자동으로 붙음 (`S21`, 같은 기종 두 번째는 `S21-2`) |
 
 CLI: `node mcp-server/dist/cli.js devices` · `node mcp-server/dist/cli.js connect S21`
 

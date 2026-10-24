@@ -1,14 +1,18 @@
 import { runAdb } from "./adb.js";
 import { type BeaconReply, beaconToken, queryBeacon, scanBeacons, subnetHosts } from "./beacon.js";
+import { latestReport } from "./checkpoints.js";
 import { COMPANION_APP_NAME } from "./config.js";
 import {
   type AliasMap,
   type DeviceCandidate,
   DeviceSelectionError,
   describeCandidate,
+  ensureAutoAlias,
   loadAliases,
   loadKnownDevices,
+  marketNameForModel,
   matchSelector,
+  normalizeModelCode,
   planConnect,
   rememberDevice,
   resolveDevice,
@@ -382,10 +386,65 @@ async function waitForOnline(
 }
 
 /** Snapshot for list_devices / CLI: adb transports plus discovered-but-not-connected phones. */
+export interface SavedPhone {
+  serial: string;
+  aliases: string[];
+  model?: string;
+  lastAddress?: string;
+  lastSeen?: string;
+  online: boolean;
+  report?: string;
+}
+
+/** Every phone this PC remembers, most recently seen first, with its aliases and latest check report. */
+export function savedPhones(adb: DeviceInfo[], aliases: AliasMap): SavedPhone[] {
+  const onlinePhys = new Set(adb.filter(online).map((d) => d.physicalSerial));
+  return Object.entries(loadKnownDevices())
+    .map(([serial, k]) => ({
+      serial,
+      aliases: Object.entries(aliases)
+        .filter(([, s]) => s === serial)
+        .map(([a]) => a),
+      model: k.model,
+      lastAddress: k.lastAddress,
+      lastSeen: k.lastSeen,
+      online: onlinePhys.has(serial),
+      report: latestReport(serial),
+    }))
+    .sort((a, b) => (b.lastSeen ?? "").localeCompare(a.lastSeen ?? ""));
+}
+
+const pad2 = (n: number) => String(n).padStart(2, "0");
+const shortTime = (iso: string | undefined) => {
+  const d = iso ? new Date(iso) : undefined;
+  return d && !Number.isNaN(d.getTime()) ? `${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}` : "-";
+};
+
+/** Markdown table of saved phones (aliases are what the "device" parameter of every tool accepts). */
+export function formatSavedPhones(list: SavedPhone[]): string {
+  if (list.length === 0) return `${t("saved.title", 0)}\n${t("saved.none")}`;
+  const rows = list.map((p) => {
+    const market = marketNameForModel(p.model);
+    const model = p.model ? (market ? `${market} (${normalizeModelCode(p.model)})` : p.model) : "-";
+    const alias = p.aliases.length ? p.aliases.map((a) => `\`${a}\``).join(", ") : "-";
+    const now = t(p.online ? "saved.online" : "saved.offline");
+    return `| ${alias} | ${model} | ${p.serial} | ${p.lastAddress ?? "-"} | ${shortTime(p.lastSeen)} | ${now} |`;
+  });
+  const lines = [t("saved.title", list.length), "", t("saved.header"), "|---|---|---|---|---|---|", ...rows];
+  const reports = list.filter((p) => p.report);
+  if (reports.length) {
+    lines.push("", t("saved.reports"), ...reports.map((p) => `  - ${p.aliases[0] ?? p.serial}: ${p.report}`));
+  }
+  return lines.join("\n");
+}
+
 export async function snapshot(): Promise<{ adb: DeviceInfo[]; discovered: DeviceInfo[]; aliases: AliasMap }> {
   const [adb, mdns] = await Promise.all([listAdbDevices(), discoverMdns()]);
   const connected = new Set(adb.filter(online).flatMap((d) => [d.physicalSerial, d.address].filter(Boolean)));
   const discovered = mdns.filter((m) => !(m.physicalSerial && connected.has(m.physicalSerial)) && !connected.has(m.address));
+  // Phones remembered before auto aliases existed get theirs now, oldest first so numbering follows age.
+  const known = Object.entries(loadKnownDevices()).sort(([, a], [, b]) => (a.lastSeen ?? "").localeCompare(b.lastSeen ?? ""));
+  for (const [serial] of known) ensureAutoAlias(serial);
   return { adb, discovered, aliases: loadAliases() };
 }
 
@@ -405,5 +464,6 @@ export function formatSnapshot(s: { adb: DeviceInfo[]; discovered: DeviceInfo[];
       ? s.discovered.map((d) => `  - ${describeCandidate({ ...d, serial: d.address ?? "" }, s.aliases)} instance=${d.mdns?.instance}`)
       : [`  ${t("snapshot.none")}`]),
   );
+  lines.push("", formatSavedPhones(savedPhones(s.adb, s.aliases)));
   return lines.join("\n");
 }
