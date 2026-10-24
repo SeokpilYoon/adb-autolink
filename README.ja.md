@@ -92,6 +92,7 @@ Claude がペアリングを案内し、コンパニオンアプリをインス�
 | `connect_device` / `disconnect_device` | 明示的な接続 / 切断(通常は不要) |
 | `pair_device` | 6 桁のコードによる初回ペアリング |
 | `install_companion_app` | ADB Autolink アプリをダウンロードしてインストールし、権限を付与 |
+| `save_checkpoint` | 初回接続時と Wi-Fi オフ/オンのテスト後に ADB Autolink アプリ画面をキャプチャし、接続方法を記録 (`~/.adb-autolink/checks/`) |
 | `install_apk` | APK をインストール(`-r -g`) |
 | `launch_app` / `stop_app` | 起動(ランチャーまたは特定の Activity)/ 強制停止 |
 | `screenshot` | 既定は 1280px の JPEG プレビュー。元の PNG は `full_resolution`、`save_path` も指定可 |

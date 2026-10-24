@@ -5,6 +5,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { runAdb, runAdbBinary } from "./adb.js";
 import { beaconToken } from "./beacon.js";
+import { STAGES, saveCheckpoint, viaFromLog } from "./checkpoints.js";
 import {
   AUTH_TIMEOUT_OFF_COMMAND,
   companionSetupCommands,
@@ -13,9 +14,9 @@ import {
   setupBroadcastCommand,
   setupCommandOk,
 } from "./companion.js";
-import { COMPANION_APP_NAME, COMPANION_PACKAGE } from "./config.js";
+import { COMPANION_APP_NAME, COMPANION_PACKAGE, VERSION } from "./config.js";
 import { adbDisconnect, ensureConnected, formatSnapshot, listAdbDevices, snapshot } from "./connector.js";
-import { describeCandidate, loadAliases, resolveDevice, setAlias } from "./devices.js";
+import { describeCandidate, loadAliases, marketNameForModel, resolveDevice, setAlias } from "./devices.js";
 import { LOCALES, guideUrl, t, withLang } from "./i18n.js";
 import { decodePng, downscale, encodeJpeg, isAllBlack } from "./image.js";
 import {
@@ -25,6 +26,7 @@ import {
   parseKeyguardShowing,
   parsePairOutput,
   parseWakefulness,
+  splitHostPort,
   validateConnectAddress,
   validatePairArgs,
 } from "./parse.js";
@@ -92,6 +94,22 @@ async function adbInstall(serial: string, abs: string, flags: string[]): Promise
     throw new Error(`${t("install.failed", serial)}\n${out}${hint ? `\n\n${t("install.hint", hint)}` : ""}`);
   }
   return out;
+}
+
+/** `adb screencap` as PNG plus its decoded pixels (decoded once: black check, JPEG and preview reuse them). */
+async function captureScreen(serial: string): Promise<{ png: Buffer; img: ReturnType<typeof decodePng> }> {
+  const { stdout: png } = await runAdbBinary(["exec-out", "screencap", "-p"], { serial, timeoutMs: 30_000 });
+  const sig = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
+  if (png.length < 8 || !png.subarray(0, 4).equals(sig)) {
+    throw new Error(`screencap did not return a PNG (${png.length} bytes): ${png.subarray(0, 200).toString("utf8")}`);
+  }
+  return { png, img: decodePng(png) };
+}
+
+/** versionName of an installed package, or undefined when it is not installed. */
+async function installedVersion(serial: string, pkg: string): Promise<string | undefined> {
+  const out = await shell(serial, `dumpsys package ${pkg} | grep -m1 versionName`, 10_000).catch(() => "");
+  return /versionName=(\S+)/.exec(out)?.[1];
 }
 
 /** After `adb pair` the phone can take several seconds to advertise its connect port over mDNS: retry before giving up. */
@@ -251,13 +269,7 @@ export function registerTools(server: McpServer): void {
         if (abs && ![".png", ".jpg", ".jpeg"].includes(ext)) throw new Error(`save_path must end in .png, .jpg or .jpeg: ${abs}`);
         if (abs && !overwrite && existsSync(abs)) throw new Error(`File already exists: ${abs} (pass overwrite=true to replace it)`);
         const { serial, warn } = await connectAwake(device);
-        const { stdout: png } = await runAdbBinary(["exec-out", "screencap", "-p"], { serial, timeoutMs: 30_000 });
-        const sig = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
-        if (png.length < 8 || !png.subarray(0, 4).equals(sig)) {
-          throw new Error(`screencap did not return a PNG (${png.length} bytes): ${png.subarray(0, 200).toString("utf8")}`);
-        }
-        // Decode the PNG once; the black check, saved JPEG and downscaled preview all reuse the raw pixels.
-        const img = decodePng(png);
+        const { png, img } = await captureScreen(serial);
         const meta = { width: img.width, height: img.height };
         let note = `Screenshot from ${serial} (${meta.width}x${meta.height})`;
         if (abs) {
@@ -280,6 +292,61 @@ export function registerTools(server: McpServer): void {
           content: [
             { type: "image", data: data.toString("base64"), mimeType },
             { type: "text", text: note + warn },
+          ],
+        };
+      }),
+  );
+
+  server.registerTool(
+    "save_checkpoint",
+    {
+      description:
+        "Record a setup checkpoint: connect (timing how long it takes and how: already online, last known address, " +
+        "ADB Autolink port beacon or mDNS), open the ADB Autolink app so its screen shows the current ip:port, take a " +
+        "screenshot and save it with a report row under ~/.adb-autolink/checks/<device>/<session>/. Call it with " +
+        "stage=first_connect right after the first successful connection in setup, and with stage=reconnect after the user " +
+        "turned Wi-Fi off and on. Give the user the returned screenshot and report paths.",
+      inputSchema: {
+        stage: z.enum(STAGES).describe("first_connect (starts a new session) or reconnect (joins the latest session of this device)"),
+        device: deviceParam,
+        lang: langParam,
+      },
+    },
+    ({ stage, device, lang }) =>
+      guardLang(lang, async () => {
+        const started = Date.now();
+        const c = await ensureConnected(device);
+        const elapsedMs = Date.now() - started;
+        const via = viaFromLog(c.log, !!device && !!splitHostPort(device.trim()));
+        const warn = await ensureAwake(c.serial);
+        const appVersion = await installedVersion(c.serial, COMPANION_PACKAGE);
+        if (appVersion) {
+          await shell(c.serial, `am start -n ${COMPANION_PACKAGE}/.MainActivity`);
+          await new Promise((res) => setTimeout(res, 2_500)); // let the app confirm and draw the port
+        }
+        const { png, img } = await captureScreen(c.serial);
+        const serial = c.device.physicalSerial ?? c.serial;
+        const address = c.device.address ?? c.serial;
+        const saved = saveCheckpoint({
+          stage,
+          deviceName: marketNameForModel(c.device.model) ?? c.device.model,
+          serial,
+          address,
+          via,
+          elapsedMs,
+          appVersion,
+          pluginVersion: VERSION,
+          png,
+        });
+        const lines = [
+          t("checkpoint.saved", t(`checkpoint.stage.${stage}`), saved.png, saved.report, address, t(`checkpoint.via.${via}`), (elapsedMs / 1000).toFixed(1)),
+        ];
+        if (!appVersion) lines.push(t("checkpoint.noApp"));
+        if (warn) lines.push(warn);
+        return {
+          content: [
+            { type: "image", data: encodeJpeg(downscale(img, 1280), 80).toString("base64"), mimeType: "image/jpeg" },
+            { type: "text", text: lines.join("\n") },
           ],
         };
       }),

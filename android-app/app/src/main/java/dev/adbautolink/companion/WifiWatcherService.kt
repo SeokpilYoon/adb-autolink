@@ -14,6 +14,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
@@ -27,7 +28,8 @@ import java.util.concurrent.Executors
  * adbd shows a confirmation dialog and resets adb_wifi_enabled to 0. So we act once per
  * (SSID, BSSID): write 1, verify a few seconds later, and if reverted ask the user to approve
  * "Always allow on this network". A manual "off" (tile/app, [Prefs.userDisabled]) is respected
- * until the next network change; any other drop to 0 is retried once, then the user is alerted.
+ * until the next network change; any other drop to 0 is retried once (again after a minute of working),
+ * then the user is alerted.
  */
 class WifiWatcherService : Service() {
     private val handler = Handler(Looper.getMainLooper())
@@ -40,6 +42,8 @@ class WifiWatcherService : Service() {
     private var networkKey: String? = null
     private var state = State.IDLE
     private var retried = false
+    /** elapsedRealtime when Wireless debugging was last seen on (0 = not since the last drop). */
+    private var enabledSince = 0L
     /** Current Wireless debugging port, found by [AdbPortLocator]; read by the beacon thread. */
     @Volatile private var adbPort: Int? = null
     private val locator = Executors.newSingleThreadExecutor()
@@ -124,6 +128,10 @@ class WifiWatcherService : Service() {
         val ssid = snapshot?.ssid
         val dropped = state == State.DONE && !prefs.userDisabled && !AdbWifiController.isEnabled(this) &&
             ssid != null && ssid in prefs.whitelist && snapshot?.ipv4 != null
+        // The single retry guards against a pending approval prompt resetting it at once. A drop after a
+        // stretch of working fine is a new event (e.g. the system restarted adbd), so it gets a retry again.
+        if (dropped && retried && enabledSince != 0L && SystemClock.elapsedRealtime() - enabledSince > STABLE_MS) retried = false
+        enabledSince = 0L
         if (dropped && !retried) {
             retried = true
             state = State.IDLE
@@ -156,6 +164,7 @@ class WifiWatcherService : Service() {
             }
             snap.ipv4 == null -> getString(R.string.status_waiting_ip, ssid)
             enabled -> {
+                if (enabledSince == 0L) enabledSince = SystemClock.elapsedRealtime()
                 state = State.DONE
                 getString(R.string.status_on, ssid)
             }
@@ -258,6 +267,7 @@ class WifiWatcherService : Service() {
         private const val DEBOUNCE_MS = 1_500L
         private const val VERIFY_MS = 3_000L
         private const val RETRY_MS = 2_000L
+        private const val STABLE_MS = 60_000L
         private const val LOCATE_RETRY_MS = 2_000L
         private const val MAX_LOCATE_ATTEMPTS = 5
 

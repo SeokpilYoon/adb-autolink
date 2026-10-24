@@ -92,6 +92,7 @@ Claude가 페어링을 안내하고 컴패니언 앱을 설치합니다(최신 G
 | `connect_device` / `disconnect_device` | 명시적 연결 / 연결 해제 (보통은 필요 없음) |
 | `pair_device` | 6자리 코드로 최초 페어링 |
 | `install_companion_app` | ADB Autolink 앱을 다운로드해 설치하고 권한 부여 |
+| `save_checkpoint` | 최초 연결과 Wi-Fi 껐다 켜기 테스트 때 ADB Autolink 앱 화면을 캡처하고 연결 방법을 기록 (`~/.adb-autolink/checks/`) |
 | `install_apk` | APK 설치 (`-r -g`) |
 | `launch_app` / `stop_app` | 실행 (런처 또는 특정 액티비티) / 강제 종료 |
 | `screenshot` | 기본은 1280px JPEG 미리보기, 원본 PNG는 `full_resolution`, `save_path` 선택 가능 |

@@ -92,6 +92,7 @@ Every device tool auto-connects first. Select a device by serial, `ip:port`, ali
 | `connect_device` / `disconnect_device` | Explicit connect / disconnect (usually not needed) |
 | `pair_device` | First-time pairing with a 6-digit code |
 | `install_companion_app` | Download + install the ADB Autolink app and grant its permission |
+| `save_checkpoint` | Screenshot the ADB Autolink app and log how the phone connected, at first connection and after a Wi-Fi off/on test (`~/.adb-autolink/checks/`) |
 | `install_apk` | Install an APK (`-r -g`) |
 | `launch_app` / `stop_app` | Start (launcher or a specific activity) / force-stop |
 | `screenshot` | 1280px JPEG preview by default, `full_resolution` for the original PNG, optional `save_path` |

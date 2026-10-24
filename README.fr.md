@@ -92,6 +92,7 @@ Chaque outil d'appareil se connecte d'abord automatiquement. Sélectionnez un ap
 | `connect_device` / `disconnect_device` | Connexion / déconnexion explicite (généralement inutile) |
 | `pair_device` | Premier appairage avec un code à 6 chiffres |
 | `install_companion_app` | Télécharge et installe l'application ADB Autolink et lui accorde sa permission |
+| `save_checkpoint` | Capture l'application ADB Autolink et note comment le téléphone s'est connecté, à la première connexion et après un test Wi-Fi coupé/rétabli (`~/.adb-autolink/checks/`) |
 | `install_apk` | Installe un APK (`-r -g`) |
 | `launch_app` / `stop_app` | Lance (launcher ou activité précise) / force l'arrêt |
 | `screenshot` | Aperçu JPEG de 1280px par défaut, `full_resolution` pour le PNG d'origine, `save_path` facultatif |

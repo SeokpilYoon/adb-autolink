@@ -8,7 +8,7 @@ const entry = process.argv[2] ? path.resolve(process.argv[2]) : path.join(here, 
 const server = spawn(process.execPath, [entry], { stdio: ["pipe", "pipe", "inherit"] });
 const expected = [
   "list_devices", "connect_device", "disconnect_device", "install_apk", "launch_app", "stop_app",
-  "screenshot", "tap", "swipe", "input_text", "key_event", "logcat", "set_device_alias", "wake_device", "pair_device", "install_companion_app",
+  "screenshot", "tap", "swipe", "input_text", "key_event", "logcat", "set_device_alias", "wake_device", "pair_device", "install_companion_app", "save_checkpoint",
 ];
 
 let buf = "";

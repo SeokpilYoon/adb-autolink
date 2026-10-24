@@ -92,6 +92,7 @@ Claude 会引导你完成配对并安装配套应用（从最新的 GitHub relea
 | `connect_device` / `disconnect_device` | 显式连接 / 断开（通常不需要） |
 | `pair_device` | 使用 6 位配对码进行首次配对 |
 | `install_companion_app` | 下载并安装 ADB Autolink 应用，并授予其权限 |
+| `save_checkpoint` | 在首次连接和 Wi-Fi 关开测试后截取 ADB Autolink 应用画面并记录连接方式（`~/.adb-autolink/checks/`） |
 | `install_apk` | 安装 APK（`-r -g`） |
 | `launch_app` / `stop_app` | 启动（启动器或指定 Activity）/ 强制停止 |
 | `screenshot` | 默认返回 1280px 的 JPEG 预览，`full_resolution` 返回原始 PNG，可选 `save_path` |

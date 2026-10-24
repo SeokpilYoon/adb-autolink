@@ -11,6 +11,14 @@ All notable changes to adb-autolink are recorded here. Each version must match a
 
 Release pages are generated from these sections.
 
+## v0.4.1 - Saved connection checks, and a second drop on the same Wi-Fi is retried
+
+**Upgrading from 0.4.0:** run `/plugin update adb-autolink`, restart Claude Code, then call `install_companion_app` once per phone to get the app fix. The app updates in place and keeps its whitelist and beacon token.
+
+- **`save_checkpoint` tool:** records a setup check. It connects (timing how long it takes and noting how: already online, last known address, port beacon or mDNS), opens the ADB Autolink app so the screen shows the current ip:port, and saves the screenshot with a report row under `~/.adb-autolink/checks/<device>_<serial>/<date_time>/` (`1-first-connect.png`, `2-reconnect.png`, `report.md`, `session.json`). A reconnect test joins the device's latest session from the last 24 hours, and the five newest sessions per device are kept. The result gives the file paths. The records stay in the plugin's state folder, not your project, because phone screens can show personal data.
+- **`/adb-autolink:setup` verifies with saved records:** a checkpoint right after the first connection, then another after the user turns Wi-Fi off and on, so the report shows the port changing while the connection still comes back.
+- **Fix (app): Wireless debugging dropping a second time on the same Wi-Fi was not turned back on.** The app retried only once per network, to avoid looping on a pending "Always allow on this network" prompt, and that retry was not restored until the Wi-Fi changed. It now gets a retry again after Wireless debugging has worked for a minute. An immediate reset by a pending prompt still gets a single retry.
+
 ## v0.4.0 - Reconnects even where mDNS is blocked
 
 **Upgrading from 0.3.x:** run `/plugin update adb-autolink`, restart Claude Code, then call `install_companion_app` once per phone. The reinstall hands the app this PC's beacon token; until then the phone cannot use the new reconnect path. The app updates in place and keeps your whitelist.

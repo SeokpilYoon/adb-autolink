@@ -7,7 +7,7 @@ description: >-
   pair phone, connect phone over Wi-Fi, 무선 디버깅, 무선 adb, 폰 연결, 휴대폰 연결, 페어링, ワイヤレスデバッグ,
   ワイヤレス デバッグ, スマホ接続, ペア設定, 无线调试, 连接手机, 配对, depuración inalámbrica, vincular teléfono,
   débogage sans fil, associer le téléphone.
-version: 0.4.0
+version: 0.4.1
 license: MIT
 depends_on:
   required_bins:
@@ -27,7 +27,7 @@ Work through the steps in order, one at a time, and confirm each with the user b
 
 ## 1. Check prerequisites
 - Call `list_devices`. If it fails because adb is not found, tell the user to install Android SDK platform-tools (or Android Studio) or set `ADB_PATH`, then stop.
-- The PC and phone must be on the same Wi-Fi. On Windows the network profile should be **Private** so mDNS (UDP 5353) reaches adb.
+- The PC and phone must be on the same Wi-Fi. A **Private** network profile on Windows lets mDNS (UDP 5353) reach adb; it is not required once the companion app is installed, whose port beacon works without mDNS.
 
 ## 2. Pair (once per phone)
 Skip if `list_devices` already shows the phone online or discovered.
@@ -52,6 +52,11 @@ The install already did the settings, so don't walk the user through the app. On
 - When Android asks *"Allow wireless debugging on this network?"* tick **Always allow on this network**. Mesh or dual-band routers may ask once per access point.
 - More networks: tap **Allow this Wi-Fi** there, or the **Allow** action in the notification that appears when Wireless debugging is turned on by hand on a new network.
 
-## 5. Verify
-- Ask the user to toggle Wi-Fi off and on (or step out and back). Then call `connect_device` and `screenshot` without any manual input.
-- Suggest `set_device_alias` (e.g. "test", "main") if they have several phones.
+## 5. Verify, with a saved record
+1. Call `save_checkpoint` with `stage: "first_connect"` (and `device` if there are several phones). It opens the ADB Autolink app, screenshots the current ip:port and saves it with a report row. Give the user the screenshot and report paths from the result.
+2. Ask the user to toggle Wi-Fi off and on (or step out and back).
+3. Call `save_checkpoint` with `stage: "reconnect"`. It reconnects without any input, records how (normally the port beacon) and how long it took, and adds the second screenshot to the same report. Give the user both paths, and point out that the port changed while the connection still came back.
+   - If it fails saying Wireless debugging is OFF, the phone is waiting on *"Always allow on this network"*; ask the user to approve it and call `save_checkpoint` again.
+4. Suggest `set_device_alias` (e.g. "test", "main") if they have several phones.
+
+Records live in `~/.adb-autolink/checks/<device>_<serial>/<date_time>/` (`1-first-connect.png`, `2-reconnect.png`, `report.md`); the five newest sessions per device are kept.
