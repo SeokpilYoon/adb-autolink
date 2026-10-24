@@ -47,7 +47,8 @@
 - Claude Code
 - Node.js 20+
 - Android SDK platform-tools（支持 mDNS 的 `adb` 34+）。依次通过 `ADB_PATH`、`ANDROID_HOME` / `ANDROID_SDK_ROOT`、Android Studio 默认 SDK 位置和 `PATH` 查找。
-- 与电脑处于同一局域网的 Android 11+ 手机。已测试机型：Samsung Galaxy（One UI）。
+- 与电脑处于同一局域网的 Android 11+ 手机。
+- **已用真机验证：** Windows + Samsung Galaxy（S21 为 One UI 7，S24+ 为 One UI 8）。**支持但尚未用真机验证：** Linux、macOS 和其他安卓品牌（Pixel、小米等）。CI 会在 Windows、Linux、macOS 上构建并测试服务器。在 WSL2 中需开启镜像网络模式，才能访问同一 Wi-Fi 上的手机。
 
 ## 安装
 

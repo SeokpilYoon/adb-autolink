@@ -47,7 +47,8 @@ Sin volver a emparejar y sin escribir direcciones IP, puertos ni códigos de emp
 - Claude Code
 - Node.js 20+
 - Android SDK platform-tools (`adb` 34+ con mDNS). Se localiza mediante `ADB_PATH`, `ANDROID_HOME` / `ANDROID_SDK_ROOT`, la ubicación predeterminada del SDK de Android Studio o `PATH`.
-- Teléfono con Android 11+, en la misma LAN que el PC. Dispositivo probado: Samsung Galaxy (One UI).
+- Teléfono con Android 11+, en la misma LAN que el PC.
+- **Verificado con dispositivos reales:** Windows con Samsung Galaxy (S21 con One UI 7, S24+ con One UI 8). **Compatible pero aún sin verificar con dispositivos:** Linux, macOS y otras marcas Android (Pixel, Xiaomi, ...); la CI compila y prueba el servidor en Windows, Linux y macOS. En WSL2, activa la red en modo espejo para que el PC llegue a los teléfonos de tu Wi-Fi.
 
 ## Instalación
 

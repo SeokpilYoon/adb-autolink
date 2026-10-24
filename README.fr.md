@@ -47,7 +47,8 @@ Pas de nouvel appairage, pas d'adresse IP, de port ni de code d'appairage à sai
 - Claude Code
 - Node.js 20+
 - Android SDK platform-tools (`adb` 34+ avec mDNS). Détecté via `ADB_PATH`, `ANDROID_HOME` / `ANDROID_SDK_ROOT`, l'emplacement par défaut du SDK d'Android Studio, ou `PATH`.
-- Téléphone Android 11+, sur le même LAN que le PC. Cible testée : Samsung Galaxy (One UI).
+- Téléphone Android 11+, sur le même LAN que le PC.
+- **Vérifié sur appareils réels :** Windows avec Samsung Galaxy (S21 sous One UI 7, S24+ sous One UI 8). **Pris en charge mais pas encore vérifié sur appareils :** Linux, macOS et les autres marques Android (Pixel, Xiaomi, ...) ; la CI compile et teste le serveur sous Windows, Linux et macOS. Sous WSL2, activez le réseau en mode miroir pour que le PC atteigne les téléphones de votre Wi-Fi.
 
 ## Installation
 

@@ -7,6 +7,7 @@ import {
   type DeviceCandidate,
   DeviceSelectionError,
   describeCandidate,
+  displayName,
   ensureAutoAlias,
   loadAliases,
   loadKnownDevices,
@@ -42,6 +43,20 @@ export interface DeviceInfo extends DeviceCandidate {
   mdns?: MdnsService;
 }
 
+/** ro.product.marketname, else ro.product.model; "" if neither answers. */
+async function reportedProductName(serial: string): Promise<string> {
+  for (const prop of ["ro.product.marketname", "ro.product.model"]) {
+    try {
+      const r = await runAdb(["shell", "getprop", prop], { serial, timeoutMs: 5_000 });
+      const v = r.stdout.trim();
+      if (v) return v;
+    } catch {
+      // try the next one
+    }
+  }
+  return "";
+}
+
 /** `adb devices -l` with physical serials filled in. */
 export async function listAdbDevices(): Promise<DeviceInfo[]> {
   const { stdout } = await runAdb(["devices", "-l"], { timeoutMs: 15_000 });
@@ -73,8 +88,15 @@ export async function listAdbDevices(): Promise<DeviceInfo[]> {
     if (info.physicalSerial) {
       const k = known[info.physicalSerial];
       if (!info.model && k?.model) info.model = k.model;
+      let marketName = k?.marketName;
+      // Phones outside the Galaxy table: ask once for the name people use ("Pixel 8"), before the
+      // auto alias is chosen. An empty string records that the phone has none.
+      if (marketName === undefined && e.state === "device" && !marketNameForModel(info.model)) {
+        marketName = await reportedProductName(e.serial);
+      }
+      if (marketName) info.marketName = marketName;
       if (e.state === "device" && (e.model || info.address)) {
-        rememberDevice(info.physicalSerial, { model: e.model, product: e.product, lastAddress: info.address });
+        rememberDevice(info.physicalSerial, { model: e.model, product: e.product, lastAddress: info.address, marketName });
       }
     }
     result.push(info);
@@ -184,7 +206,14 @@ async function pickLive(selector: string | undefined, devices: DeviceInfo[], ali
 function knownCandidates(): DeviceInfo[] {
   return Object.entries(loadKnownDevices())
     .filter(([, k]) => k.lastAddress)
-    .map(([phys, k]) => ({ serial: "", physicalSerial: phys, address: k.lastAddress, model: k.model, state: "known" }));
+    .map(([phys, k]) => ({
+      serial: "",
+      physicalSerial: phys,
+      address: k.lastAddress,
+      model: k.model,
+      marketName: k.marketName || undefined,
+      state: "known",
+    }));
 }
 
 /** Transports belonging to any of `targets` (by ip:port or physical serial). */
@@ -390,6 +419,7 @@ export interface SavedPhone {
   serial: string;
   aliases: string[];
   model?: string;
+  marketName?: string;
   lastAddress?: string;
   lastSeen?: string;
   online: boolean;
@@ -406,6 +436,7 @@ export function savedPhones(adb: DeviceInfo[], aliases: AliasMap): SavedPhone[] 
         .filter(([, s]) => s === serial)
         .map(([a]) => a),
       model: k.model,
+      marketName: k.marketName || undefined,
       lastAddress: k.lastAddress,
       lastSeen: k.lastSeen,
       online: onlinePhys.has(serial),
@@ -424,7 +455,7 @@ const shortTime = (iso: string | undefined) => {
 export function formatSavedPhones(list: SavedPhone[]): string {
   if (list.length === 0) return `${t("saved.title", 0)}\n${t("saved.none")}`;
   const rows = list.map((p) => {
-    const market = marketNameForModel(p.model);
+    const market = displayName(p.model, p.marketName);
     const model = p.model ? (market ? `${market} (${normalizeModelCode(p.model)})` : p.model) : "-";
     const alias = p.aliases.length ? p.aliases.map((a) => `\`${a}\``).join(", ") : "-";
     const now = t(p.online ? "saved.online" : "saved.offline");

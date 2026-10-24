@@ -107,3 +107,47 @@ describe("formatSavedPhones", () => {
     expect(withLang("en", () => formatSavedPhones([]))).toContain("No phones saved yet");
   });
 });
+
+describe("phones outside the Galaxy table", () => {
+  it("uses the product name the phone reports, unless it is just the model code", async () => {
+    const { displayName } = await import("../src/devices.js");
+    expect(displayName("Pixel_8", "Pixel 8")).toBe("Pixel 8");
+    expect(displayName("SM_S926N", "Galaxy S24+")).toBe("Galaxy S24+"); // table wins
+    expect(displayName("SM_A536N", "SM-A536N")).toBeUndefined();
+    expect(displayName("2201116SG", "")).toBeUndefined();
+  });
+
+  it("builds aliases from those names", () => {
+    expect(autoAliasBase("Pixel_8", "Pixel 8")).toBe("Pixel8");
+    expect(autoAliasBase("Pixel_8", "Google Pixel 8 Pro")).toBe("Pixel8Pro");
+    expect(autoAliasBase("2201116SG", "Redmi Note 11")).toBe("RedmiNote11");
+    expect(autoAliasBase("SM_A536N", "Galaxy A53 5G")).toBe("A535G");
+    expect(autoAliasBase("2201116SG", "")).toBe("2201116SG");
+  });
+
+  it("finds a phone by its reported name", () => {
+    const cands = [
+      { serial: "P", physicalSerial: "P", model: "Pixel_8", marketName: "Pixel 8", state: "device" },
+      { serial: "R", physicalSerial: "R", model: "2201116SG", marketName: "Redmi Note 11", state: "device" },
+    ];
+    expect(matchSelector("pixel 8", cands).map((c) => c.serial)).toEqual(["P"]);
+    expect(matchSelector("Redmi-Note-11", cands).map((c) => c.serial)).toEqual(["R"]);
+  });
+});
+
+describe("automatic aliases for other brands", () => {
+  const prevHome = process.env.ADB_AUTOLINK_HOME;
+  beforeEach(() => {
+    process.env.ADB_AUTOLINK_HOME = mkdtempSync(path.join(os.tmpdir(), "adbal-alias-"));
+  });
+  afterEach(() => {
+    if (prevHome === undefined) delete process.env.ADB_AUTOLINK_HOME;
+    else process.env.ADB_AUTOLINK_HOME = prevHome;
+  });
+
+  it("names a Pixel after its reported name", () => {
+    rememberDevice("PIX1", { model: "Pixel_8", marketName: "Pixel 8" });
+    rememberDevice("PIX2", { model: "Pixel_8", marketName: "Pixel 8" });
+    expect(loadAliases()).toEqual({ Pixel8: "PIX1", "Pixel8-2": "PIX2" });
+  });
+});

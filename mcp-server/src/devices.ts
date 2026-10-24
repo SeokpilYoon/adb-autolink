@@ -36,6 +36,22 @@ export function marketNameForModel(model: string | undefined): string | undefine
   return SAMSUNG_MODELS.find((m) => code.startsWith(m.prefix))?.name;
 }
 
+/**
+ * The name people call a phone: the Galaxy table first, else the product name the phone reports
+ * (ro.product.marketname / ro.product.model, e.g. "Pixel 8", "Redmi Note 11"), else nothing.
+ * A reported name that is just the model code ("SM-A536N", "2201116SG") adds nothing and is ignored;
+ * a readable one that happens to equal the code ("Pixel 8" for Pixel_8) is kept.
+ */
+export function displayName(model: string | undefined, reported: string | undefined): string | undefined {
+  const known = marketNameForModel(model);
+  if (known) return known;
+  const name = reported?.trim();
+  if (!name) return undefined;
+  const looksLikeCode = !/[a-z]/.test(name);
+  if (looksLikeCode && model && normalizeModelCode(name) === normalizeModelCode(model)) return undefined;
+  return name;
+}
+
 /** A device candidate considered by resolveDevice (online, offline, or only discovered via mDNS). */
 export interface DeviceCandidate {
   /** Transport serial used with `adb -s` (empty for mDNS-only entries). */
@@ -45,6 +61,8 @@ export interface DeviceCandidate {
   /** ip:port if wireless. */
   address?: string;
   model?: string;
+  /** Product name the phone reports when it is not in the Galaxy table (see displayName). */
+  marketName?: string;
   state: string;
 }
 
@@ -92,7 +110,8 @@ export function matchSelector(selector: string, cands: DeviceCandidate[], aliase
     },
     (c) => {
       const known = SAMSUNG_MODELS.find((m) => m.key === normalizeMarketName(sel));
-      return !!known && !!c.model && normalizeModelCode(c.model).startsWith(known.prefix);
+      if (known) return !!c.model && normalizeModelCode(c.model).startsWith(known.prefix);
+      return !!c.marketName && normalizeMarketName(c.marketName) === normalizeMarketName(sel);
     },
     (c) => {
       const needle = sel.toUpperCase().replace(/[\s_\-]+/g, "");
@@ -112,7 +131,7 @@ export function describeCandidate(c: DeviceCandidate, aliases: AliasMap = {}): s
   const id = c.physicalSerial ?? c.serial;
   const alias = Object.entries(aliases).find(([, s]) => s === id)?.[0];
   const parts = [c.serial || c.address || id];
-  const market = marketNameForModel(c.model);
+  const market = displayName(c.model, c.marketName);
   if (c.model) parts.push(market ? `${market} (${c.model})` : c.model);
   if (alias) parts.push(`alias=${alias}`);
   if (c.physicalSerial && c.physicalSerial !== c.serial) parts.push(`serial=${c.physicalSerial}`);
@@ -222,10 +241,16 @@ export function removeAlias(alias: string): AliasMap {
   return aliases;
 }
 
-/** "Galaxy S24+" -> "S24+", "Galaxy S24 Ultra" -> "S24Ultra"; models without a market name use their code. */
-export function autoAliasBase(model: string): string {
-  const market = marketNameForModel(model);
-  return market ? market.replace(/^Galaxy\s+/, "").replace(/\s+/g, "") : normalizeModelCode(model);
+/**
+ * "Galaxy S24+" -> "S24+", "Galaxy S24 Ultra" -> "S24Ultra", "Google Pixel 8" -> "Pixel8",
+ * "Redmi Note 11" -> "RedmiNote11"; phones without any name use their model code.
+ */
+export function autoAliasBase(model: string, reported?: string): string {
+  const name = displayName(model, reported);
+  if (!name) return normalizeModelCode(model);
+  return name
+    .replace(/^(samsung\s+)?galaxy\s+|^google\s+/i, "")
+    .replace(/[^\w+]+/g, "");
 }
 
 /** base, then base-2, base-3, ... : the first one no other phone uses. */
@@ -246,7 +271,7 @@ export function ensureAutoAlias(physicalSerial: string): void {
   if (!known?.model || known.autoAlias) return;
   const aliases = loadAliases();
   if (!Object.values(aliases).includes(physicalSerial)) {
-    aliases[nextAutoAlias(autoAliasBase(known.model), aliases)] = physicalSerial;
+    aliases[nextAutoAlias(autoAliasBase(known.model, known.marketName), aliases)] = physicalSerial;
     try {
       writeJson("aliases.json", aliases);
     } catch {
@@ -269,6 +294,8 @@ export interface KnownDevice {
   lastSeen?: string;
   /** The automatic model-name alias was handled (given, or the phone already had one). Never redone. */
   autoAlias?: boolean;
+  /** Product name the phone reported (empty string = asked, none), read once per phone. */
+  marketName?: string;
 }
 
 export function loadKnownDevices(): Record<string, KnownDevice> {

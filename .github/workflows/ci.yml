@@ -1,0 +1,67 @@
+# Checks the MCP server on every desktop OS it supports and builds the companion app.
+# Real phones are not available here: this proves install, typecheck, unit tests and that the
+# server starts and lists its tools on Windows, Linux and macOS, not wireless connections.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  mcp-server:
+    name: MCP server (${{ matrix.os }}, Node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: [20, 22]
+    defaults:
+      run:
+        working-directory: mcp-server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: mcp-server/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      # The committed dist/ bundle is what the plugin runs: it must start on this OS.
+      - run: node scripts/smoke.mjs
+
+  release-check:
+    name: Versions and dist are consistent
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mcp-server/package-lock.json
+      - run: npm ci
+        working-directory: mcp-server
+      - run: node scripts/release.mjs check
+
+  android-app:
+    name: Companion app build and lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      # No keystore in CI, so the release build comes out unsigned; that still exercises R8.
+      - run: ./gradlew --console=plain assembleDebug assembleRelease lintRelease

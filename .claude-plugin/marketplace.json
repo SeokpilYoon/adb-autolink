@@ -9,7 +9,7 @@
     {
       "name": "adb-autolink",
       "description": "Zero-touch wireless ADB: auto-enable wireless debugging on trusted Wi-Fi and auto-reconnect via mDNS. MCP tools for install, screenshot, input and logcat.",
-      "version": "0.4.3",
+      "version": "0.4.4",
       "source": "./",
       "category": "development",
       "homepage": "https://github.com/SeokpilYoon/adb-autolink",

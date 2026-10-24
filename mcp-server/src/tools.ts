@@ -16,7 +16,7 @@ import {
 } from "./companion.js";
 import { COMPANION_APP_NAME, COMPANION_PACKAGE, VERSION } from "./config.js";
 import { adbDisconnect, ensureConnected, formatSnapshot, listAdbDevices, snapshot } from "./connector.js";
-import { describeCandidate, loadAliases, marketNameForModel, removeAlias, resolveDevice, setAlias } from "./devices.js";
+import { describeCandidate, displayName, loadAliases, removeAlias, resolveDevice, setAlias } from "./devices.js";
 import { LOCALES, guideUrl, t, withLang } from "./i18n.js";
 import { decodePng, downscale, encodeJpeg, isAllBlack } from "./image.js";
 import {
@@ -332,7 +332,7 @@ export function registerTools(server: McpServer): void {
         const address = c.device.address ?? c.serial;
         const saved = saveCheckpoint({
           stage,
-          deviceName: marketNameForModel(c.device.model) ?? c.device.model,
+          deviceName: displayName(c.device.model, c.device.marketName) ?? c.device.model,
           serial,
           address,
           via,

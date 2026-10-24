@@ -47,7 +47,8 @@ No re-pairing, no typing IP addresses, ports or pairing codes. The phone turns w
 - Claude Code
 - Node.js 20+
 - Android SDK platform-tools (`adb` 34+ with mDNS). Found via `ADB_PATH`, `ANDROID_HOME` / `ANDROID_SDK_ROOT`, the default Android Studio SDK location, or `PATH`.
-- Android 11+ phone, on the same LAN as the PC. Tested target: Samsung Galaxy (One UI).
+- Android 11+ phone on the same LAN as the PC.
+- **Verified on real devices:** Windows with Samsung Galaxy (S21 on One UI 7, S24+ on One UI 8). **Supported but not yet verified on devices:** Linux, macOS and other Android brands (Pixel, Xiaomi, ...); CI builds and tests the server on Windows, Linux and macOS. Under WSL2, turn on mirrored networking so the PC can reach phones on your Wi-Fi.
 
 ## Install
 

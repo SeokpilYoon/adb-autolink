@@ -47,7 +47,8 @@
 - Claude Code
 - Node.js 20+
 - Android SDK platform-tools(mDNS 対応の `adb` 34+)。`ADB_PATH`、`ANDROID_HOME` / `ANDROID_SDK_ROOT`、Android Studio 既定の SDK 場所、`PATH` の順に探します。
-- PC と同じ LAN 上の Android 11+ スマートフォン。動作確認の対象: Samsung Galaxy(One UI)。
+- PC と同じ LAN 上の Android 11+ スマートフォン。
+- **実機で確認済み:** Windows + Samsung Galaxy(S21 は One UI 7、S24+ は One UI 8)。**対応しているが実機では未確認:** Linux、macOS、ほかの Android メーカー(Pixel、Xiaomi など)。CI は Windows、Linux、macOS でサーバーのビルドとテストを実行します。WSL2 ではミラー ネットワーク モードを有効にしないと、同じ Wi-Fi のスマートフォンに届きません。
 
 ## インストール
 

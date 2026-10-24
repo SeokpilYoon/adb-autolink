@@ -11,6 +11,14 @@ All notable changes to adb-autolink are recorded here. Each version must match a
 
 Release pages are generated from these sections.
 
+## v0.4.4 - CI on Windows, Linux and macOS; names for every Android brand
+
+**Upgrading from 0.4.3:** run `/plugin update adb-autolink` and restart Claude Code. The phone app is unchanged apart from its version number.
+
+- **CI:** GitHub Actions now runs the MCP server's typecheck, tests and a start-up check on Windows, Linux and macOS (Node 20 and 22), checks that versions and the committed `dist` are consistent, and builds and lints the companion app. Real phones are not part of CI.
+- **Phones outside the Galaxy table get readable names:** on first connection the server reads the product name the phone reports (`ro.product.marketname`, else `ro.product.model`) once. A Pixel 8 is shown as "Pixel 8", gets the alias `Pixel8` (a second one `Pixel8-2`), and is found by "pixel 8". Names that are only a model code are ignored, and Galaxy phones, which report only their code, keep using the built-in table.
+- **Clearer support statement in the READMEs:** verified on real devices with Windows and Samsung Galaxy; Linux, macOS and other Android brands are supported but not yet verified on devices. Under WSL2, mirrored networking is needed to reach phones on your Wi-Fi.
+
 ## v0.4.3 - Saved phones table and model-name aliases
 
 **Upgrading from 0.4.2:** run `/plugin update adb-autolink` and restart Claude Code. The phone app is unchanged apart from its version number, so there is no need to reinstall it. Phones you connected before get their model-name alias the next time you list devices.

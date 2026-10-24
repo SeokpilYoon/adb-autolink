@@ -26,8 +26,8 @@ android {
         applicationId = "dev.adbautolink.companion"
         minSdk = 30
         targetSdk = 35
-        versionCode = 10
-        versionName = "0.4.3"
+        versionCode = 11
+        versionName = "0.4.4"
     }
 
     signingConfigs {

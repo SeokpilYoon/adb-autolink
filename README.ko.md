@@ -47,7 +47,8 @@
 - Claude Code
 - Node.js 20+
 - Android SDK platform-tools (mDNS를 지원하는 `adb` 34+). `ADB_PATH`, `ANDROID_HOME` / `ANDROID_SDK_ROOT`, Android Studio 기본 SDK 위치, `PATH` 순으로 탐색합니다.
-- PC와 같은 LAN에 있는 Android 11+ 폰. 테스트 대상: Samsung Galaxy (One UI).
+- PC와 같은 LAN에 있는 Android 11+ 폰.
+- **실기기 검증:** Windows + Samsung Galaxy (S21 One UI 7, S24+ One UI 8). **지원하지만 실기기 미검증:** Linux, macOS, 다른 안드로이드 제조사(픽셀, 샤오미 등). CI가 Windows, Linux, macOS에서 서버 빌드와 테스트를 실행합니다. WSL2에서는 미러 네트워크 모드를 켜야 같은 Wi-Fi의 폰에 접근할 수 있습니다.
 
 ## 설치
 
