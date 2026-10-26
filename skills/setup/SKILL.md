@@ -1,13 +1,13 @@
 ---
 name: setup
 description: >-
-  First-time setup of adb-autolink for an Android phone: pair over wireless debugging, install the ADB Autolink
-  companion app, grant its permission, and walk the user through the on-phone settings. Use when the user asks to set
+  First-time setup of adb-autolink for an Android phone (pair over wireless debugging, install the ADB Autolink
+  companion app) or, on a Mac, an iPhone (Developer Mode, pair in Xcode with "Connect via network"). Use when the user asks to set
   up, onboard or add a new phone for wireless adb / adb-autolink. Triggers: wireless adb setup, wireless debugging,
   pair phone, connect phone over Wi-Fi, 무선 디버깅, 무선 adb, 폰 연결, 휴대폰 연결, 페어링, ワイヤレスデバッグ,
   ワイヤレス デバッグ, スマホ接続, ペア設定, 无线调试, 连接手机, 配对, depuración inalámbrica, vincular teléfono,
-  débogage sans fil, associer le téléphone.
-version: 0.4.4
+  débogage sans fil, associer le téléphone, iPhone setup, connect iPhone, 아이폰 연결, iPhone 接続, 连接 iPhone.
+version: 0.5.0
 license: MIT
 depends_on:
   required_bins:
@@ -24,6 +24,14 @@ Always talk to the user in the language they are using; pass `lang` to tools tha
 Goal: after this, the phone re-enables wireless debugging by itself on trusted Wi-Fi and every adb-autolink MCP tool reconnects automatically.
 
 Work through the steps in order, one at a time, and confirm each with the user before moving on. Use the `adb-autolink` MCP tools; do not shell out to adb yourself unless a tool is missing.
+
+## iPhone instead of Android? (macOS only, preview)
+If the user is setting up an iPhone, skip the Android steps below. iPhones work only when Claude Code runs on a Mac with Xcode 15 or later; there is no companion app and no pairing code.
+1. On the iPhone: **Settings → Privacy & Security → Developer Mode** on, then restart when asked.
+2. Connect it to the Mac with a cable and tap **Trust**. In Xcode: **Window → Devices and Simulators**, select the phone, check **Connect via network**.
+3. Unplug it, keep it on the Mac's Wi-Fi and unlocked, and call `list_devices`: it appears under the iPhones section, named after its model (e.g. `iPhone15Pro`).
+4. Verify with `save_checkpoint` (`stage: "first_connect"`), then finish with the saved phones table as in step 5 below.
+Tell the user plainly that iPhone support is a preview not yet verified on a real iPhone, and that taps, swipes, text, keys and logs are not available on iPhone yet (tools answer with an explanation).
 
 ## 1. Check prerequisites
 - Call `list_devices`. If it fails because adb is not found, tell the user to install Android SDK platform-tools (or Android Studio) or set `ADB_PATH`, then stop.

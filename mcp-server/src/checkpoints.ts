@@ -15,8 +15,8 @@ import { type MessageKey, t } from "./i18n.js";
 
 export type Stage = "first_connect" | "reconnect";
 export const STAGES = ["first_connect", "reconnect"] as const;
-/** How ensureConnected reached the phone, read from its log. */
-export type Via = "online" | "last_known" | "beacon" | "mdns" | "direct";
+/** How the phone was reached: ensureConnected's path for Android (read from its log), "coredevice" for iPhones. */
+export type Via = "online" | "last_known" | "beacon" | "mdns" | "direct" | "coredevice";
 
 export interface CheckpointEntry {
   n: number;

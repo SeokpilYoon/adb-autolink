@@ -83,6 +83,18 @@ Claude 会引导你完成配对并安装配套应用（从最新的 GitHub relea
    - 应用的*需要设置*卡片只列出仍缺少的项目。
 4. 在每个网络上首次连接时，Android 会询问*"要在此网络上允许无线调试吗？"*：勾选**在此网络上始终允许**。信任以接入点（BSSID）为单位，因此 Mesh 或双频路由器可能会对每个 AP 各询问一次。需要此授权时，应用会通过通知提醒你。
 
+## iPhone（macOS，预览）
+
+在安装了 Xcode 15 或更高版本的 Mac 上，同样的工具也能操作 iPhone，使用的是 Apple 的 `xcrun devicectl`。Xcode 会保持已配对 iPhone 的 Wi-Fi 连接，因此无需跟踪端口，也不需要配套应用。**尚未在真实 iPhone 上验证**：CI 会在 macOS 上运行真实的 `devicectl`，但没有连接手机。
+
+1. 在 iPhone 上开启 **设置 → 隐私与安全性 → 开发者模式**，并按提示重启。
+2. 用数据线连接 Mac 并点按 **信任**，然后在 Xcode 的 **Window → Devices and Simulators** 中选择手机，勾选 **Connect via network**。
+3. 拔掉数据线后，只要与 Mac 在同一 Wi-Fi，Claude 就能使用它。`list_devices` 会以机型名别名（`iPhone15Pro`）显示。
+
+| 目前 iPhone 可用 | 计划中（WebDriverAgent） |
+|---|---|
+| `list_devices`、`connect_device`、`install_apk`（已签名的 `.ipa` 或构建好的 `.app`）、`launch_app` / `stop_app`（Bundle ID）、`screenshot`、`save_checkpoint`、`set_device_alias` | `tap`、`swipe`、`input_text`、`key_event`、日志 |
+
 ## MCP 工具
 
 所有设备工具都会先自动连接。可通过序列号、`ip:port`、别名或型号名（`S21`、`S24+`、`S24 Ultra`）选择设备。省略时，若只有一台在线设备，就使用它。

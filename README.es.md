@@ -83,6 +83,18 @@ Claude te guía por el emparejamiento e instala la app complementaria (descargad
    - La tarjeta *Falta configuración* de la app solo muestra lo que aún falta.
 4. La primera vez en cada red, Android pregunta *"¿Permitir la depuración inalámbrica en esta red?"*: marca **Permitir siempre en esta red**. La confianza es por punto de acceso (BSSID), así que los routers mesh o de doble banda pueden preguntar una vez por cada AP. La app te avisa con una notificación cuando hace falta esta aprobación.
 
+## iPhone (macOS, vista previa)
+
+En un Mac con Xcode 15 o posterior, las mismas herramientas llegan también a los iPhone mediante `xcrun devicectl` de Apple. Xcode mantiene conectado por Wi-Fi un iPhone vinculado, así que no hay puerto que seguir ni app complementaria. **Aún no verificado con un iPhone real**: la CI ejecuta el `devicectl` real en macOS, pero sin teléfono conectado.
+
+1. En el iPhone, activa **Ajustes → Privacidad y seguridad → Modo de desarrollador** y reinicia cuando te lo pida.
+2. Conéctalo al Mac con un cable, toca **Confiar** y, en Xcode, abre **Window → Devices and Simulators**, selecciona el teléfono y marca **Connect via network**.
+3. Desconéctalo. Mientras esté en la misma Wi-Fi que el Mac, Claude puede usarlo: `list_devices` lo muestra con el nombre de su modelo (`iPhone15Pro`).
+
+| Funciona hoy en iPhone | Previsto (WebDriverAgent) |
+|---|---|
+| `list_devices`, `connect_device`, `install_apk` (`.ipa` firmado o `.app` compilado), `launch_app` / `stop_app` (bundle ID), `screenshot`, `save_checkpoint`, `set_device_alias` | `tap`, `swipe`, `input_text`, `key_event`, registros |
+
 ## Herramientas MCP
 
 Todas las herramientas de dispositivo se conectan automáticamente primero. Selecciona un dispositivo por número de serie, `ip:port`, alias o nombre de modelo (`S21`, `S24+`, `S24 Ultra`). Si lo omites, se usa el único dispositivo en línea.

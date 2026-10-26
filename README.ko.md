@@ -83,6 +83,18 @@ Claude가 페어링을 안내하고 컴패니언 앱을 설치합니다(최신 G
    - 앱의 *설정 필요* 카드에는 아직 빠진 항목만 표시됩니다.
 4. 각 네트워크에서 처음에는 Android가 *"이 네트워크에서 무선 디버깅을 허용하시겠습니까?"*라고 묻습니다. **이 네트워크에서 항상 허용**을 체크하세요. 신뢰는 액세스 포인트(BSSID) 단위라서 메시 또는 듀얼 밴드 공유기는 AP마다 한 번씩 물을 수 있습니다. 이 승인이 필요하면 앱이 알림으로 알려줍니다.
 
+## 아이폰 (macOS, 미리보기)
+
+Xcode 15 이상이 설치된 Mac에서는 같은 도구로 아이폰도 다룰 수 있습니다. Apple의 `xcrun devicectl`을 사용합니다. Xcode가 페어링된 아이폰의 Wi-Fi 연결을 유지하므로, 포트를 추적할 필요도 컴패니언 앱도 필요 없습니다. **아직 실제 아이폰으로는 검증하지 않았습니다.** CI가 macOS에서 실제 `devicectl`을 실행하지만 연결된 폰은 없습니다.
+
+1. 아이폰에서 **설정 → 개인정보 보호 및 보안 → 개발자 모드**를 켜고, 안내에 따라 재시동합니다.
+2. 케이블로 Mac에 연결해 **신뢰**를 누른 뒤, Xcode의 **Window → Devices and Simulators**에서 폰을 선택하고 **Connect via network**를 체크합니다.
+3. 케이블을 빼도 Mac과 같은 Wi-Fi에 있으면 Claude가 사용할 수 있습니다. `list_devices`에 기종 이름 별칭(`iPhone15Pro`)으로 나옵니다.
+
+| 지금 아이폰에서 되는 것 | 예정 (WebDriverAgent) |
+|---|---|
+| `list_devices`, `connect_device`, `install_apk` (서명된 `.ipa` 또는 빌드된 `.app`), `launch_app` / `stop_app` (번들 ID), `screenshot`, `save_checkpoint`, `set_device_alias` | `tap`, `swipe`, `input_text`, `key_event`, 로그 |
+
 ## MCP 도구
 
 모든 기기 도구는 먼저 자동으로 연결합니다. 기기는 시리얼, `ip:port`, 별칭, 모델명(`S21`, `S24+`, `S24 Ultra`)으로 선택합니다. 생략하면 온라인 기기가 하나일 때 그 기기를 사용합니다.

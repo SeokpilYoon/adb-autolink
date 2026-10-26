@@ -83,6 +83,18 @@ New to Wireless debugging? The [illustrated setup guide](docs/guide/wireless-deb
    - The app's *Setup needed* card lists only what is still missing.
 4. The first time on each network Android asks *"Allow wireless debugging on this network?"*: tick **Always allow on this network**. Trust is per access point (BSSID), so mesh or dual-band routers may ask once per AP. The app notifies you when this approval is needed.
 
+## iPhone (macOS, preview)
+
+On a Mac with Xcode 15 or later the same tools also reach iPhones, through Apple's `xcrun devicectl`. Xcode keeps a paired iPhone connected over Wi-Fi, so there is no port to track and no companion app. **Not yet verified on a real iPhone**: CI runs the real `devicectl` on macOS, but without a phone attached.
+
+1. On the iPhone, turn on **Settings → Privacy & Security → Developer Mode** and restart when asked.
+2. Connect it to the Mac with a cable, tap **Trust**, then in Xcode open **Window → Devices and Simulators**, select the phone and check **Connect via network**.
+3. Unplug it. While it is on the same Wi-Fi as the Mac, Claude can use it: `list_devices` shows it, named after its model (`iPhone15Pro`).
+
+| Works on iPhone now | Planned (WebDriverAgent) |
+|---|---|
+| `list_devices`, `connect_device`, `install_apk` (signed `.ipa` or built `.app`), `launch_app` / `stop_app` (bundle ID), `screenshot`, `save_checkpoint`, `set_device_alias` | `tap`, `swipe`, `input_text`, `key_event`, logs |
+
 ## MCP tools
 
 Every device tool auto-connects first. Select a device by serial, `ip:port`, alias, or model name (`S21`, `S24+`, `S24 Ultra`). If you omit it, the only online device is used.

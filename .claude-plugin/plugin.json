@@ -1,7 +1,7 @@
 {
   "name": "adb-autolink",
-  "version": "0.4.4",
-  "description": "Zero-touch wireless ADB for Android: a companion app re-enables wireless debugging on trusted Wi-Fi, and an MCP server auto-reconnects via mDNS so Claude can install APKs, take screenshots, tap/swipe and read logcat.",
+  "version": "0.5.0",
+  "description": "Zero-touch wireless device control for Claude Code. Android: a companion app re-enables wireless debugging on trusted Wi-Fi and the MCP server reconnects on its own, so Claude can install APKs, take screenshots, tap/swipe and read logcat. iPhone (macOS preview): install, launch, stop and screenshot through Xcode's devicectl.",
   "author": {
     "name": "SeokpilYoon"
   },
@@ -12,8 +12,10 @@
     "android",
     "adb",
     "wireless-debugging",
+    "iphone",
+    "ios",
+    "devicectl",
     "mcp",
-    "mdns",
     "game-dev"
   ],
   "mcpServers": {

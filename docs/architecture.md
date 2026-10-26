@@ -38,6 +38,14 @@ Every device tool goes through `ensureConnected`, and only one connection attemp
 3. **Which entries are connected:** only remembered serials that match the selector. Unknown devices are connected only on the first run.
 4. **Cleanup:** stale `offline` entries for the same phone are disconnected. Devices that adb auto-connected through mDNS are matched to the same phone, so they are not listed twice.
 
+## iPhone (macOS, preview)
+
+`ios.ts` drives iPhones through Apple's `xcrun devicectl` (Xcode 15+), always with `--json-output`; the key paths follow Flutter's devicectl integration. CoreDevice owns pairing and the Wi-Fi connection, so there is no port to discover and no companion app.
+
+- **Routing (`targets.ts`):** every device tool first asks `iosTarget(device)`. An alias, model name or UDID of a paired iPhone selects it; without a selector an iPhone is chosen only when it is the only reachable one and no Android device is online. Anything else takes the Android path unchanged. On Windows and Linux the check returns at once.
+- **Supported:** list, connect (reachability), install (`device install app`, `.ipa` or `.app`), launch (`device process launch --terminate-existing`), stop (the app's URL from `device info apps`, its PIDs from `device info processes`, then `process terminate --kill`), screenshot (`device capture screenshot`), checkpoints and aliases. Tap, swipe, text, keys and logs answer with an explanation; they are planned through WebDriverAgent.
+- iPhones are remembered in `devices.json` with `platform: "ios"`, so they get model-name aliases and appear in the saved phones table.
+
 ## State
 
 | Where | What |

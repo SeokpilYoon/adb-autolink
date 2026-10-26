@@ -296,6 +296,8 @@ export interface KnownDevice {
   autoAlias?: boolean;
   /** Product name the phone reported (empty string = asked, none), read once per phone. */
   marketName?: string;
+  /** "ios" for iPhones (seen through devicectl on a Mac); absent for Android. */
+  platform?: "ios";
 }
 
 export function loadKnownDevices(): Record<string, KnownDevice> {

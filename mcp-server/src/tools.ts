@@ -1,4 +1,5 @@
-import { existsSync, mkdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
@@ -18,6 +19,7 @@ import { COMPANION_APP_NAME, COMPANION_PACKAGE, VERSION } from "./config.js";
 import { adbDisconnect, ensureConnected, formatSnapshot, listAdbDevices, snapshot } from "./connector.js";
 import { describeCandidate, displayName, loadAliases, removeAlias, resolveDevice, setAlias } from "./devices.js";
 import { LOCALES, guideUrl, t, withLang } from "./i18n.js";
+import { type IosDevice, iosInstall, iosLaunch, iosScreenshot, iosTerminate } from "./ios.js";
 import { decodePng, downscale, encodeJpeg, isAllBlack } from "./image.js";
 import {
   installFailureHint,
@@ -31,6 +33,7 @@ import {
   validatePairArgs,
 } from "./parse.js";
 import { assertPackageName, inputTextCommands, normalizeKey, shQuote } from "./shell.js";
+import { androidOnly, describeIos, iosTarget } from "./targets.js";
 
 const deviceParam = z
   .string()
@@ -106,6 +109,34 @@ async function captureScreen(serial: string): Promise<{ png: Buffer; img: Return
   return { png, img: decodePng(png) };
 }
 
+/** devicectl screenshot into a temp PNG, read back and decoded like an adb capture. */
+async function captureIos(d: IosDevice): Promise<{ png: Buffer; img: ReturnType<typeof decodePng> }> {
+  const dir = mkdtempSync(path.join(os.tmpdir(), "adbal-ios-shot-"));
+  try {
+    const file = path.join(dir, "screen.png");
+    await iosScreenshot(d.identifier, file);
+    const png = readFileSync(file);
+    return { png, img: decodePng(png) };
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+/** iPhone bundle IDs allow hyphens, unlike Android package names. Passed to devicectl as an argument, never a shell. */
+function assertBundleId(id: string): void {
+  if (!/^[A-Za-z0-9][A-Za-z0-9.-]*$/.test(id)) throw new Error(`Invalid bundle ID "${id}"`);
+}
+
+/** A signed .ipa file or a built .app folder, absolute. */
+function iosAppFile(p: string): string {
+  const abs = path.resolve(p);
+  const ext = path.extname(abs).toLowerCase();
+  if (ext !== ".ipa" && ext !== ".app") throw new Error(`For an iPhone, pass a .ipa file or a .app folder: ${abs}`);
+  if (!existsSync(abs)) throw new Error(`Not found: ${abs}`);
+  if (ext === ".app" && !statSync(abs).isDirectory()) throw new Error(`A .app must be the app folder: ${abs}`);
+  return abs;
+}
+
 /** versionName of an installed package, or undefined when it is not installed. */
 async function installedVersion(serial: string, pkg: string): Promise<string | undefined> {
   const out = await shell(serial, `dumpsys package ${pkg} | grep -m1 versionName`, 10_000).catch(() => "");
@@ -156,11 +187,16 @@ export function registerTools(server: McpServer): void {
   server.registerTool(
     "connect_device",
     {
-      description: "Connect to a device over wireless adb: tries its last known ip:port, then finds its current port via mDNS and runs adb connect. Usually not needed, since every other tool auto-connects. The phone must have been paired once (see pair_device).",
+      description:
+        "Connect to a device. Android: tries its last known ip:port, the companion app's port beacon, then mDNS, and runs adb connect " +
+        "(paired once, see pair_device). iPhone (on a Mac): checks that the phone paired in Xcode is reachable over Wi-Fi or USB. " +
+        "Usually not needed, since every other tool connects by itself.",
       inputSchema: { device: deviceParam, lang: langParam },
     },
     ({ device, lang }) =>
       guardLang(lang, async () => {
+        const ios = await iosTarget(device);
+        if (ios) return text(t("connected", describeIos(ios)));
         const r = await ensureConnected(device);
         const lines = [t("connected", describeCandidate(r.device, loadAliases()))];
         if (r.log.length) lines.push(...r.log.map((l) => `  ${l}`));
@@ -192,9 +228,11 @@ export function registerTools(server: McpServer): void {
   server.registerTool(
     "install_apk",
     {
-      description: "Install an APK file from this PC onto the device (adb install; by default -r keeps app data and -g grants runtime permissions).",
+      description:
+        "Install an app from this computer onto the device. Android: an .apk (adb install; by default -r keeps app data and -g " +
+        "grants runtime permissions). iPhone (on a Mac): a signed .ipa or a built .app folder (devicectl).",
       inputSchema: {
-        path: z.string().describe("Path to the .apk on this PC"),
+        path: z.string().describe("Path to the .apk (Android) or .ipa/.app (iPhone) on this computer"),
         replace: z.boolean().default(true).describe("Reinstall keeping data (-r)"),
         grant_permissions: z.boolean().default(true).describe("Grant runtime permissions (-g)"),
         device: deviceParam,
@@ -202,6 +240,12 @@ export function registerTools(server: McpServer): void {
     },
     ({ path: apk, replace, grant_permissions, device }) =>
       guard(async () => {
+        const ios = await iosTarget(device);
+        if (ios) {
+          const app = iosAppFile(apk);
+          await iosInstall(ios.identifier, app);
+          return text(`Installed ${path.basename(app)} on ${describeIos(ios)}`);
+        }
         const abs = apkFile(apk);
         const { serial } = await ensureConnected(device);
         const out = await adbInstall(serial, abs, [...(replace ? ["-r"] : []), ...(grant_permissions ? ["-g"] : [])]);
@@ -212,16 +256,25 @@ export function registerTools(server: McpServer): void {
   server.registerTool(
     "launch_app",
     {
-      description: "Launch an app by package name (its launcher activity), or a specific activity via am start -n. Wakes the screen first.",
+      description:
+        "Launch an app. Android: by package name (its launcher activity), or a specific activity via am start -n; wakes the screen " +
+        "first. iPhone: by bundle ID, restarting it if it is already running.",
       inputSchema: {
-        package: z.string().describe("Package name, e.g. com.example.game"),
+        package: z.string().describe("Android package name or iPhone bundle ID, e.g. com.example.game"),
         activity: z.string().optional().describe('Activity, e.g. ".MainActivity" or "com.example/.MainActivity"'),
         device: deviceParam,
       },
     },
     ({ package: pkg, activity, device }) =>
       guard(async () => {
-        assertPackageName(pkg);
+        const ios = await iosTarget(device);
+        if (ios) assertBundleId(pkg);
+        else assertPackageName(pkg);
+        if (ios) {
+          if (activity) throw new Error("activity applies to Android only; iPhone apps are launched by bundle ID.");
+          const pid = await iosLaunch(ios.identifier, pkg);
+          return text(`Launched ${pkg} on ${describeIos(ios)}${pid ? ` (pid ${pid})` : ""}`);
+        }
         const { serial, warn } = await connectAwake(device);
         let out: string;
         if (activity) {
@@ -239,12 +292,18 @@ export function registerTools(server: McpServer): void {
   server.registerTool(
     "stop_app",
     {
-      description: "Force-stop an app by package name (am force-stop).",
+      description: "Force-stop an app: Android package name (am force-stop) or iPhone bundle ID (kills its processes).",
       inputSchema: { package: z.string(), device: deviceParam },
     },
     ({ package: pkg, device }) =>
       guard(async () => {
-        assertPackageName(pkg);
+        const ios = await iosTarget(device);
+        if (ios) assertBundleId(pkg);
+        else assertPackageName(pkg);
+        if (ios) {
+          const n = await iosTerminate(ios.identifier, pkg);
+          return text(n ? `Stopped ${pkg} on ${describeIos(ios)}` : `${pkg} was not running on ${describeIos(ios)}`);
+        }
         const { serial } = await ensureConnected(device);
         await shell(serial, `am force-stop ${pkg}`);
         return text(`Stopped ${pkg} on ${serial}`);
@@ -271,8 +330,18 @@ export function registerTools(server: McpServer): void {
         const ext = abs ? path.extname(abs).toLowerCase() : "";
         if (abs && ![".png", ".jpg", ".jpeg"].includes(ext)) throw new Error(`save_path must end in .png, .jpg or .jpeg: ${abs}`);
         if (abs && !overwrite && existsSync(abs)) throw new Error(`File already exists: ${abs} (pass overwrite=true to replace it)`);
-        const { serial, warn } = await connectAwake(device);
-        const { png, img } = await captureScreen(serial);
+        const ios = await iosTarget(device);
+        let serial: string;
+        let warn = "";
+        let shot: { png: Buffer; img: ReturnType<typeof decodePng> };
+        if (ios) {
+          serial = describeIos(ios);
+          shot = await captureIos(ios);
+        } else {
+          ({ serial, warn } = await connectAwake(device));
+          shot = await captureScreen(serial);
+        }
+        const { png, img } = shot;
         const meta = { width: img.width, height: img.height };
         let note = `Screenshot from ${serial} (${meta.width}x${meta.height})`;
         if (abs) {
@@ -318,6 +387,30 @@ export function registerTools(server: McpServer): void {
     ({ stage, device, lang }) =>
       guardLang(lang, async () => {
         const started = Date.now();
+        const ios = await iosTarget(device);
+        if (ios) {
+          // CoreDevice keeps iPhones connected: there is no companion app or reconnect path to record, just reachability.
+          const { png, img } = await captureIos(ios);
+          const elapsedMs = Date.now() - started;
+          const address = ios.transport?.toLowerCase() === "wired" ? "USB" : "Wi-Fi";
+          const saved = saveCheckpoint({
+            stage,
+            deviceName: ios.marketingName ?? ios.productType,
+            serial: ios.udid,
+            address,
+            via: "coredevice",
+            elapsedMs,
+            pluginVersion: VERSION,
+            png,
+          });
+          const msg = t("checkpoint.saved", t(`checkpoint.stage.${stage}`), saved.png, saved.report, address, t("checkpoint.via.coredevice"), (elapsedMs / 1000).toFixed(1));
+          return {
+            content: [
+              { type: "image", data: encodeJpeg(downscale(img, 1280), 80).toString("base64"), mimeType: "image/jpeg" },
+              { type: "text", text: msg },
+            ],
+          };
+        }
         const c = await ensureConnected(device);
         const elapsedMs = Date.now() - started;
         const via = viaFromLog(c.log, !!device && !!splitHostPort(device.trim()));
@@ -363,6 +456,7 @@ export function registerTools(server: McpServer): void {
     },
     ({ x, y, device }) =>
       guard(async () => {
+        await androidOnly(device, "tap");
         const { serial, warn } = await connectAwake(device);
         await shell(serial, `input tap ${x} ${y}`);
         return text(`Tapped (${x}, ${y}) on ${serial}${warn}`);
@@ -384,6 +478,7 @@ export function registerTools(server: McpServer): void {
     },
     ({ x1, y1, x2, y2, duration_ms, device }) =>
       guard(async () => {
+        await androidOnly(device, "swipe");
         const { serial, warn } = await connectAwake(device);
         await shell(serial, `input swipe ${x1} ${y1} ${x2} ${y2}${duration_ms ? ` ${duration_ms}` : ""}`, 90_000);
         return text(`Swiped (${x1},${y1}) -> (${x2},${y2}) on ${serial}${warn}`);
@@ -399,6 +494,7 @@ export function registerTools(server: McpServer): void {
     ({ text: value, device }) =>
       guard(async () => {
         const commands = inputTextCommands(value); // validates before touching the device
+        await androidOnly(device, "input_text");
         const { serial, warn } = await connectAwake(device);
         for (const cmd of commands) await shell(serial, cmd);
         return text(`Typed ${value.length} chars on ${serial}${warn}`);
@@ -413,6 +509,7 @@ export function registerTools(server: McpServer): void {
     },
     ({ device }) =>
       guard(async () => {
+        await androidOnly(device, "wake_device");
         const { serial } = await ensureConnected(device);
         const w = await ensureAwake(serial);
         return text(w ? `${serial}: screen on.\n${w}` : `${serial}: screen on and unlocked.`);
@@ -428,6 +525,7 @@ export function registerTools(server: McpServer): void {
     ({ key, device }) =>
       guard(async () => {
         const code = normalizeKey(key);
+        await androidOnly(device, "key_event");
         const { serial } = await ensureConnected(device);
         await shell(serial, `input keyevent ${code}`);
         return text(`Sent ${code} on ${serial}`);
@@ -454,6 +552,7 @@ export function registerTools(server: McpServer): void {
       guard(async () => {
         if (pkg) assertPackageName(pkg);
         if (tag && !/^[^\s'"`$;&|<>\\*:]+$/.test(tag)) throw new Error(`Invalid tag "${tag}"`);
+        await androidOnly(device, "logcat");
         const { serial } = await ensureConnected(device);
         const args = ["logcat", "-d", "-v", "threadtime", "-t", String(lines)];
         if (crash_only) args.push("-b", "crash");
@@ -558,6 +657,7 @@ export function registerTools(server: McpServer): void {
           apk = d.file;
           steps.push(d.note);
         }
+        await androidOnly(device, "install_companion_app");
         const { serial } = await ensureConnected(device);
         await adbInstall(serial, apk, ["-r"]);
         steps.push(t("companion.installed", serial));
@@ -627,8 +727,8 @@ export function registerTools(server: McpServer): void {
           all = removeAlias(alias);
           head = `Removed alias "${alias}"`;
         } else {
-          const r = await ensureConnected(device);
-          const phys = r.device.physicalSerial ?? r.serial;
+          const ios = await iosTarget(device);
+          const phys = ios ? ios.udid : await ensureConnected(device).then((r) => r.device.physicalSerial ?? r.serial);
           all = setAlias(alias, phys);
           head = `Alias "${alias}" → ${phys}`;
         }

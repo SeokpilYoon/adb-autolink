@@ -83,6 +83,18 @@ Claude がペアリングを案内し、コンパニオンアプリをインス�
    - アプリの*設定が必要です*カードには、まだ足りない項目だけが表示されます。
 4. 各ネットワークで初回のみ、Android が*「このネットワークでワイヤレス デバッグを許可しますか?」*と尋ねます。**このネットワークで常に許可**にチェックを入れてください。信頼はアクセスポイント(BSSID)単位なので、メッシュやデュアルバンドのルーターでは AP ごとに一度尋ねられることがあります。この承認が必要なときは、アプリが通知でお知らせします。
 
+## iPhone(macOS、プレビュー)
+
+Xcode 15 以降を入れた Mac では、同じツールで iPhone も扱えます。Apple の `xcrun devicectl` を使います。ペアリング済みの iPhone は Xcode が Wi-Fi 接続を維持するため、ポートの追跡もコンパニオンアプリも不要です。**実機の iPhone ではまだ検証していません。** CI は macOS で実際の `devicectl` を実行しますが、接続された端末はありません。
+
+1. iPhone で **設定 → プライバシーとセキュリティ → デベロッパモード** をオンにし、案内に従って再起動します。
+2. ケーブルで Mac に接続して **信頼** をタップし、Xcode の **Window → Devices and Simulators** で端末を選んで **Connect via network** にチェックします。
+3. ケーブルを外しても、Mac と同じ Wi-Fi にあれば Claude が使えます。`list_devices` に機種名の別名(`iPhone15Pro`)で表示されます。
+
+| 現在 iPhone で使えるもの | 予定 (WebDriverAgent) |
+|---|---|
+| `list_devices`、`connect_device`、`install_apk`(署名済み `.ipa` またはビルドした `.app`)、`launch_app` / `stop_app`(バンドル ID)、`screenshot`、`save_checkpoint`、`set_device_alias` | `tap`、`swipe`、`input_text`、`key_event`、ログ |
+
 ## MCP ツール
 
 すべてのデバイス系ツールは、最初に自動接続します。デバイスはシリアル、`ip:port`、エイリアス、モデル名(`S21`、`S24+`、`S24 Ultra`)で指定します。省略すると、オンラインのデバイスが 1 台だけの場合はそれが使われます。

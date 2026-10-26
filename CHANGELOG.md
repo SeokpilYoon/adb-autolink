@@ -11,6 +11,16 @@ All notable changes to adb-autolink are recorded here. Each version must match a
 
 Release pages are generated from these sections.
 
+## v0.5.0 - iPhone on macOS (preview)
+
+**Upgrading from 0.4.4:** run `/plugin update adb-autolink` and restart Claude Code. Android behaves as before and the phone app is unchanged apart from its version number.
+
+- **iPhone support on a Mac, through Xcode's `xcrun devicectl` (Xcode 15+).** Pair the iPhone once in Xcode with **Connect via network** (and Developer Mode on): CoreDevice then keeps it reachable over Wi-Fi, so there is no companion app and no port to track. **Preview: not yet verified on a real iPhone.** CI runs the real `devicectl` on macOS, without a phone attached.
+  - **Works on iPhone:** `list_devices` (an iPhones section plus the saved phones table), `connect_device`, `install_apk` (a signed `.ipa` or a built `.app`), `launch_app` and `stop_app` by bundle ID, `screenshot`, `save_checkpoint` and `set_device_alias`. iPhones get model-name aliases like `iPhone15Pro`.
+  - **Not yet:** `tap`, `swipe`, `input_text`, `key_event`, `logcat` and the Android-only tools answer with an explanation. Taps, swipes, text, keys and logs are planned through WebDriverAgent.
+  - **Choosing a device:** an iPhone's alias, model name ("iphone 15 pro") or UDID selects it; anything else goes to Android as before. On Windows and Linux the iPhone check is skipped.
+- `/adb-autolink:setup` has an iPhone branch, and the READMEs have an iPhone section with the three setup steps.
+
 ## v0.4.4 - CI on Windows, Linux and macOS; names for every Android brand
 
 **Upgrading from 0.4.3:** run `/plugin update adb-autolink` and restart Claude Code. The phone app is unchanged apart from its version number.

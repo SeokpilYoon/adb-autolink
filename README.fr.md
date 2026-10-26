@@ -83,6 +83,18 @@ Première fois avec le débogage sans fil ? Le [guide illustré](docs/guide/wire
    - La carte *Configuration requise* de l'application n'affiche que ce qui manque encore.
 4. La première fois sur chaque réseau, Android demande *« Autoriser le débogage sans fil sur ce réseau ? »* : cochez **Toujours autoriser sur ce réseau**. La confiance est accordée par point d'accès (BSSID) ; les routeurs mesh ou bi-bande peuvent donc le demander une fois par AP. L'application vous envoie une notification quand cette approbation est nécessaire.
 
+## iPhone (macOS, aperçu)
+
+Sur un Mac avec Xcode 15 ou plus récent, les mêmes outils atteignent aussi les iPhone, via `xcrun devicectl` d'Apple. Xcode garde un iPhone associé connecté en Wi-Fi : pas de port à suivre ni d'application compagnon. **Pas encore vérifié sur un vrai iPhone** : la CI exécute le vrai `devicectl` sous macOS, mais sans téléphone branché.
+
+1. Sur l'iPhone, activez **Réglages → Confidentialité et sécurité → Mode développeur** et redémarrez quand il le demande.
+2. Branchez-le au Mac, touchez **Se fier**, puis dans Xcode ouvrez **Window → Devices and Simulators**, sélectionnez le téléphone et cochez **Connect via network**.
+3. Débranchez-le. Tant qu'il est sur le même Wi-Fi que le Mac, Claude peut l'utiliser : `list_devices` l'affiche sous le nom de son modèle (`iPhone15Pro`).
+
+| Disponible aujourd'hui sur iPhone | Prévu (WebDriverAgent) |
+|---|---|
+| `list_devices`, `connect_device`, `install_apk` (`.ipa` signé ou `.app` compilé), `launch_app` / `stop_app` (bundle ID), `screenshot`, `save_checkpoint`, `set_device_alias` | `tap`, `swipe`, `input_text`, `key_event`, journaux |
+
 ## Outils MCP
 
 Chaque outil d'appareil se connecte d'abord automatiquement. Sélectionnez un appareil par numéro de série, `ip:port`, alias ou nom de modèle (`S21`, `S24+`, `S24 Ultra`). Si vous l'omettez, le seul appareil en ligne est utilisé.

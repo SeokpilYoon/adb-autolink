@@ -1,6 +1,7 @@
 import { runAdb } from "./adb.js";
 import { type BeaconReply, beaconToken, queryBeacon, scanBeacons, subnetHosts } from "./beacon.js";
 import { latestReport } from "./checkpoints.js";
+import { IS_MAC, type IosDevice, isAvailable, listIosDevices } from "./ios.js";
 import { COMPANION_APP_NAME } from "./config.js";
 import {
   type AliasMap,
@@ -427,8 +428,8 @@ export interface SavedPhone {
 }
 
 /** Every phone this PC remembers, most recently seen first, with its aliases and latest check report. */
-export function savedPhones(adb: DeviceInfo[], aliases: AliasMap): SavedPhone[] {
-  const onlinePhys = new Set(adb.filter(online).map((d) => d.physicalSerial));
+export function savedPhones(adb: DeviceInfo[], aliases: AliasMap, iosOnline: Set<string> = new Set()): SavedPhone[] {
+  const onlinePhys = new Set<string | undefined>([...adb.filter(online).map((d) => d.physicalSerial), ...iosOnline]);
   return Object.entries(loadKnownDevices())
     .map(([serial, k]) => ({
       serial,
@@ -469,17 +470,28 @@ export function formatSavedPhones(list: SavedPhone[]): string {
   return lines.join("\n");
 }
 
-export async function snapshot(): Promise<{ adb: DeviceInfo[]; discovered: DeviceInfo[]; aliases: AliasMap }> {
-  const [adb, mdns] = await Promise.all([listAdbDevices(), discoverMdns()]);
+export interface Snapshot {
+  adb: DeviceInfo[];
+  discovered: DeviceInfo[];
+  /** iPhones paired with this Mac (always empty elsewhere). */
+  ios: IosDevice[];
+  aliases: AliasMap;
+}
+
+export async function snapshot(): Promise<Snapshot> {
+  const [adb, mdns, ios] = await Promise.all([listAdbDevices(), discoverMdns(), listIosDevices()]);
+  for (const d of ios) {
+    if (d.productType) rememberDevice(d.udid, { model: d.productType, marketName: d.marketingName ?? "", platform: "ios" });
+  }
   const connected = new Set(adb.filter(online).flatMap((d) => [d.physicalSerial, d.address].filter(Boolean)));
   const discovered = mdns.filter((m) => !(m.physicalSerial && connected.has(m.physicalSerial)) && !connected.has(m.address));
   // Phones remembered before auto aliases existed get theirs now, oldest first so numbering follows age.
   const known = Object.entries(loadKnownDevices()).sort(([, a], [, b]) => (a.lastSeen ?? "").localeCompare(b.lastSeen ?? ""));
   for (const [serial] of known) ensureAutoAlias(serial);
-  return { adb, discovered, aliases: loadAliases() };
+  return { adb, discovered, ios, aliases: loadAliases() };
 }
 
-export function formatSnapshot(s: { adb: DeviceInfo[]; discovered: DeviceInfo[]; aliases: AliasMap }): string {
+export function formatSnapshot(s: Snapshot): string {
   const lines: string[] = [];
   const on = s.adb.filter(online);
   const other = s.adb.filter((d) => !online(d));
@@ -495,6 +507,19 @@ export function formatSnapshot(s: { adb: DeviceInfo[]; discovered: DeviceInfo[];
       ? s.discovered.map((d) => `  - ${describeCandidate({ ...d, serial: d.address ?? "" }, s.aliases)} instance=${d.mdns?.instance}`)
       : [`  ${t("snapshot.none")}`]),
   );
-  lines.push("", formatSavedPhones(savedPhones(s.adb, s.aliases)));
+  if (IS_MAC) {
+    lines.push(t("snapshot.ios", s.ios.length));
+    lines.push(
+      ...(s.ios.length
+        ? s.ios.map((d) => {
+            const alias = Object.entries(s.aliases).find(([, v]) => v === d.udid)?.[0];
+            const where = isAvailable(d) ? (d.transport?.toLowerCase() === "wired" ? "USB" : "Wi-Fi") : "offline";
+            return `  - ${d.marketingName ?? d.productType ?? "iPhone"} "${d.name ?? ""}" iOS ${d.osVersion ?? "?"}${alias ? ` alias=${alias}` : ""} udid=${d.udid} [${where}]`;
+          })
+        : [`  ${t("snapshot.none")}`]),
+    );
+  }
+  const iosOnline = new Set(s.ios.filter(isAvailable).map((d) => d.udid));
+  lines.push("", formatSavedPhones(savedPhones(s.adb, s.aliases, iosOnline)));
   return lines.join("\n");
 }
