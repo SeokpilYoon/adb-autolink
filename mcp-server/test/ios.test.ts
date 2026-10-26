@@ -91,7 +91,7 @@ describe.runIf(IS_MAC)("xcrun devicectl on this Mac", () => {
   it("lists devices in the JSON shape the parser expects", async () => {
     let json: unknown;
     try {
-      json = await devicectl(["list", "devices", "--timeout", "3"], 60_000);
+      json = await devicectl(["list", "devices", "--timeout", "5"], 60_000); // devicectl rejects timeouts under 5 s
     } catch (e) {
       if (e instanceof IosUnavailableError) return; // Xcode older than 15: nothing to check
       throw e;
