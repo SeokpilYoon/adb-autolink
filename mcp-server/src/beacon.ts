@@ -1,24 +1,23 @@
 /**
- * Port beacon: the companion app answers on a fixed TCP port with the current Wireless debugging port.
+ * Port beacon: the companion app tells this PC, over a fixed TCP port, the current Wireless debugging port.
  *
  * Android picks a new random connect port every time Wireless debugging turns on, and mDNS (multicast
  * UDP 5353) is often blocked: Windows drops inbound multicast on Public networks or without a firewall
- * rule, and many routers filter it. Asking the phone over unicast TCP needs neither. The app answers only
- * a request that carries a token this PC handed it at install time (install_companion_app).
+ * rule, and many routers filter it. Asking the phone over unicast TCP needs neither.
  *
- *   PC  -> phone:47383   "ADBAL1 <token>\n"
- *   phone -> PC          "ADBAL1 serial=<ro.serialno> port=<connect port, 0 if unknown> adb=<on|off>[ nonce=<hex>]\n"
+ * Both sides prove they hold the key handed over by adb at setup, which never travels over the network.
+ * A scan reaches every host on the subnet, so nothing a stranger answers may be believed or signed:
  *
- * With Wireless debugging off, the app also offers a one-time nonce. Turning it on is a second request
- * on a new connection, proving this PC holds the wake key without ever sending it:
+ *   PC    -> "ADBAL2 <cn> <mac(hello, cn)>"          strangers get no answer at all
+ *   phone -> "ADBAL2 <sn>"
+ *   PC    -> "<status|wake> <mac(cmd, cn, sn)>"
+ *   phone -> "ADBAL2 serial=<ro.serialno> port=<port, 0 if unknown> adb=<on|off> mac=<mac(reply, cmd, cn, sn, line)>"
  *
- *   PC  -> phone:47383   "ADBAL1W <hex HMAC-SHA256(wake key, "wake <nonce> <serial>")>\n"
- *   phone -> PC          the status line above, or nothing when refused
- *
- * The token is sent in the clear (and to every host a scan reaches), so it only ever reveals a port.
- * The wake key is a separate secret that leaves this PC only through adb at setup.
+ * mac() is HMAC-SHA256 of its "|"-joined parts, must match PortBeacon.kt. Nonces live and die with the
+ * connection, so proofs cannot be replayed, and a wake is only ever sent to a host that already proved
+ * itself with a status reply.
  */
-import { createHmac, randomBytes } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import net from "node:net";
 import os from "node:os";
@@ -26,7 +25,10 @@ import path from "node:path";
 import { stateDir } from "./devices.js";
 
 export const BEACON_PORT = 47383;
-const MAGIC = "ADBAL1";
+const MAGIC = "ADBAL2";
+const LEGACY_MAGIC = "ADBAL1";
+
+export type BeaconCommand = "status" | "wake";
 
 export interface BeaconReply {
   host: string;
@@ -34,8 +36,8 @@ export interface BeaconReply {
   /** Wireless debugging connect port; 0 when the app has not seen it yet. */
   port: number;
   adbOn: boolean;
-  /** One-time value for a wake request; only apps that can turn Wireless debugging on send it. */
-  nonce?: string;
+  /** The phone proved it holds this PC's key. False only for apps older than the current protocol. */
+  verified: boolean;
 }
 
 /** A random hex secret created on first use and kept in the state dir. */
@@ -53,15 +55,19 @@ function secretFile(dir: string, name: string, bytes: number): string {
   return secret;
 }
 
-/** This PC's beacon token: lets it ask a phone for its status. */
+/** Only for apps older than v0.6.1, which identify a PC by this token, sent in the clear. */
 export const beaconToken = (dir = stateDir()): string => secretFile(dir, "beacon-token", 16);
 
-/** This PC's wake key: lets it turn Wireless debugging on. Never sent over the network. */
+/** This PC's key: proves it to its phones and theirs to it. Reaches a phone only through adb at setup. */
 export const wakeKey = (dir = stateDir()): string => secretFile(dir, "wake-key", 32);
 
-/** Must match PortBeacon.kt. */
-export const wakeProof = (key: string, nonce: string, serial: string): string =>
-  createHmac("sha256", key).update(`wake ${nonce} ${serial}`).digest("hex");
+export const mac = (key: string, ...parts: string[]): string => createHmac("sha256", key).update(parts.join("|")).digest("hex");
+
+export function sameMac(a: string, b: string): boolean {
+  const x = Buffer.from(a);
+  const y = Buffer.from(b);
+  return x.length === y.length && timingSafeEqual(x, y);
+}
 
 /**
  * Phones to turn on. Naming a phone is a request for that phone. Without a name, only an obvious single
@@ -69,28 +75,75 @@ export const wakeProof = (key: string, nonce: string, serial: string): string =>
  */
 export function wakeTargets(replies: BeaconReply[], selector: string | undefined): BeaconReply[] {
   if (!selector && replies.length !== 1) return [];
-  return replies.filter((r) => !r.adbOn && r.nonce);
+  return replies.filter((r) => !r.adbOn && r.verified);
 }
 
-export function parseBeaconReply(line: string, host: string): BeaconReply | undefined {
+/** Addresses a phone can have on a LAN or a private VPN (Tailscale's 100.64.0.0/10). */
+export function isLocalAddress(host: string): boolean {
+  const ip = /^(\d{1,3})\.(\d{1,3})\.\d{1,3}\.\d{1,3}$/.exec(host);
+  if (!ip) return /^(::1$|fe[89ab]|f[cd])/i.test(host);
+  const a = Number(ip[1]);
+  const b = Number(ip[2]);
+  return a === 10 || a === 127 || (a === 192 && b === 168) || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 100 && b >= 64 && b <= 127);
+}
+
+function parseStatus(line: string, host: string, magic: string, verified: boolean): BeaconReply | undefined {
   const parts = line.trim().split(/\s+/);
-  if (parts[0] !== MAGIC) return undefined;
+  if (parts[0] !== magic) return undefined;
   const kv = Object.fromEntries(parts.slice(1).map((p) => p.split("=", 2) as [string, string]));
   const port = Number(kv.port);
   if (!kv.serial || !Number.isInteger(port) || port < 0 || port > 65535) return undefined;
-  const nonce = kv.nonce && /^[0-9a-f]{32}$/.test(kv.nonce) ? kv.nonce : undefined;
-  return { host, serial: kv.serial, port, adbOn: kv.adb === "on", ...(nonce ? { nonce } : {}) };
+  return { host, serial: kv.serial, port, adbOn: kv.adb === "on", verified };
 }
 
-/** Ask one host. Resolves undefined on refusal, timeout, a wrong token (the app just closes) or garbage. */
-export const queryBeacon = (host: string, token: string, timeoutMs = 1_500): Promise<BeaconReply | undefined> =>
-  exchange(host, `${MAGIC} ${token}`, timeoutMs);
+/** The phone's reply to an old-protocol request. Unauthenticated: anyone on the network can send this. */
+export const parseBeaconReply = (line: string, host: string): BeaconReply | undefined => parseStatus(line, host, LEGACY_MAGIC, false);
 
-/** Ask a phone that offered `nonce` to turn Wireless debugging on. A reply means it accepted. */
-export const requestWake = (host: string, key: string, nonce: string, serial: string, timeoutMs = 2_500): Promise<BeaconReply | undefined> =>
-  exchange(host, `${MAGIC}W ${wakeProof(key, nonce, serial)}`, timeoutMs);
+/** The final line of a session; undefined unless the phone proved it holds the key for this very exchange. */
+export function verifyReply(line: string, host: string, key: string, cmd: BeaconCommand, cn: string, sn: string): BeaconReply | undefined {
+  const m = /^(.*) mac=([0-9a-f]{64})$/.exec(line.trim());
+  if (!m || !sameMac(m[2]!, mac(key, "reply", cmd, cn, sn, m[1]!))) return undefined;
+  return parseStatus(m[1]!, host, MAGIC, true);
+}
 
-function exchange(host: string, line: string, timeoutMs: number): Promise<BeaconReply | undefined> {
+/** One authenticated exchange. Resolves undefined on refusal, timeout or anything that fails to prove itself. */
+export function beaconSession(host: string, key: string, cmd: BeaconCommand, timeoutMs = 2_500): Promise<BeaconReply | undefined> {
+  return new Promise((resolve) => {
+    const cn = randomBytes(16).toString("hex");
+    let sn: string | undefined;
+    let buf = "";
+    let settled = false;
+    const finish = (r: BeaconReply | undefined) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      socket.destroy();
+      resolve(r);
+    };
+    const timer = setTimeout(() => finish(undefined), timeoutMs);
+    const socket = net.connect({ host, port: BEACON_PORT });
+    socket.on("error", () => finish(undefined));
+    socket.on("close", () => finish(undefined));
+    socket.on("connect", () => socket.write(`${MAGIC} ${cn} ${mac(key, "hello", cn)}\n`));
+    socket.on("data", (d) => {
+      buf += d.toString("utf8");
+      if (buf.length > 512) return finish(undefined);
+      for (let nl = buf.indexOf("\n"); nl >= 0 && !settled; nl = buf.indexOf("\n")) {
+        const line = buf.slice(0, nl).trim();
+        buf = buf.slice(nl + 1);
+        if (sn) return finish(verifyReply(line, host, key, cmd, cn, sn));
+        const challenge = new RegExp(`^${MAGIC} ([0-9a-f]{32})$`).exec(line);
+        if (!challenge) return finish(undefined);
+        sn = challenge[1]!;
+        socket.write(`${cmd} ${mac(key, cmd, cn, sn)}\n`);
+      }
+      return undefined;
+    });
+  });
+}
+
+/** Ask an app older than v0.6.1 at the one address it was last seen. Sends the token in the clear. */
+export function queryLegacyBeacon(host: string, token: string, timeoutMs = 1_500): Promise<BeaconReply | undefined> {
   return new Promise((resolve) => {
     let buf = "";
     let settled = false;
@@ -103,7 +156,7 @@ function exchange(host: string, line: string, timeoutMs: number): Promise<Beacon
     const socket = net.connect({ host, port: BEACON_PORT });
     socket.setTimeout(timeoutMs, () => finish(undefined));
     socket.on("error", () => finish(undefined));
-    socket.on("connect", () => socket.write(`${line}\n`));
+    socket.on("connect", () => socket.write(`${LEGACY_MAGIC} ${token}\n`));
     socket.on("data", (d) => {
       buf += d.toString("utf8");
       const nl = buf.indexOf("\n");
@@ -129,14 +182,14 @@ export function subnetHosts(interfaces: NodeJS.Dict<os.NetworkInterfaceInfo[]> =
   return [...hosts];
 }
 
-/** Query many hosts with bounded concurrency; returns every reply. */
-export async function scanBeacons(hosts: string[], token: string, timeoutMs = 600, concurrency = 64): Promise<BeaconReply[]> {
+/** Query many hosts with bounded concurrency; returns every reply that proved itself. */
+export async function scanBeacons(hosts: string[], key: string, timeoutMs = 900, concurrency = 64): Promise<BeaconReply[]> {
   const replies: BeaconReply[] = [];
   let next = 0;
   const worker = async () => {
     while (next < hosts.length) {
       const host = hosts[next++]!;
-      const r = await queryBeacon(host, token, timeoutMs);
+      const r = await beaconSession(host, key, "status", timeoutMs);
       if (r) replies.push(r);
     }
   };

@@ -9,6 +9,11 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/SeokpilYoon/adb-autolink/actions/workflows/ci.yml"><img src="https://github.com/SeokpilYoon/adb-autolink/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="SECURITY.md#security-review"><img src="https://img.shields.io/badge/revisi%C3%B3n%20de%20seguridad-v0.6.1-blue" alt="Security review" /></a>
+</p>
+
+<p align="center">
   <img src=".claude-plugin/icon.png" width="96" alt="adb-autolink icon" />
 </p>
 
@@ -19,6 +24,8 @@ Sal con tu teléfono, vuelve y simplemente pídeselo a Claude:
 > "Instala Builds/game.apk en mi S21, ábrelo y haz una captura de pantalla."
 
 Sin volver a emparejar y sin escribir direcciones IP, puertos ni códigos de emparejamiento. El teléfono vuelve a activar la depuración inalámbrica por sí solo cuando se une a una red Wi-Fi de confianza, y el servidor MCP lo encuentra mediante mDNS y se reconecta cuando hace falta.
+
+> **Seguridad:** este plugin da a Claude el control de un teléfono, así que compruébalo antes de instalarlo. [SECURITY.md](SECURITY.md#security-review) publica la revisión de v0.6.1: las amenazas consideradas, lo que se encontró y corrigió, lo que se probó en teléfonos reales y los riesgos que quedan. Se hizo con Claude y **no es una auditoría de terceros**. CI comprueba las pruebas y los avisos de npm en cada commit.
 
 ## Cómo funciona
 
@@ -146,7 +153,7 @@ Consulta [docs/](docs/README.md): [arquitectura](docs/architecture.md), [soluci�
 - La depuración inalámbrica solo se activa automáticamente en los SSID de tu lista blanca, y Android sigue exigiendo confianza por punto de acceso y emparejamiento basado en claves. No añadas Wi-Fi públicas a la lista blanca.
 - El servidor MCP solo se conecta automáticamente a teléfonos a los que ya se haya conectado antes. La primera ejecución es la única excepción.
 - El mosaico de Ajustes rápidos activa y desactiva la conexión automática. Al desactivarla se apaga la depuración inalámbrica y se deja de seguir la Wi-Fi; para activarla, el teléfono debe estar desbloqueado.
-- Un PC configurado con `install_companion_app` puede volver a activar la depuración inalámbrica por Wi-Fi, incluso con la conexión automática desactivada o en una Wi-Fi no permitida. Para ello la app escucha en TCP 47383 en la Wi-Fi actual, y el PC se identifica con una clave que nunca envía por la red. Para detener todo en segundo plano mientras la conexión automática esté desactivada, desactiva **Permitir que mi PC la active** en Avanzado.
+- Un PC configurado con `install_companion_app` puede volver a activar la depuración inalámbrica en una Wi-Fi permitida, incluso con la conexión automática desactivada o el teléfono bloqueado. La app escucha en TCP 47383 solo en Wi-Fi permitidas, ambos lados se identifican con una clave que nunca viaja por la red y el teléfono avisa cada vez. Para detener todo en segundo plano mientras la conexión automática esté desactivada, desactiva **Permitir que mi PC la active** en Avanzado; **Olvidar todos los PC** borra todas las claves.
 - Activar la depuración inalámbrica también activa las Opciones para desarrolladores y la depuración USB; desactivarla no revierte esos cambios.
 - La salida de Logcat y el contenido de la pantalla se pasan al modelo, así que trata los logs de apps no fiables como entrada no fiable.
 

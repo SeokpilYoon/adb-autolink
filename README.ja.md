@@ -9,6 +9,11 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/SeokpilYoon/adb-autolink/actions/workflows/ci.yml"><img src="https://github.com/SeokpilYoon/adb-autolink/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="SECURITY.md#security-review"><img src="https://img.shields.io/badge/%E3%82%BB%E3%82%AD%E3%83%A5%E3%83%AA%E3%83%86%E3%82%A3%E3%83%AC%E3%83%93%E3%83%A5%E3%83%BC-v0.6.1-blue" alt="Security review" /></a>
+</p>
+
+<p align="center">
   <img src=".claude-plugin/icon.png" width="96" alt="adb-autolink icon" />
 </p>
 
@@ -19,6 +24,8 @@
 > 「Builds/game.apk を S21 にインストールして、起動してスクリーンショットを撮って。」
 
 再ペアリングも、IP アドレス、ポート、ペアリングコードの入力も不要です。信頼する Wi-Fi ネットワークに接続すると、スマートフォンが自動でワイヤレス デバッグを再び有効にし、MCP サーバーが mDNS で見つけて必要なときに再接続します。
+
+> **セキュリティ:** このプラグインは Claude にスマートフォンの操作権限を与えるため、インストール前にご確認ください。[SECURITY.md](SECURITY.md#security-review) で v0.6.1 のレビューを公開しています。想定した脅威、発見して修正した問題、実機で試した内容、残るリスクを記載しています。Claude と共に行ったレビューであり、**第三者監査ではありません。** CI がコミットごとにテストと npm の脆弱性を確認します。
 
 ## 仕組み
 
@@ -146,7 +153,7 @@ CLI: `node mcp-server/dist/cli.js devices` · `node mcp-server/dist/cli.js conne
 - ワイヤレス デバッグは、許可リストに登録した SSID でのみ自動で有効になります。Android はこれに加えて、アクセスポイントごとの信頼と鍵ベースのペアリングを引き続き強制します。公共の Wi-Fi は登録しないでください。
 - MCP サーバーは、過去に接続したことのあるスマートフォンにしか自動接続しません。例外は初回の実行だけです。
 - クイック設定タイルで自動接続のオン/オフを切り替えられます。オフにするとワイヤレス デバッグがオフになり Wi-Fi の追従が止まります。オンにするにはスマートフォンのロック解除が必要です。
-- `install_companion_app` で設定した PC は、自動接続がオフでも、許可していない Wi-Fi でも、Wi-Fi 経由でワイヤレス デバッグを再びオンにできます。このためアプリは現在の Wi-Fi の TCP 47383 で待ち受け、PC はネットワークに送らない鍵で自身を証明します。自動接続がオフの間バックグラウンドの動作をすべて止めるには、詳細設定の **PC からのオンを許可** をオフにしてください。
+- `install_companion_app` で設定した PC は、許可した Wi-Fi でワイヤレス デバッグを再びオンにできます。自動接続がオフでも、スマートフォンがロック中でもオンになります。アプリは許可した Wi-Fi の TCP 47383 でのみ待ち受け、双方がネットワークに送らない鍵で自身を証明し、オンになるたびに通知が表示されます。自動接続がオフの間バックグラウンドの動作をすべて止めるには、詳細設定の **PC からのオンを許可** をオフにしてください。同じメニューの **登録済みの PC をすべて削除** ですべての鍵を削除できます。
 - ワイヤレス デバッグを有効にすると、開発者向けオプションと USB デバッグも有効になります。オフにしても、これらは元に戻りません。
 - Logcat の出力と画面の内容はモデルに渡されます。信頼できないアプリのログは、信頼できない入力として扱ってください。
 

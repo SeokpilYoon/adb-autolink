@@ -28,7 +28,7 @@
 
     <string name="auto_switch_label">Connexion automatique</string>
     <string name="auto_switch_on_hint">La désactiver coupe aussi le débogage sans fil.</string>
-    <string name="auto_switch_off_hint">Votre liste de Wi-Fi autorisés est conservée. Un PC configuré avec cette application peut la réactiver (voir Avancé).</string>
+    <string name="auto_switch_off_hint">Votre liste de Wi-Fi autorisés est conservée. Sur un Wi-Fi autorisé, un PC configuré avec cette application peut la réactiver (voir Avancé).</string>
     <string name="hero_paused">La connexion automatique est désactivée</string>
     <string name="hero_paused_body">Activez-la pour rallumer le débogage sans fil sur vos Wi-Fi autorisés, ou demandez-le depuis votre PC. Vous pouvez aussi la basculer depuis la vignette des réglages rapides.</string>
     <string name="resume_auto">Activer la connexion automatique</string>
@@ -63,7 +63,11 @@
     <string name="auth_timeout_warning">Android oublie les autorisations de PC inutilisées depuis 7 jours. En désactivant cette option, votre PC reste autorisé indéfiniment : toute personne disposant de la clé adb de ce PC peut se connecter tant que le débogage sans fil est activé. À n’utiliser qu’avec des PC et réseaux de confiance.</string>
 
     <string name="remote_wake_label">Autoriser mon PC à l\'activer</string>
-    <string name="remote_wake_hint">Les PC configurés avec cette application peuvent activer le débogage sans fil par Wi-Fi, même sur un Wi-Fi non autorisé ou lorsque la connexion automatique est désactivée. Désactivez cette option pour tout arrêter en arrière-plan tant que la connexion automatique est désactivée.</string>
+    <string name="remote_wake_hint">Les PC configurés avec cette application peuvent activer le débogage sans fil sur un Wi-Fi autorisé, même si la connexion automatique est désactivée. Le téléphone vous prévient à chaque fois. Désactivez cette option pour tout arrêter en arrière-plan tant que la connexion automatique est désactivée.</string>
+    <string name="forget_pcs">Oublier tous les PC</string>
+    <string name="forget_pcs_done">PC oubliés. Exécutez install_companion_app pour en configurer un à nouveau.</string>
+    <string name="woken_title">Un PC a activé le débogage sans fil</string>
+    <string name="woken_text">Si ce n\'est pas vous, désactivez la connexion automatique et touchez Oublier tous les PC dans Avancé.</string>
     <string name="language_label">Langue de l’appli</string>
     <string name="change_language">Modifier</string>
 

@@ -120,3 +120,17 @@ describe("planConnect (which discovered mDNS entries to adb connect)", () => {
     expect(planConnect(undefined, [s21m, newm], {})).toEqual({ connect: [s21m, newm], bootstrap: false });
   });
 });
+
+describe("planConnect and strangers", () => {
+  const advert = { serial: "", address: "192.168.0.66:5555", physicalSerial: "UNKNOWN1", state: "discovered" };
+  const known = { R3CX40C2YKL: { model: "SM-S926N" } };
+
+  it("does not bootstrap a stranger when the name fits a remembered phone", () => {
+    expect(planConnect("S24+", [advert], known, {})).toEqual({ connect: [], bootstrap: false });
+    expect(planConnect("mine", [advert], known, { mine: "R3CX40C2YKL" })).toEqual({ connect: [], bootstrap: false });
+  });
+
+  it("still bootstraps a name nothing remembered fits", () => {
+    expect(planConnect("S21", [advert], known, {}).bootstrap).toBe(true);
+  });
+});

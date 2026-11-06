@@ -32,7 +32,9 @@ jobs:
           cache-dependency-path: mcp-server/package-lock.json
       - run: npm ci
       - run: npm run typecheck
+      # vitest needs Node 22+. Node 20 still gets typecheck, build and the start-up check.
       - run: npm test
+        if: matrix.node != 20
       # The committed dist/ bundle is what the plugin runs: it must start on this OS.
       - run: node scripts/smoke.mjs
 
@@ -47,6 +49,10 @@ jobs:
           cache: npm
           cache-dependency-path: mcp-server/package-lock.json
       - run: npm ci
+        working-directory: mcp-server
+      # Runtime packages are bundled into dist/, so all of them count.
+      - name: No high or critical advisories in npm packages
+        run: npm audit --audit-level=high
         working-directory: mcp-server
       - run: node scripts/release.mjs check
 

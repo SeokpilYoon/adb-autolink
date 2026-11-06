@@ -1,5 +1,19 @@
+import { randomBytes } from "node:crypto";
 import { runAdb } from "./adb.js";
-import { type BeaconReply, beaconToken, queryBeacon, requestWake, scanBeacons, subnetHosts, wakeKey, wakeTargets } from "./beacon.js";
+import {
+  type BeaconReply,
+  beaconSession,
+  beaconToken,
+  isLocalAddress,
+  mac,
+  queryLegacyBeacon,
+  sameMac,
+  scanBeacons,
+  subnetHosts,
+  wakeKey,
+  wakeTargets,
+} from "./beacon.js";
+import { parseProofs, proveCommand } from "./companion.js";
 import { latestReport } from "./checkpoints.js";
 import { IS_MAC, type IosDevice, isAvailable, listIosDevices } from "./ios.js";
 import { COMPANION_APP_NAME } from "./config.js";
@@ -10,6 +24,7 @@ import {
   describeCandidate,
   displayName,
   ensureAutoAlias,
+  forgetAddress,
   loadAliases,
   loadKnownDevices,
   marketNameForModel,
@@ -50,7 +65,8 @@ async function reportedProductName(serial: string): Promise<string> {
     try {
       const r = await runAdb(["shell", "getprop", prop], { serial, timeoutMs: 5_000 });
       const v = r.stdout.trim();
-      if (v) return v;
+      // Comes from the device and ends up in saved lists the model reads: a name, nothing else.
+      if (/^[\p{L}\p{N} +()._-]{1,40}$/u.test(v)) return v;
     } catch {
       // try the next one
     }
@@ -232,12 +248,67 @@ let connectLock: Promise<unknown> = Promise.resolve();
  * then discovers it via mDNS and runs `adb connect`.
  */
 export function ensureConnected(selector?: string): Promise<EnsureResult> {
+  const addr = selector ? splitHostPort(selector.trim()) : undefined;
+  if (addr && !isLocalAddress(addr.host) && !process.env.ADB_AUTOLINK_ALLOW_PUBLIC) {
+    return Promise.reject(new DeviceSelectionError(t("connect.publicAddress", addr.host)));
+  }
   const run = connectLock.then(() => ensureConnectedUnlocked(selector));
   connectLock = run.catch(() => undefined);
   return run;
 }
 
+/** Ask the app, through this adb transport, to prove it holds this PC's key. */
+export async function proveOverAdb(serial: string): Promise<boolean> {
+  const challenge = randomBytes(16).toString("hex");
+  const r = await runAdb(["shell", proveCommand(challenge)], { serial, timeoutMs: 10_000, allowFailure: true }).catch(() => undefined);
+  const want = mac(wakeKey(), "adb", challenge);
+  return !!r && parseProofs(r.stdout).some((p) => sameMac(p, want));
+}
+
+/** Wireless transports whose phone proved itself to this server process. */
+const provenTransports = new Set<string>();
+
+/**
+ * adb accepts whatever answers on an address and takes its word for the serial, so a stranger on the Wi-Fi
+ * could pose as a remembered phone and receive everything typed or installed. A phone whose app once
+ * proved it holds this PC's key must prove it again here, through the adb connection itself. USB is exempt.
+ */
+async function isGenuine(d: DeviceInfo, selector: string | undefined): Promise<boolean> {
+  if (!isAddressSerial(d.serial) && !isMdnsSerial(d.serial)) return true;
+  const id = `${d.serial}#${d.entry?.transportId ?? ""}`;
+  if (provenTransports.has(id)) return true;
+  const known = loadKnownDevices();
+  const named = selector && !splitHostPort(selector.trim()) ? matchSelector(selector, knownCandidates(), loadAliases()) : [];
+  const claimed = named.filter((c) => known[c.physicalSerial!]?.provesKey);
+  const phys = d.physicalSerial;
+  if (claimed.length && !claimed.some((c) => c.physicalSerial === phys)) return false;
+  const required = claimed.length > 0 || (!!phys && !!known[phys]?.provesKey) || Object.values(known).some((k) => k.provesKey && !!d.address && k.lastAddress === d.address);
+  if (!required) return true;
+  const ok = await proveOverAdb(d.serial);
+  if (ok) provenTransports.add(id);
+  return ok;
+}
+
 async function ensureConnectedUnlocked(selector?: string): Promise<EnsureResult> {
+  const first = await connectTarget(selector);
+  if (await isGenuine(first.device, selector)) return first;
+  // Drop the impostor, and with it the address it may have planted, then look for the real phone.
+  const drop = async (r: EnsureResult) => {
+    await adbDisconnect(r.device.serial);
+    addressSerialCache.delete(r.device.serial);
+    if (r.device.physicalSerial) forgetAddress(r.device.physicalSerial);
+    for (const c of knownCandidates()) if (c.address === r.device.address) forgetAddress(c.physicalSerial!);
+  };
+  await drop(first);
+  const notProven = new DeviceSelectionError(t("connect.notProven", selector ?? first.device.serial));
+  const second = await connectTarget(selector).catch(() => undefined);
+  if (!second) throw notProven;
+  if (await isGenuine(second.device, selector)) return second;
+  await drop(second);
+  throw notProven;
+}
+
+async function connectTarget(selector?: string): Promise<EnsureResult> {
   const log: string[] = [];
   const aliases = loadAliases();
   let devices = await listAdbDevices();
@@ -335,9 +406,10 @@ async function ensureConnectedUnlocked(selector?: string): Promise<EnsureResult>
 
 /**
  * Ask remembered phones' companion apps for their current connect port: first at their last known IP,
- * then across this PC's private /24 subnets (DHCP may have moved them). A phone with Wireless debugging off
- * is asked to turn it on. `off` lists phones that stayed off, which usually means the "Always allow on this
- * network" prompt is waiting. `refused` lists phones that are on with a confirmed port yet rejected adb:
+ * then across this PC's private /24 subnets (DHCP may have moved them). Only replies that prove they come
+ * from a phone holding this PC's key are believed, and only such a phone is asked to turn Wireless debugging
+ * on. `off` lists phones that stayed off, which usually means the "Always allow on this network" prompt is
+ * waiting. `refused` lists phones that are on with a confirmed port yet rejected adb:
  * the app checks that port speaks adb, so what is left is the phone no longer trusting this PC's key.
  */
 async function connectViaBeacon(
@@ -355,21 +427,31 @@ async function connectViaBeacon(
   const wanted = new Set(targets.map((t) => t.physicalSerial).filter((s): s is string => !!s && !onlinePhys.has(s)));
   if (wanted.size === 0) return { off, refused };
 
-  const token = beaconToken();
+  const key = wakeKey();
   const lastHosts = [...new Set(targets.map((t) => (t.address ? splitHostPort(t.address)?.host : undefined)).filter((h): h is string => !!h))];
   const ask = async (hosts: string[], scan: boolean) => {
-    const replies = scan ? await scanBeacons(hosts, token) : (await Promise.all(hosts.map((h) => queryBeacon(h, token)))).filter((r) => !!r);
+    const replies = scan ? await scanBeacons(hosts, key) : await Promise.all(hosts.map((h) => beaconSession(h, key, "status")));
     return replies.filter((r): r is BeaconReply => !!r && wanted.has(r.serial));
   };
   let mine = await ask(lastHosts, false);
+  if (mine.length === 0) {
+    // An app older than v0.6.1 cannot prove anything: ask it only where it was last seen, unless the phone
+    // has already moved on to the current protocol, in which case this reply could only be an impostor.
+    const known = loadKnownDevices();
+    const legacy = targets.filter((t) => t.address && !known[t.physicalSerial!]?.provesKey);
+    const token = legacy.length ? beaconToken() : "";
+    const replies = await Promise.all(legacy.map((t) => queryLegacyBeacon(splitHostPort(t.address!)!.host, token)));
+    mine = replies.filter((r): r is BeaconReply => !!r && legacy.some((t) => t.physicalSerial === r.serial));
+  }
   if (mine.length === 0) {
     const hosts = subnetHosts().filter((h) => !lastHosts.includes(h));
     mine = await ask(hosts, true);
     log.push(`beacon: scanned ${hosts.length} hosts on the local subnets, ${mine.length} remembered phone(s) answered`);
   }
+  for (const r of mine) if (r.verified) rememberDevice(r.serial, { provesKey: true });
   const woken = new Set<string>();
   for (const r of wakeTargets(mine, selector)) {
-    const accepted = await requestWake(r.host, wakeKey(), r.nonce!, r.serial);
+    const accepted = await beaconSession(r.host, key, "wake");
     log.push(`beacon ${r.host}: asked ${r.serial} to turn Wireless debugging on: ${accepted ? "accepted" : "refused"}`);
     if (accepted) woken.add(r.serial);
   }

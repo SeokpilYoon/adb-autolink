@@ -11,6 +11,20 @@ All notable changes to adb-autolink are recorded here. Each version must match a
 
 Release pages are generated from these sections.
 
+## v0.6.1 - Security fixes for remote wake
+
+**Upgrade if you installed v0.6.0.** Run `/plugin update adb-autolink`, restart Claude Code, then run `install_companion_app` once per phone while it is connected. The network protocol changed: a v0.6.0 app is no longer woken by this version, and phones keep their pairing. The findings and what was and wasn't tested are in [SECURITY.md](https://github.com/SeokpilYoon/adb-autolink/blob/main/SECURITY.md#security-review).
+
+- **The PC no longer trusts whatever answers on the network.** adb accepts any peer and takes its word for the serial, so a stranger on the same Wi-Fi could pose as a remembered phone and receive what was typed or installed, or feed the model a fake screen. Phones and PC now prove a shared key to each other, and a set-up phone must prove it again through every new wireless adb connection or it is disconnected. Names that fit a remembered phone no longer reach unknown mDNS adverts.
+- **New protocol for the port beacon.** The key never crosses the network, strangers get no answer, nonces belong to one connection, and a wake goes only to a host that proved itself. Apps older than this version are asked only at their last address and never woken.
+- **Behaviour change: the app listens, and a PC can wake it, only on allowed Wi-Fi.** v0.6.0 did this on any Wi-Fi. While the main switch is off the app still waits on allowed Wi-Fi, unless **Let my PC turn this on** is off.
+- **Every wake shows a notification**, and **Forget all PCs** under Advanced removes every key. `install_companion_app` now says that remote wake is on.
+- **The companion APK is verified:** the plugin downloads the APK of its own version and refuses it unless its SHA-256 matches the hash pinned in the plugin.
+- **Harder for screen text to steer the model:** public `ip:port` selectors are refused unless `ADB_AUTOLINK_ALLOW_PUBLIC=1` is set, and `ui_tree` and `logcat` output is labelled as data from the phone.
+- **Smaller fixes:** keys no longer appear in adb error text; the listener has an overall deadline and per-host limits; screen dumps stay in `/data/local/tmp`; app data is excluded from cloud backup and device transfer; checkpoint folders are private; a name a phone reports is checked before it is saved.
+- **Dependencies:** zod 4 and vitest 5, leaving no npm advisories, and CI now fails on high or critical ones. vitest needs Node 22, so on Node 20 CI skips the unit tests but still runs the typecheck and start-up check. The plugin itself still runs on Node 20.
+- **SECURITY.md** now has a security review section. It was not a third-party audit.
+
 ## v0.6.0 - Turn a phone back on from Claude Code, and read the screen as text
 
 **Upgrading from 0.5.0:** run `/plugin update adb-autolink`, restart Claude Code, and run `install_companion_app` once per phone while it is connected. That installs the new app and hands it this PC's wake key; until then the phone behaves as before. Phones on the old app still reconnect normally.

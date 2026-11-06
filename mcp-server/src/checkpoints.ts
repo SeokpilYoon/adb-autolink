@@ -151,7 +151,7 @@ export function saveCheckpoint(i: SaveInput): { png: string; report: string; ses
   const now = i.now ?? new Date();
   const deviceDir = path.join(checksDir(i.root), deviceFolderName(i.deviceName, i.serial));
   const dir = pickSessionDir(deviceDir, i.stage, now);
-  mkdirSync(dir, { recursive: true });
+  mkdirSync(dir, { recursive: true, mode: 0o700 }); // screenshots of a personal phone
 
   const session = readSession(dir) ?? { device: i.deviceName ? `${i.deviceName} (${i.serial})` : i.serial, serial: i.serial, entries: [] };
   const n = session.entries.length + 1;

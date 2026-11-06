@@ -23,10 +23,13 @@ Pairing is persistent: the phone keeps the PC's adb key. The optional `adb_allow
   - On a whitelisted network the service writes `adb_wifi_enabled=1` and checks a few seconds later that it stuck.
   - Android approves wireless debugging per access point (BSSID) and resets the setting to 0 on an access point you haven't approved yet. The service then retries once and asks the user to approve that access point.
 - **Manual off:** if the user turns wireless debugging off with the tile or in the app, the service leaves it off until the network changes.
-- **Auto-connect switch (`AutoConnect`, app and Quick Settings tile):** off stops the service, the Wi-Fi trigger and the port beacon and turns Wireless debugging off, keeping the whitelist; its foreground notification disappears with it. `install_companion_app` switches it back on.
+- **Auto-connect switch (`AutoConnect`, app and Quick Settings tile):** off turns Wireless debugging off and stops following the Wi-Fi, keeping the whitelist. Unless **Let my PC turn this on** is off, the service and port beacon stay up on whitelisted Wi-Fi so a set-up PC can switch it back on; otherwise everything stops. `install_companion_app` switches it back on.
 - **Battery:** no permanent `MulticastLock`. It is held only for the few seconds `AdbPortLocator` asks mDNS for the new port, since the port beacon no longer needs the phone to answer mDNS queries with the screen off.
-- **Port beacon (`PortBeacon`, `AdbPortLocator`):** the PC can rarely rely on mDNS to learn the new port. Windows drops inbound multicast on Public networks or without a firewall rule for adb, and many routers filter it. So on whitelisted Wi-Fi the app answers on TCP 47383 (Wi-Fi address only) with the current port, and only to a request carrying a token that a PC handed it in `install_companion_app`.
-  - Protocol: the PC sends `ADBAL1 <token>`, and the phone replies `ADBAL1 serial=<ro.serialno> port=<port, 0 if unknown> adb=<on|off>`.
+- **Port beacon (`PortBeacon`, `AdbPortLocator`):** the PC can rarely rely on mDNS to learn the new port. Windows drops inbound multicast on Public networks or without a firewall rule for adb, and many routers filter it. So on whitelisted Wi-Fi the app answers on TCP 47383 (Wi-Fi address only) with the current port, and can turn Wireless debugging on, but only for a PC proving the key it handed over through adb in `install_companion_app`.
+  - Protocol, all on one connection (`mac` is HMAC-SHA256 of the `|`-joined parts): the PC sends `ADBAL2 <cn> <mac(hello, cn)>`, the phone answers `ADBAL2 <sn>`, the PC sends `<status|wake> <mac(cmd, cn, sn)>`, and the phone replies `ADBAL2 serial=<ro.serialno> port=<port, 0 if unknown> adb=<on|off> mac=<mac(reply, cmd, cn, sn, line)>`. Anyone without the key gets no answer, and the PC ignores replies that do not verify.
+  - A wake goes only to a host whose status reply verified. It also clears the auto-connect pause, and the phone shows a notification.
+  - After connecting, a phone that has proved itself once must do so again through adb (`action.PROVE`, `mac(adb, challenge)`), since adb itself accepts any peer. `pair_device` resets this, because the code on the phone authenticates it.
+  - Apps older than v0.6.1 speak `ADBAL1 <token>`. The PC still asks them, at their last address only and never to wake.
   - Finding the port on the phone: apps cannot read `/proc/net` or `service.adb.tls.port`, and the phone's own mDNS can return the previous port from its cache after a restart. So every candidate (the last port, then the mDNS answer) is confirmed with the adb handshake: adbd answers a `CNXN` packet on its TLS port with `STLS`. A full scan of open ports, which is correct but takes tens of seconds, is the last resort.
 
 ### PC side (`ensureConnected`)
@@ -50,8 +53,8 @@ Every device tool goes through `ensureConnected`, and only one connection attemp
 
 | Where | What |
 |---|---|
-| Phone: app SharedPreferences | Whitelist (auto mode is on while it is non-empty), the user-off flag, the last suggested SSID, beacon tokens (one per PC) and the device serial |
-| PC: `~/.adb-autolink/` (`ADB_AUTOLINK_HOME`) | `aliases.json`, remembered devices (serial → model, last address) and `beacon-token` |
+| Phone: app SharedPreferences | Whitelist (auto mode is on while it is non-empty), the user-off flag, the last suggested SSID, PC keys (one per PC) and the device serial |
+| PC: `~/.adb-autolink/` (`ADB_AUTOLINK_HOME`) | `aliases.json`, remembered devices (serial → model, last address) `wake-key` and, for apps older than v0.6.1, `beacon-token` |
 | PC: `~/.adb-autolink/cache/` | The downloaded companion APK |
 
 ## Languages

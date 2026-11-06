@@ -28,7 +28,7 @@
 
     <string name="auto_switch_label">自動接続</string>
     <string name="auto_switch_on_hint">オフにするとワイヤレス デバッグもオフになります。</string>
-    <string name="auto_switch_off_hint">許可した Wi-Fi の一覧はそのまま残ります。このアプリで設定した PC からは再びオンにできます(詳細設定を参照)。</string>
+    <string name="auto_switch_off_hint">許可した Wi-Fi の一覧はそのまま残ります。許可した Wi-Fi では、このアプリで設定した PC から再びオンにできます(詳細設定を参照)。</string>
     <string name="hero_paused">自動接続はオフです</string>
     <string name="hero_paused_body">オンにすると、許可した Wi-Fi でワイヤレス デバッグが再びオンになります。PC からのリクエストでもオンになります。クイック設定タイルからも切り替えられます。</string>
     <string name="resume_auto">自動接続をオンにする</string>
@@ -61,7 +61,11 @@
     <string name="auth_timeout_warning">Android は 7 日間使われていない PC の承認を破棄します。これを無効にすると PC は永久に承認されたままになり、ワイヤレス デバッグが ON の間はその PC の adb 鍵を持つ誰でも接続できます。信頼できる PC とネットワークでのみ使用してください。</string>
 
     <string name="remote_wake_label">PC からのオンを許可</string>
-    <string name="remote_wake_hint">このアプリで設定した PC は、許可していない Wi-Fi でも、自動接続がオフでも、Wi-Fi 経由でワイヤレス デバッグをオンにできます。これをオフにすると、自動接続がオフの間はバックグラウンドの動作がすべて止まります。</string>
+    <string name="remote_wake_hint">このアプリで設定した PC は、許可した Wi-Fi でワイヤレス デバッグをオンにできます。自動接続がオフでもオンになり、そのたびに通知が表示されます。これをオフにすると、自動接続がオフの間はバックグラウンドの動作がすべて止まります。</string>
+    <string name="forget_pcs">登録済みの PC をすべて削除</string>
+    <string name="forget_pcs_done">PC を削除しました。再設定するには install_companion_app を実行してください。</string>
+    <string name="woken_title">PC がワイヤレス デバッグをオンにしました</string>
+    <string name="woken_text">心当たりがない場合は、自動接続をオフにし、詳細設定の「登録済みの PC をすべて削除」をタップしてください。</string>
     <string name="language_label">アプリの言語</string>
     <string name="change_language">変更</string>
 

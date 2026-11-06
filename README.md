@@ -9,6 +9,11 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/SeokpilYoon/adb-autolink/actions/workflows/ci.yml"><img src="https://github.com/SeokpilYoon/adb-autolink/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="SECURITY.md#security-review"><img src="https://img.shields.io/badge/security%20review-v0.6.1-blue" alt="Security review" /></a>
+</p>
+
+<p align="center">
   <img src=".claude-plugin/icon.png" width="96" alt="adb-autolink icon" />
 </p>
 
@@ -19,6 +24,8 @@ Walk out with your phone, come back, and just ask Claude:
 > "Install Builds/game.apk on my S21, launch it and take a screenshot."
 
 No re-pairing, no typing IP addresses, ports or pairing codes. The phone turns wireless debugging back on by itself when it joins a Wi-Fi network you trust, and the MCP server finds it via mDNS and reconnects on demand.
+
+> **Security:** this plugin gives Claude control of a phone, so check before you install. [SECURITY.md](SECURITY.md#security-review) publishes the v0.6.1 review: the threats considered, what it found and fixed, what was tested on real phones, and the risks that remain. It was done with Claude and is **not a third-party audit**. CI checks the tests and npm advisories on every commit.
 
 ## How it works
 
@@ -146,7 +153,7 @@ See [docs/](docs/README.md): [architecture](docs/architecture.md), [troubleshoot
 - Wireless debugging is only auto-enabled on SSIDs you whitelist, and Android still enforces per-access-point trust plus key-based pairing. Don't whitelist public Wi-Fi.
 - The MCP server auto-connects only to phones it has connected to before. The first run is the only exception.
 - The Quick Settings tile switches auto-connect on and off. Turning it off turns Wireless debugging off and stops following the Wi-Fi; turning it on requires an unlocked phone.
-- A PC set up with `install_companion_app` can turn Wireless debugging back on over Wi-Fi, even while auto-connect is off or on a Wi-Fi that is not allowed. The app listens on TCP 47383 on the current Wi-Fi for this, and the PC proves itself with a key it never sends over the network. Turn off **Let my PC turn this on** under Advanced to stop all background work while auto-connect is off.
+- A PC set up with `install_companion_app` can turn Wireless debugging back on on an allowed Wi-Fi, even while auto-connect is off or the phone is locked. The app listens on TCP 47383 on allowed Wi-Fi only, both sides prove themselves with a key that never crosses the network, and the phone notifies you each time. Turn off **Let my PC turn this on** under Advanced to stop all background work while auto-connect is off, and use **Forget all PCs** there to remove every key.
 - Enabling wireless debugging also turns on Developer options and USB debugging; turning it off does not revert those.
 - Logcat output and screen content are passed to the model, so treat logs from untrusted apps as untrusted input.
 

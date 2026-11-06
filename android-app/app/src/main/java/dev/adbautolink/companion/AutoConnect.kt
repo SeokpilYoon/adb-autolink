@@ -10,8 +10,8 @@ object AutoConnect {
 
     /**
      * Off: turns Wireless debugging off and stops following the Wi-Fi. Unless the user disabled remote
-     * wake, the service stays to answer a set-up PC, which can switch this back on; otherwise nothing runs
-     * or listens. On: Wireless debugging comes back on an allowed Wi-Fi. Returns an error message, or null.
+     * wake, the service stays to answer a set-up PC on an allowed Wi-Fi, which can switch this back on;
+     * otherwise nothing runs or listens. On: Wireless debugging comes back on an allowed Wi-Fi. Returns an error message, or null.
      */
     fun set(context: Context, on: Boolean): String? {
         val prefs = Prefs(context)

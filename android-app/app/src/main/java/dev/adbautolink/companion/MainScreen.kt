@@ -598,6 +598,11 @@ private fun Advanced(status: Status, refresh: () -> Unit) {
                     })
                 }
                 Text(stringResource(R.string.remote_wake_hint), fontSize = 13.sp, lineHeight = 18.sp, color = c.muted)
+                TextButton(contentPadding = FlushLeft, onClick = {
+                    Prefs(context).forgetPcs()
+                    WifiWatcherService.sync(context)
+                    Toast.makeText(context, R.string.forget_pcs_done, Toast.LENGTH_LONG).show()
+                }) { Text(stringResource(R.string.forget_pcs)) }
 
                 // The system per-app language picker exists only on Android 13+.
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

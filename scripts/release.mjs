@@ -2,7 +2,9 @@
 // Release helper (no dependencies). The GitHub release page is generated from CHANGELOG.md.
 //
 //   node scripts/release.mjs check     versions agree, CHANGELOG has "## v<version>", mcp-server/dist is up to date
+//   node scripts/release.mjs pin       writes the built APK's SHA-256 into mcp-server/src/config.ts (then rebuild dist)
 //   node scripts/release.mjs publish   check + clean/pushed git + tag v<version> + gh release with adb-autolink.apk
+import { createHash } from "node:crypto";
 import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
@@ -13,7 +15,7 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const rel = (p) => path.join(root, p);
 const read = (p) => readFileSync(rel(p), "utf8");
 const APK = "android-app/build/dist/adb-autolink.apk";
-const ASSET_NAME = "adb-autolink.apk"; // install_companion_app downloads releases/latest/download/adb-autolink.apk
+const ASSET_NAME = "adb-autolink.apk"; // install_companion_app downloads releases/download/v<version>/adb-autolink.apk and checks the pinned hash
 
 class CheckError extends Error {}
 
@@ -122,6 +124,21 @@ function apkVersionName(apk) {
   return m[1];
 }
 
+const CONFIG = "mcp-server/src/config.ts";
+const PIN = /(COMPANION_APK_SHA256 = ")([0-9a-f]{64})(")/;
+const apkSha256 = (apk) => createHash("sha256").update(readFileSync(apk)).digest("hex");
+
+function pin() {
+  const apk = rel(APK);
+  if (!existsSync(apk)) throw new CheckError(`${APK} not found; build it with (cd android-app && ./gradlew assembleRelease)`);
+  const file = rel(CONFIG);
+  const source = readFileSync(file, "utf8");
+  if (!PIN.test(source)) throw new CheckError(`no COMPANION_APK_SHA256 in ${CONFIG}`);
+  const hash = apkSha256(apk);
+  writeFileSync(file, source.replace(PIN, `$1${hash}$3`));
+  console.log(`pinned ${hash} in ${CONFIG}; now run: (cd mcp-server && npm run build)`);
+}
+
 function publish() {
   const { version, notes } = check();
   const tag = `v${version}`;
@@ -131,6 +148,8 @@ function publish() {
   const apkVersion = apkVersionName(apk);
   if (apkVersion !== version) throw new CheckError(`${APK} has versionName ${apkVersion}, expected ${version}; rebuild the APK`);
   console.log(`APK: ${APK} versionName ${apkVersion}`);
+  const pinned = PIN.exec(readFileSync(rel(CONFIG), "utf8"))?.[2];
+  if (pinned !== apkSha256(apk)) throw new CheckError(`${APK} does not match COMPANION_APK_SHA256; run: node scripts/release.mjs pin, rebuild dist, commit`);
 
   if (run("git", ["status", "--porcelain"])) throw new CheckError("working tree is not clean; commit or stash first");
   run("git", ["fetch", "--quiet", "--tags"]);
@@ -174,9 +193,10 @@ function publish() {
 const cmd = process.argv[2];
 try {
   if (cmd === "check") check();
+  else if (cmd === "pin") pin();
   else if (cmd === "publish") publish();
   else {
-    console.error("Usage: node scripts/release.mjs <check|publish>");
+    console.error("Usage: node scripts/release.mjs <check|pin|publish>");
     process.exit(2);
   }
 } catch (e) {

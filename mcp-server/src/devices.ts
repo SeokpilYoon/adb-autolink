@@ -298,6 +298,16 @@ export interface KnownDevice {
   marketName?: string;
   /** "ios" for iPhones (seen through devicectl on a Mac); absent for Android. */
   platform?: "ios";
+  /** Its app proved it holds this PC's key, so from now on it must prove that on every wireless connection. */
+  provesKey?: boolean;
+}
+
+/** Drop a remembered address that turned out not to be this phone. */
+export function forgetAddress(serial: string): void {
+  const all = loadKnownDevices();
+  if (!all[serial]?.lastAddress) return;
+  delete all[serial]!.lastAddress;
+  writeJson("devices.json", all);
 }
 
 export function loadKnownDevices(): Record<string, KnownDevice> {
@@ -347,5 +357,8 @@ export function planConnect<T extends DeviceCandidate>(
   const withModel = notOnline.map((c) => (isKnown(c) && !c.model ? { ...c, model: known[c.physicalSerial!]!.model } : c));
   const hits = new Set(matchSelector(selector, withModel, aliases));
   const matched = notOnline.filter((_, i) => hits.has(withModel[i]!));
-  return matched.length ? { connect: matched, bootstrap: false } : { connect: unknown, bootstrap: true };
+  if (matched.length) return { connect: matched, bootstrap: false };
+  // A name that fits a remembered phone must not reach strangers: anyone can advertise over mDNS and claim a model.
+  const remembered = Object.entries(known).map(([s, k]) => ({ serial: "", physicalSerial: s, model: k.model, marketName: k.marketName || undefined, state: "known" }));
+  return matchSelector(selector, remembered, aliases).length ? { connect: [], bootstrap: false } : { connect: unknown, bootstrap: true };
 }

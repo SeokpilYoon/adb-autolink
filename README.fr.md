@@ -9,6 +9,11 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/SeokpilYoon/adb-autolink/actions/workflows/ci.yml"><img src="https://github.com/SeokpilYoon/adb-autolink/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="SECURITY.md#security-review"><img src="https://img.shields.io/badge/revue%20de%20s%C3%A9curit%C3%A9-v0.6.1-blue" alt="Security review" /></a>
+</p>
+
+<p align="center">
   <img src=".claude-plugin/icon.png" width="96" alt="adb-autolink icon" />
 </p>
 
@@ -19,6 +24,8 @@ Sortez avec votre téléphone, revenez, et demandez simplement à Claude :
 > "Installe Builds/game.apk sur mon S21, lance-le et fais une capture d'écran."
 
 Pas de nouvel appairage, pas d'adresse IP, de port ni de code d'appairage à saisir. Le téléphone réactive tout seul le débogage sans fil dès qu'il rejoint un réseau Wi-Fi de confiance, et le serveur MCP le trouve via mDNS et se reconnecte à la demande.
+
+> **Sécurité :** ce plugin donne à Claude le contrôle d'un téléphone, alors vérifiez avant d'installer. [SECURITY.md](SECURITY.md#security-review) publie la revue de la v0.6.1 : les menaces considérées, ce qui a été trouvé et corrigé, ce qui a été testé sur de vrais téléphones et les risques restants. Elle a été faite avec Claude et **n'est pas un audit tiers**. La CI vérifie les tests et les alertes npm à chaque commit.
 
 ## Fonctionnement
 
@@ -146,7 +153,7 @@ Voir [docs/](docs/README.md) : [architecture](docs/architecture.md), [dépannage
 - Le débogage sans fil n'est activé automatiquement que sur les SSID de votre liste blanche, et Android continue d'imposer la confiance par point d'accès ainsi que l'appairage par clés. N'ajoutez pas de Wi-Fi public à la liste blanche.
 - Le serveur MCP ne se connecte automatiquement qu'aux téléphones auxquels il s'est déjà connecté. La première exécution est la seule exception.
 - La tuile des réglages rapides active et désactive la connexion automatique. La désactiver coupe le débogage sans fil et arrête le suivi du Wi-Fi ; pour la réactiver, le téléphone doit être déverrouillé.
-- Un PC configuré avec `install_companion_app` peut réactiver le débogage sans fil par Wi-Fi, même lorsque la connexion automatique est désactivée ou sur un Wi-Fi non autorisé. Pour cela, l'application écoute sur TCP 47383 sur le Wi-Fi actuel, et le PC s'identifie avec une clé qu'il n'envoie jamais sur le réseau. Pour tout arrêter en arrière-plan tant que la connexion automatique est désactivée, désactivez **Autoriser mon PC à l'activer** dans Avancé.
+- Un PC configuré avec `install_companion_app` peut réactiver le débogage sans fil sur un Wi-Fi autorisé, même lorsque la connexion automatique est désactivée ou le téléphone verrouillé. L'application écoute sur TCP 47383 uniquement sur les Wi-Fi autorisés, les deux côtés s'identifient avec une clé qui ne passe jamais par le réseau, et le téléphone vous prévient à chaque fois. Pour tout arrêter en arrière-plan tant que la connexion automatique est désactivée, désactivez **Autoriser mon PC à l'activer** dans Avancé ; **Oublier tous les PC** efface toutes les clés.
 - Activer le débogage sans fil active aussi les Options pour les développeurs et le débogage USB ; le désactiver ne les rétablit pas.
 - La sortie de Logcat et le contenu de l'écran sont transmis au modèle : traitez donc les logs d'applications non fiables comme une entrée non fiable.
 

@@ -34,7 +34,7 @@
     <!-- Main screen: hero (link state) and current network -->
     <string name="auto_switch_label">Auto-connect</string>
     <string name="auto_switch_on_hint">Turning it off also turns Wireless debugging off.</string>
-    <string name="auto_switch_off_hint">Your allowed Wi-Fi list is kept. A PC set up with this app can still turn it back on (see Advanced).</string>
+    <string name="auto_switch_off_hint">Your allowed Wi-Fi list is kept. On an allowed Wi-Fi, a PC set up with this app can still turn it back on (see Advanced).</string>
     <string name="hero_paused">Auto-connect is off</string>
     <string name="hero_paused_body">Turn it on to bring Wireless debugging back on your allowed Wi-Fi, or ask from your PC. You can also switch it from the Quick Settings tile.</string>
     <string name="resume_auto">Turn on auto-connect</string>
@@ -70,7 +70,11 @@
     <string name="auth_timeout_warning">Android forgets PC authorizations not used for 7 days. Disabling this keeps your PC authorized forever: anyone holding that PC\'s adb key can connect while Wireless debugging is on. Only use with trusted PCs and networks.</string>
 
     <string name="remote_wake_label">Let my PC turn this on</string>
-    <string name="remote_wake_hint">PCs set up with this app can turn Wireless debugging on over Wi-Fi, even on a Wi-Fi that is not allowed or while Auto-connect is off. Turn this off to stop everything in the background while Auto-connect is off.</string>
+    <string name="remote_wake_hint">PCs set up with this app can turn Wireless debugging on over an allowed Wi-Fi, even while Auto-connect is off. The phone notifies you each time. Turn this off to stop everything in the background while Auto-connect is off.</string>
+    <string name="forget_pcs">Forget all PCs</string>
+    <string name="forget_pcs_done">PCs forgotten. Run install_companion_app to set one up again.</string>
+    <string name="woken_title">A PC turned on Wireless debugging</string>
+    <string name="woken_text">If this wasn\'t you, turn Auto-connect off and tap Forget all PCs under Advanced.</string>
     <string name="language_label">App language</string>
     <string name="change_language">Change</string>
 

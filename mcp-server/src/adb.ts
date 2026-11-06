@@ -99,7 +99,7 @@ function exec(args: string[], opts: RunAdbOptions, binary: boolean): Promise<Adb
           if (e.code === "ERR_CHILD_PROCESS_STDIO_MAXBUFFER") {
             reject(
               new AdbError(
-                `adb ${fullArgs.join(" ")} produced more than ${MAX_BUFFER / 1024 / 1024} MB of output (maxBuffer exceeded)`,
+                `adb ${shown(fullArgs)} produced more than ${MAX_BUFFER / 1024 / 1024} MB of output (maxBuffer exceeded)`,
                 fullArgs,
                 "",
                 errText,
@@ -111,7 +111,7 @@ function exec(args: string[], opts: RunAdbOptions, binary: boolean): Promise<Adb
           if (e.killed) {
             reject(
               new AdbError(
-                `adb ${fullArgs.join(" ")} timed out after ${opts.timeoutMs ?? DEFAULT_TIMEOUT} ms`,
+                `adb ${shown(fullArgs)} timed out after ${opts.timeoutMs ?? DEFAULT_TIMEOUT} ms`,
                 fullArgs,
                 binary ? "" : out.toString("utf8"),
                 errText,
@@ -127,7 +127,7 @@ function exec(args: string[], opts: RunAdbOptions, binary: boolean): Promise<Adb
           }
           const text = (errText || out.toString("utf8")).trim();
           reject(
-            new AdbError(`adb ${fullArgs.join(" ")} failed (exit ${code}): ${text}`, fullArgs, out.toString("utf8"), errText, code),
+            new AdbError(`adb ${shown(fullArgs)} failed (exit ${code}): ${text}`, fullArgs, out.toString("utf8"), errText, code),
           );
           return;
         }
@@ -138,6 +138,9 @@ function exec(args: string[], opts: RunAdbOptions, binary: boolean): Promise<Adb
 }
 
 /** Run adb and return text output. */
+/** Command line for error messages, which reach the model and logs: never with the key handed over at setup. */
+export const shown = (args: string[]): string => args.join(" ").replace(/(--es wake_key )\S+/g, "$1<redacted>");
+
 export async function runAdb(args: string[], opts: RunAdbOptions = {}): Promise<AdbResult<string>> {
   const r = await exec(args, opts, false);
   return { ...r, stdout: r.stdout.toString("utf8") };

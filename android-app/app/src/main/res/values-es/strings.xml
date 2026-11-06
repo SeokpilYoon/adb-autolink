@@ -28,7 +28,7 @@
 
     <string name="auto_switch_label">Conexión automática</string>
     <string name="auto_switch_on_hint">Al desactivarla también se desactiva la depuración inalámbrica.</string>
-    <string name="auto_switch_off_hint">Tu lista de Wi-Fi permitidas se conserva. Un PC configurado con esta app puede volver a activarla (ver Avanzado).</string>
+    <string name="auto_switch_off_hint">Tu lista de Wi-Fi permitidas se conserva. En una Wi-Fi permitida, un PC configurado con esta app puede volver a activarla (ver Avanzado).</string>
     <string name="hero_paused">La conexión automática está desactivada</string>
     <string name="hero_paused_body">Actívala para volver a encender la depuración inalámbrica en tus Wi-Fi permitidas, o solicítalo desde tu PC. También puedes cambiarla desde el mosaico de Ajustes rápidos.</string>
     <string name="resume_auto">Activar conexión automática</string>
@@ -63,7 +63,11 @@
     <string name="auth_timeout_warning">Android olvida las autorizaciones de PC que no se usan en 7 días. Si lo desactivas, tu PC quedará autorizado para siempre: cualquiera con la clave adb de ese PC podrá conectarse mientras la depuración inalámbrica esté activada. Úsalo solo con PC y redes de confianza.</string>
 
     <string name="remote_wake_label">Permitir que mi PC la active</string>
-    <string name="remote_wake_hint">Los PC configurados con esta app pueden activar la depuración inalámbrica por Wi-Fi, incluso en una Wi-Fi no permitida o con la conexión automática desactivada. Desactiva esto para detener todo en segundo plano mientras la conexión automática esté desactivada.</string>
+    <string name="remote_wake_hint">Los PC configurados con esta app pueden activar la depuración inalámbrica en una Wi-Fi permitida, incluso con la conexión automática desactivada. El teléfono te avisa cada vez. Desactiva esto para detener todo en segundo plano mientras la conexión automática esté desactivada.</string>
+    <string name="forget_pcs">Olvidar todos los PC</string>
+    <string name="forget_pcs_done">PC olvidados. Ejecuta install_companion_app para volver a configurar uno.</string>
+    <string name="woken_title">Un PC activó la depuración inalámbrica</string>
+    <string name="woken_text">Si no fuiste tú, desactiva la conexión automática y toca Olvidar todos los PC en Avanzado.</string>
     <string name="language_label">Idioma de la app</string>
     <string name="change_language">Cambiar</string>
 

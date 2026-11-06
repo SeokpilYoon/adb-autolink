@@ -22,7 +22,7 @@ import java.util.concurrent.Executors
 
 /**
  * Foreground service that enables Wireless debugging when a whitelisted Wi-Fi is connected, and that
- * lets a set-up PC turn it on over the network (see [PortBeacon]), also when auto-connect is paused.
+ * lets a set-up PC turn it on there over the network (see [PortBeacon]), also when auto-connect is paused.
  *
  * Android trusts wireless debugging per BSSID: on an untrusted AP (new network, mesh/band roam)
  * adbd shows a confirmation dialog and resets adb_wifi_enabled to 0. So we act once per
@@ -53,10 +53,9 @@ class WifiWatcherService : Service() {
     /** Last confirmed port: Wireless debugging sometimes comes back on the same one, which is the cheapest check. */
     private var lastAdbPort: Int? = null
     private val beacon = PortBeacon(
-        tokens = { prefs.beaconTokens },
-        wakeKeys = { if (prefs.remoteWake && !AdbWifiController.isEnabled(this)) prefs.wakeKeys else emptySet() },
-        serial = { prefs.deviceSerial },
-        reply = ::beaconReply,
+        keys = { prefs.wakeKeys },
+        canWake = { prefs.remoteWake },
+        status = ::beaconReply,
         onWake = { handler.post(::wakeFromPc) },
     )
     private val adbObserver = object : ContentObserver(handler) {
@@ -165,7 +164,7 @@ class WifiWatcherService : Service() {
 
         val enabled = AdbWifiController.isEnabled(this)
         if (enabled) notifications.cancel(ALERT_ID)
-        updateBeacon(if (prefs.wakeReady || (whitelisted && !prefs.paused)) snap?.ipv4 else null, enabled)
+        updateBeacon(if (whitelisted && (prefs.wakeReady || !prefs.paused)) snap?.ipv4 else null, enabled)
         val text = when {
             !AdbWifiController.hasPermission(this) -> getString(R.string.status_no_permission)
             prefs.paused -> {
@@ -204,16 +203,40 @@ class WifiWatcherService : Service() {
         retried = false
         sync(this)
         AutoConnect.refreshTile(this)
-        if (!AdbWifiController.isEnabled(this)) AdbWifiController.setEnabled(this, true)?.let { Log.w(TAG, it) }
+        if (AdbWifiController.isEnabled(this)) return
+        AdbWifiController.setEnabled(this, true)?.let {
+            Log.w(TAG, it)
+            return
+        }
+        notifyWoken()
+    }
+
+    /** Happens with nobody touching the phone, so its owner must always get to see it. */
+    private fun notifyWoken() {
+        val open = PendingIntent.getActivity(
+            this, 2, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE
+        )
+        notifications.notify(
+            WOKEN_ID,
+            NotificationCompat.Builder(this, CHANNEL_ALERT)
+                .setSmallIcon(R.drawable.ic_tile)
+                .setContentTitle(getString(R.string.woken_title))
+                .setStyle(NotificationCompat.BigTextStyle().bigText(getString(R.string.woken_text)))
+                .setContentText(getString(R.string.woken_text))
+                .setContentIntent(open)
+                .setAutoCancel(true)
+                .build(),
+        )
     }
 
     /** Serve the port beacon once a PC has set it up, and keep the port it reports current. */
     private fun updateBeacon(ipv4: String?, enabled: Boolean) {
-        if (ipv4 == null || prefs.beaconTokens.isEmpty()) {
+        if (ipv4 == null || prefs.wakeKeys.isEmpty()) {
             beacon.stop()
             return
         }
-        beacon.start(ipv4)
+        // Another app may be holding the port for a moment: until it is ours, keep trying.
+        if (!beacon.start(ipv4)) handler.postDelayed(evaluateRunnable, BIND_RETRY_MS)
         if (!enabled) adbPort = null else if (adbPort == null) locatePort(ipv4)
     }
 
@@ -242,7 +265,7 @@ class WifiWatcherService : Service() {
     private fun beaconReply(): String? {
         val serial = prefs.deviceSerial ?: return null
         val on = AdbWifiController.isEnabled(this)
-        return "ADBAL1 serial=$serial port=${if (on) adbPort ?: 0 else 0} adb=${if (on) "on" else "off"}"
+        return "ADBAL2 serial=$serial port=${if (on) adbPort ?: 0 else 0} adb=${if (on) "on" else "off"}"
     }
 
     private fun enable(ssid: String): String {
@@ -291,11 +314,13 @@ class WifiWatcherService : Service() {
         private const val CHANNEL_ALERT = "approval"
         private const val STATUS_ID = 1
         private const val ALERT_ID = 2
+        private const val WOKEN_ID = 3
         private const val DEBOUNCE_MS = 1_500L
         private const val VERIFY_MS = 3_000L
         private const val RETRY_MS = 2_000L
         private const val STABLE_MS = 60_000L
         private const val LOCATE_RETRY_MS = 2_000L
+        private const val BIND_RETRY_MS = 5_000L
         private const val MAX_LOCATE_ATTEMPTS = 5
 
         /** Returns false if the system refused to start the service (e.g. background FGS limits). */

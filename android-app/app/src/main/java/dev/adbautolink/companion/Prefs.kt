@@ -9,11 +9,11 @@ class Prefs(context: Context) {
     /** Wireless debugging follows the Wi-Fi unless the user paused auto-connect, once a Wi-Fi is whitelisted. */
     val autoEnabled: Boolean get() = !paused && whitelist.isNotEmpty()
 
-    /** A set-up PC may turn Wireless debugging on over the network, on any Wi-Fi and while paused. */
-    val wakeReady: Boolean get() = remoteWake && wakeKeys.isNotEmpty() && beaconTokens.isNotEmpty()
+    /** A set-up PC may turn Wireless debugging on over the network: on a whitelisted Wi-Fi, also while paused. */
+    val wakeReady: Boolean get() = remoteWake && wakeKeys.isNotEmpty()
 
-    /** The background service has something to do: following the Wi-Fi, or waiting for a PC. */
-    val serviceNeeded: Boolean get() = autoEnabled || wakeReady
+    /** The background service has something to do: following the Wi-Fi, or waiting for a PC on it. */
+    val serviceNeeded: Boolean get() = whitelist.isNotEmpty() && (!paused || wakeReady)
 
     /** The "Auto-connect" main switch (app and Quick Settings tile) is off. Keeps the whitelist. */
     var paused: Boolean
@@ -35,12 +35,7 @@ class Prefs(context: Context) {
         get() = sp.getString(KEY_SUGGESTED, null)
         set(value) = sp.edit { putString(KEY_SUGGESTED, value) }
 
-    /** Port-beacon tokens handed over by PCs at setup (install_companion_app), one per PC. */
-    var beaconTokens: Set<String>
-        get() = sp.getStringSet(KEY_BEACON_TOKENS, null)?.toSet() ?: emptySet()
-        set(value) = sp.edit { putStringSet(KEY_BEACON_TOKENS, value) }
-
-    /** Keys proving a request comes from a set-up PC (install_companion_app), one per PC. Never sent back. */
+    /** Keys shared with set-up PCs (install_companion_app), one per PC. Never leave the phone. */
     var wakeKeys: Set<String>
         get() = sp.getStringSet(KEY_WAKE_KEYS, null)?.toSet() ?: emptySet()
         set(value) = sp.edit { putStringSet(KEY_WAKE_KEYS, value) }
@@ -49,6 +44,12 @@ class Prefs(context: Context) {
     var remoteWake: Boolean
         get() = sp.getBoolean(KEY_REMOTE_WAKE, true)
         set(value) = sp.edit { putBoolean(KEY_REMOTE_WAKE, value) }
+
+    /** No PC is trusted any more. Also drops the token older versions kept. */
+    fun forgetPcs() = sp.edit {
+        remove(KEY_WAKE_KEYS)
+        remove(KEY_BEACON_TOKENS)
+    }
 
     /** ro.serialno from the PC setup (apps cannot read it themselves), echoed in beacon replies. */
     var deviceSerial: String?

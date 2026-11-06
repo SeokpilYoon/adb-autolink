@@ -28,7 +28,7 @@
 
     <string name="auto_switch_label">自动连接</string>
     <string name="auto_switch_on_hint">关闭后无线调试也会一并关闭。</string>
-    <string name="auto_switch_off_hint">已允许的 Wi-Fi 列表会保留。通过此应用设置的电脑仍可重新开启(见“高级”)。</string>
+    <string name="auto_switch_off_hint">已允许的 Wi-Fi 列表会保留。在允许的 Wi-Fi 上,通过此应用设置的电脑仍可重新开启(见“高级”)。</string>
     <string name="hero_paused">自动连接已关闭</string>
     <string name="hero_paused_body">开启后,在允许的 Wi-Fi 上会重新开启无线调试。也可以从电脑请求开启,或通过快捷设置图块切换。</string>
     <string name="resume_auto">开启自动连接</string>
@@ -61,7 +61,11 @@
     <string name="auth_timeout_warning">Android 会撤销 7 天内未使用的电脑授权。停用后电脑将永久保持授权：在无线调试开启期间，任何持有该电脑 adb 密钥的人都能连接。请仅在可信的电脑和网络上使用。</string>
 
     <string name="remote_wake_label">允许电脑开启</string>
-    <string name="remote_wake_hint">通过此应用设置的电脑可通过 Wi-Fi 开启无线调试,即使 Wi-Fi 未被允许或自动连接已关闭。关闭此选项后,自动连接关闭期间所有后台活动都会停止。</string>
+    <string name="remote_wake_hint">通过此应用设置的电脑可在允许的 Wi-Fi 上开启无线调试,即使自动连接已关闭,每次开启都会通知你。关闭此选项后,自动连接关闭期间所有后台活动都会停止。</string>
+    <string name="forget_pcs">删除所有已登记的电脑</string>
+    <string name="forget_pcs_done">已删除电脑。如需重新设置,请运行 install_companion_app。</string>
+    <string name="woken_title">电脑开启了无线调试</string>
+    <string name="woken_text">如果不是你的操作,请关闭自动连接,并在“高级”中点按“删除所有已登记的电脑”。</string>
     <string name="language_label">应用语言</string>
     <string name="change_language">更改</string>
 

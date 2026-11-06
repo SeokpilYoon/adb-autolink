@@ -7,7 +7,7 @@ description: >-
   pair phone, connect phone over Wi-Fi, 무선 디버깅, 무선 adb, 폰 연결, 휴대폰 연결, 페어링, ワイヤレスデバッグ,
   ワイヤレス デバッグ, スマホ接続, ペア設定, 无线调试, 连接手机, 配对, depuración inalámbrica, vincular teléfono,
   débogage sans fil, associer le téléphone, iPhone setup, connect iPhone, 아이폰 연결, iPhone 接続, 连接 iPhone.
-version: 0.6.0
+version: 0.6.1
 license: MIT
 depends_on:
   required_bins:
@@ -51,7 +51,7 @@ Skip if `list_devices` already shows the phone online or discovered.
 4. If the result says paired but not connected, ask only for the connect address (top of the Wireless debugging screen) and call `connect_device` with it. Never retry with an old remembered port.
 
 ## 3. Install the companion app
-Call `install_companion_app` (optionally with `device`). It downloads the latest release APK, installs it, grants `WRITE_SECURE_SETTINGS`, location and notification permissions, exempts the app from battery optimization and permission auto-removal, turns off the 7-day authorization timeout, opens the app, and (when connected wirelessly) allows the current Wi-Fi. Relay each numbered step of the result. If install is blocked, relay the hint (Samsung **Auto Blocker** off, Play Protect prompt on screen).
+Call `install_companion_app` (optionally with `device`). It downloads this version's release APK, checks it against the hash pinned in the plugin, installs it, grants `WRITE_SECURE_SETTINGS`, location and notification permissions, exempts the app from battery optimization and permission auto-removal, turns off the 7-day authorization timeout, opens the app, and (when connected wirelessly) allows the current Wi-Fi. Relay each numbered step of the result. If install is blocked, relay the hint (Samsung **Auto Blocker** off, Play Protect prompt on screen).
 
 ## 4. On the phone (usually nothing)
 The install already did the settings, so don't walk the user through the app. Only act on what the result reports:

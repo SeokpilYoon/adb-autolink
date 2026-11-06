@@ -9,6 +9,11 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/SeokpilYoon/adb-autolink/actions/workflows/ci.yml"><img src="https://github.com/SeokpilYoon/adb-autolink/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="SECURITY.md#security-review"><img src="https://img.shields.io/badge/%EB%B3%B4%EC%95%88%20%EA%B2%80%ED%86%A0-v0.6.1-blue" alt="Security review" /></a>
+</p>
+
+<p align="center">
   <img src=".claude-plugin/icon.png" width="96" alt="adb-autolink icon" />
 </p>
 
@@ -19,6 +24,8 @@
 > "Builds/game.apk를 내 S21에 설치하고, 실행한 다음 스크린샷 찍어줘."
 
 다시 페어링할 필요도, IP 주소나 포트, 페어링 코드를 입력할 필요도 없습니다. 폰이 신뢰하는 Wi-Fi에 접속하면 스스로 무선 디버깅을 다시 켜고, MCP 서버가 mDNS로 폰을 찾아 필요할 때 재연결합니다.
+
+> **보안:** 이 플러그인은 Claude에게 폰 제어 권한을 주므로 설치 전에 확인하세요. [SECURITY.md](SECURITY.md#security-review)에 v0.6.1 검토 내용을 공개했습니다. 고려한 위협, 찾아서 고친 문제, 실제 폰에서 시험한 내용, 남은 위험이 적혀 있습니다. Claude와 함께 진행한 검토이며 **제3자 감사가 아닙니다.** CI가 커밋마다 테스트와 npm 취약점을 확인합니다.
 
 ## 동작 방식
 
@@ -146,7 +153,7 @@ CLI: `node mcp-server/dist/cli.js devices` · `node mcp-server/dist/cli.js conne
 - 무선 디버깅은 화이트리스트에 등록한 SSID에서만 자동으로 켜지며, Android는 여전히 액세스 포인트별 신뢰와 키 기반 페어링을 강제합니다. 공용 Wi-Fi는 등록하지 마세요.
 - MCP 서버는 이전에 연결한 적이 있는 폰에만 자동 연결합니다. 최초 실행만 예외입니다.
 - 빠른 설정 타일로 자동 연결을 켜고 끌 수 있습니다. 끄면 무선 디버깅이 꺼지고 Wi-Fi 추적이 멈추며, 켤 때는 폰의 잠금이 해제되어 있어야 합니다.
-- `install_companion_app`으로 설정한 PC는 자동 연결이 꺼져 있거나 허용되지 않은 Wi-Fi에서도 Wi-Fi로 무선 디버깅을 다시 켤 수 있습니다. 이를 위해 앱이 현재 Wi-Fi의 TCP 47383에서 대기하며, PC는 네트워크로 보내지 않는 키로 자신을 증명합니다. 자동 연결이 꺼져 있는 동안 백그라운드 동작을 모두 멈추려면 고급 메뉴의 **PC에서 켜기 허용**을 끄세요.
+- `install_companion_app`으로 설정한 PC는 허용된 Wi-Fi에서 무선 디버깅을 다시 켤 수 있습니다. 자동 연결이 꺼져 있거나 폰이 잠겨 있어도 켜집니다. 앱은 허용된 Wi-Fi의 TCP 47383에서만 대기하고, 양쪽 모두 네트워크로 보내지 않는 키로 자신을 증명하며, 켜질 때마다 폰에 알림이 뜹니다. 자동 연결이 꺼져 있는 동안 백그라운드 동작을 모두 멈추려면 고급 메뉴의 **PC에서 켜기 허용**을 끄세요. 같은 메뉴의 **등록된 PC 모두 삭제**로 키를 모두 지울 수 있습니다.
 - 무선 디버깅을 켜면 개발자 옵션과 USB 디버깅도 함께 켜지며, 끄더라도 이 설정은 원래대로 돌아가지 않습니다.
 - Logcat 출력과 화면 내용은 모델에 전달되므로, 신뢰할 수 없는 앱의 로그는 신뢰할 수 없는 입력으로 취급하세요.
 

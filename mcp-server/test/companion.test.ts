@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { companionSetupCommands, parseSetupBroadcast, setupBroadcastCommand, setupCommandOk } from "../src/companion.js";
+import { apkMatchesPin, companionSetupCommands, parseProofs, parseSetupBroadcast, proveCommand, setupBroadcastCommand, setupCommandOk } from "../src/companion.js";
+import { shown } from "../src/adb.js";
 
 describe("companion setup", () => {
   it("grants notifications only on API 33+", () => {
@@ -26,9 +27,9 @@ describe("companion setup", () => {
     expect(setupBroadcastCommand({ addCurrentWifi: true }, "x.y")).toBe(
       "am broadcast -n x.y/.SetupReceiver -a x.y.action.SETUP --ez add_current_wifi true",
     );
-    const token = "0123456789abcdef0123456789abcdef";
-    expect(setupBroadcastCommand({ addCurrentWifi: false, beaconToken: token, serial: "R3CX40C2YKL" }, "x.y")).toBe(
-      `am broadcast -n x.y/.SetupReceiver -a x.y.action.SETUP --ez add_current_wifi false --es beacon_token ${token} --es serial R3CX40C2YKL`,
+    const token = "0123456789abcdef".repeat(4);
+    expect(setupBroadcastCommand({ addCurrentWifi: false, wakeKey: token, serial: "R3CX40C2YKL" }, "x.y")).toBe(
+      `am broadcast -n x.y/.SetupReceiver -a x.y.action.SETUP --ez add_current_wifi false --es wake_key ${token} --es serial R3CX40C2YKL`,
     );
   });
 
@@ -39,7 +40,7 @@ describe("companion setup", () => {
   });
 
   it("drops extras that are not in their plain format (they reach the device shell unquoted)", () => {
-    const cmd = setupBroadcastCommand({ addCurrentWifi: true, beaconToken: "x; reboot", serial: "a b" }, "x.y");
+    const cmd = setupBroadcastCommand({ addCurrentWifi: true, wakeKey: "x; reboot", serial: "a b" }, "x.y");
     expect(cmd).not.toContain("reboot");
     expect(cmd).not.toContain("--es");
   });
@@ -54,5 +55,34 @@ describe("companion setup", () => {
     expect(parseSetupBroadcast(`${head}Broadcast completed: result=0, data="ok"`)).toEqual({ kind: "ok" });
     // Receiver never ran (e.g. old app version without SetupReceiver).
     expect(parseSetupBroadcast(`${head}Broadcast completed: result=0`).kind).toBe("unknown");
+  });
+});
+
+describe("proving a phone over adb", () => {
+  it("asks the DUMP-protected receiver", () => {
+    expect(proveCommand("ab", "x.y")).toBe("am broadcast -n x.y/.SetupReceiver -a x.y.action.PROVE --es challenge ab");
+  });
+
+  it("reads one proof per key, and nothing from anything else", () => {
+    expect(parseProofs('Broadcasting: Intent\nBroadcast completed: result=0, data="proof:aa,bb"')).toEqual(["aa", "bb"]);
+    expect(parseProofs('Broadcast completed: result=0, data="ok"')).toEqual([]);
+    expect(parseProofs("Broadcast completed: result=0")).toEqual([]);
+    expect(parseProofs("")).toEqual([]);
+  });
+});
+
+describe("the companion APK", () => {
+  it("must match the pinned hash", () => {
+    const sha256OfAbc = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
+    expect(apkMatchesPin(Buffer.from("abc"), sha256OfAbc)).toBe(true);
+    expect(apkMatchesPin(Buffer.from("abd"), sha256OfAbc)).toBe(false);
+  });
+});
+
+describe("adb error text", () => {
+  it("never shows the key handed over at setup", () => {
+    const line = shown(["-s", "x", "shell", "am broadcast --es wake_key abc123 --es serial S"]);
+    expect(line).not.toContain("abc123");
+    expect(line).toContain("--es serial S");
   });
 });

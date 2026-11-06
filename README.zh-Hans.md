@@ -9,6 +9,11 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/SeokpilYoon/adb-autolink/actions/workflows/ci.yml"><img src="https://github.com/SeokpilYoon/adb-autolink/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="SECURITY.md#security-review"><img src="https://img.shields.io/badge/%E5%AE%89%E5%85%A8%E5%AE%A1%E6%9F%A5-v0.6.1-blue" alt="Security review" /></a>
+</p>
+
+<p align="center">
   <img src=".claude-plugin/icon.png" width="96" alt="adb-autolink icon" />
 </p>
 
@@ -19,6 +24,8 @@
 > "把 Builds/game.apk 安装到我的 S21 上，启动它并截一张图。"
 
 无需重新配对，也不用输入 IP 地址、端口或配对码。手机加入你信任的 Wi-Fi 网络时会自动重新开启无线调试，MCP 服务器通过 mDNS 找到它，并在需要时重新连接。
+
+> **安全:** 此插件让 Claude 控制手机,请在安装前确认。[SECURITY.md](SECURITY.md#security-review) 公开了 v0.6.1 的审查内容:考虑的威胁、发现并修复的问题、在真机上测试的内容以及剩余风险。审查由 Claude 协助完成,**不是第三方审计**。CI 会在每次提交时检查测试和 npm 漏洞。
 
 ## 工作原理
 
@@ -146,7 +153,7 @@ CLI：`node mcp-server/dist/cli.js devices` · `node mcp-server/dist/cli.js conn
 - 无线调试只会在你加入白名单的 SSID 上自动开启，Android 仍会强制执行按接入点的信任和基于密钥的配对。不要把公共 Wi-Fi 加入白名单。
 - MCP 服务器只会自动连接之前连接过的手机，首次运行是唯一的例外。
 - 快速设置图块可开关自动连接。关闭后无线调试会关闭并停止跟随 Wi-Fi;开启时手机需要处于解锁状态。
-- 通过 `install_companion_app` 设置的电脑可经 Wi-Fi 重新开启无线调试,即使自动连接已关闭或 Wi-Fi 未被允许。为此应用会在当前 Wi-Fi 的 TCP 47383 上监听,电脑用一个从不经网络发送的密钥证明身份。若要在自动连接关闭期间停止所有后台活动,请在“高级”中关闭 **允许电脑开启**。
+- 通过 `install_companion_app` 设置的电脑可在允许的 Wi-Fi 上重新开启无线调试,即使自动连接已关闭或手机已锁定。应用只在允许的 Wi-Fi 的 TCP 47383 上监听,双方都用从不经网络发送的密钥证明身份,每次开启手机都会通知你。若要在自动连接关闭期间停止所有后台活动,请在“高级”中关闭 **允许电脑开启**。同一菜单中的 **删除所有已登记的电脑** 可删除全部密钥。
 - 开启无线调试也会同时开启开发者选项和 USB 调试；关闭无线调试不会还原这些设置。
 - Logcat 输出和屏幕内容会传递给模型，因此请将来自不受信任应用的日志视为不受信任的输入。
 
