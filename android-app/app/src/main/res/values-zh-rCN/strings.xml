@@ -28,9 +28,9 @@
 
     <string name="auto_switch_label">自动连接</string>
     <string name="auto_switch_on_hint">关闭后无线调试也会一并关闭。</string>
-    <string name="auto_switch_off_hint">关闭期间不会在后台运行任何内容。已允许的 Wi-Fi 列表会保留。</string>
+    <string name="auto_switch_off_hint">已允许的 Wi-Fi 列表会保留。通过此应用设置的电脑仍可重新开启(见“高级”)。</string>
     <string name="hero_paused">自动连接已关闭</string>
-    <string name="hero_paused_body">开启后,在允许的 Wi-Fi 上会重新开启无线调试。也可以通过快捷设置图块切换。</string>
+    <string name="hero_paused_body">开启后,在允许的 Wi-Fi 上会重新开启无线调试。也可以从电脑请求开启,或通过快捷设置图块切换。</string>
     <string name="resume_auto">开启自动连接</string>
     <string name="hero_linked">PC 现在可以连接</string>
     <string name="hero_setup">完成设置后即可自动连接</string>
@@ -60,6 +60,8 @@
     <string name="disable_auth_timeout">停用 7 天授权过期</string>
     <string name="auth_timeout_warning">Android 会撤销 7 天内未使用的电脑授权。停用后电脑将永久保持授权：在无线调试开启期间，任何持有该电脑 adb 密钥的人都能连接。请仅在可信的电脑和网络上使用。</string>
 
+    <string name="remote_wake_label">允许电脑开启</string>
+    <string name="remote_wake_hint">通过此应用设置的电脑可通过 Wi-Fi 开启无线调试,即使 Wi-Fi 未被允许或自动连接已关闭。关闭此选项后,自动连接关闭期间所有后台活动都会停止。</string>
     <string name="language_label">应用语言</string>
     <string name="change_language">更改</string>
 
@@ -70,6 +72,7 @@
     <string name="status_ssid_hidden">错误：SSID 被隐藏（&lt;unknown ssid&gt;）。请将位置权限设为“始终允许”并开启位置信息</string>
     <string name="status_not_whitelisted">%1$s：不在白名单中</string>
     <string name="status_waiting_ip">%1$s：正在等待 IP…</string>
+    <string name="status_standby">已关闭,等待电脑请求</string>
     <string name="status_on">%1$s：无线调试已开启</string>
     <string name="status_off_manual">%1$s：无线调试已关闭（手动关闭）</string>
     <string name="status_waiting_approval">%1$s：正在等待此接入点的批准</string>

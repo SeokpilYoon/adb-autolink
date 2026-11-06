@@ -28,9 +28,9 @@
 
     <string name="auto_switch_label">Connexion automatique</string>
     <string name="auto_switch_on_hint">La désactiver coupe aussi le débogage sans fil.</string>
-    <string name="auto_switch_off_hint">Tant qu\'elle est désactivée, rien ne tourne en arrière-plan. Votre liste de Wi-Fi autorisés est conservée.</string>
+    <string name="auto_switch_off_hint">Votre liste de Wi-Fi autorisés est conservée. Un PC configuré avec cette application peut la réactiver (voir Avancé).</string>
     <string name="hero_paused">La connexion automatique est désactivée</string>
-    <string name="hero_paused_body">Activez-la pour rallumer le débogage sans fil sur vos Wi-Fi autorisés. Vous pouvez aussi la basculer depuis la vignette des réglages rapides.</string>
+    <string name="hero_paused_body">Activez-la pour rallumer le débogage sans fil sur vos Wi-Fi autorisés, ou demandez-le depuis votre PC. Vous pouvez aussi la basculer depuis la vignette des réglages rapides.</string>
     <string name="resume_auto">Activer la connexion automatique</string>
     <string name="hero_linked">Votre PC peut se connecter</string>
     <string name="hero_setup">Terminez la configuration pour vous connecter automatiquement</string>
@@ -62,6 +62,8 @@
     <string name="disable_auth_timeout">Désactiver l’expiration après 7 jours</string>
     <string name="auth_timeout_warning">Android oublie les autorisations de PC inutilisées depuis 7 jours. En désactivant cette option, votre PC reste autorisé indéfiniment : toute personne disposant de la clé adb de ce PC peut se connecter tant que le débogage sans fil est activé. À n’utiliser qu’avec des PC et réseaux de confiance.</string>
 
+    <string name="remote_wake_label">Autoriser mon PC à l\'activer</string>
+    <string name="remote_wake_hint">Les PC configurés avec cette application peuvent activer le débogage sans fil par Wi-Fi, même sur un Wi-Fi non autorisé ou lorsque la connexion automatique est désactivée. Désactivez cette option pour tout arrêter en arrière-plan tant que la connexion automatique est désactivée.</string>
     <string name="language_label">Langue de l’appli</string>
     <string name="change_language">Modifier</string>
 
@@ -72,6 +74,7 @@
     <string name="status_ssid_hidden">ERREUR : SSID masqué (&lt;unknown ssid&gt;). Autorisez la localisation « Toujours » et activez la localisation</string>
     <string name="status_not_whitelisted">%1$s : pas dans la liste blanche</string>
     <string name="status_waiting_ip">%1$s : en attente d’IP…</string>
+    <string name="status_standby">Désactivé, en attente de votre PC</string>
     <string name="status_on">%1$s : débogage sans fil ACTIVÉ</string>
     <string name="status_off_manual">%1$s : débogage sans fil DÉSACTIVÉ (manuellement)</string>
     <string name="status_waiting_approval">%1$s : en attente d’approbation sur ce point d’accès</string>

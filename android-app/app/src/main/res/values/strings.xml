@@ -34,9 +34,9 @@
     <!-- Main screen: hero (link state) and current network -->
     <string name="auto_switch_label">Auto-connect</string>
     <string name="auto_switch_on_hint">Turning it off also turns Wireless debugging off.</string>
-    <string name="auto_switch_off_hint">Nothing runs in the background while it is off. Your allowed Wi-Fi list is kept.</string>
+    <string name="auto_switch_off_hint">Your allowed Wi-Fi list is kept. A PC set up with this app can still turn it back on (see Advanced).</string>
     <string name="hero_paused">Auto-connect is off</string>
-    <string name="hero_paused_body">Turn it on to bring Wireless debugging back on your allowed Wi-Fi. You can also switch it from the Quick Settings tile.</string>
+    <string name="hero_paused_body">Turn it on to bring Wireless debugging back on your allowed Wi-Fi, or ask from your PC. You can also switch it from the Quick Settings tile.</string>
     <string name="resume_auto">Turn on auto-connect</string>
     <string name="hero_linked">Your PC can connect now</string>
     <string name="hero_setup">Finish setup to connect automatically</string>
@@ -69,6 +69,8 @@
     <string name="disable_auth_timeout">Disable 7-day authorization timeout</string>
     <string name="auth_timeout_warning">Android forgets PC authorizations not used for 7 days. Disabling this keeps your PC authorized forever: anyone holding that PC\'s adb key can connect while Wireless debugging is on. Only use with trusted PCs and networks.</string>
 
+    <string name="remote_wake_label">Let my PC turn this on</string>
+    <string name="remote_wake_hint">PCs set up with this app can turn Wireless debugging on over Wi-Fi, even on a Wi-Fi that is not allowed or while Auto-connect is off. Turn this off to stop everything in the background while Auto-connect is off.</string>
     <string name="language_label">App language</string>
     <string name="change_language">Change</string>
 
@@ -80,6 +82,7 @@
     <string name="status_ssid_hidden">ERROR: SSID hidden (&lt;unknown ssid&gt;). Allow location \"all the time\" and turn location ON</string>
     <string name="status_not_whitelisted">%1$s: not whitelisted</string>
     <string name="status_waiting_ip">%1$s: waiting for IP…</string>
+    <string name="status_standby">Off, waiting for your PC</string>
     <string name="status_on">%1$s: Wireless debugging ON</string>
     <string name="status_off_manual">%1$s: Wireless debugging OFF (turned off manually)</string>
     <string name="status_waiting_approval">%1$s: waiting for approval on this access point</string>

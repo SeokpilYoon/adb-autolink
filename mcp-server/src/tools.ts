@@ -5,7 +5,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { runAdb, runAdbBinary } from "./adb.js";
-import { beaconToken } from "./beacon.js";
+import { beaconToken, wakeKey } from "./beacon.js";
 import { STAGES, saveCheckpoint, viaFromLog } from "./checkpoints.js";
 import {
   AUTH_TIMEOUT_OFF_COMMAND,
@@ -34,6 +34,7 @@ import {
 } from "./parse.js";
 import { assertPackageName, inputTextCommands, normalizeKey, shQuote } from "./shell.js";
 import { androidOnly, describeIos, iosTarget } from "./targets.js";
+import { dumpFailure, filterUi, formatUiNode, looksLikeGameSurface, parseUiDump } from "./uitree.js";
 
 const deviceParam = z
   .string()
@@ -188,7 +189,8 @@ export function registerTools(server: McpServer): void {
     "connect_device",
     {
       description:
-        "Connect to a device. Android: tries its last known ip:port, the companion app's port beacon, then mDNS, and runs adb connect " +
+        "Connect to a device. Android: tries its last known ip:port, the companion app's port beacon, then mDNS, and runs adb connect; " +
+        "a named phone with Wireless debugging off is asked through the app to turn it on " +
         "(paired once, see pair_device). iPhone (on a Mac): checks that the phone paired in Xcode is reachable over Wi-Fi or USB. " +
         "Usually not needed, since every other tool connects by itself.",
       inputSchema: { device: deviceParam, lang: langParam },
@@ -366,6 +368,52 @@ export function registerTools(server: McpServer): void {
             { type: "text", text: note + warn },
           ],
         };
+      }),
+  );
+
+  server.registerTool(
+    "ui_tree",
+    {
+      description:
+        "List the on-screen UI elements (Android, via uiautomator; nothing to install): type, text, content description, resource " +
+        "id, whether each is clickable/scrollable/checked, and its center point to pass to tap. More reliable than reading " +
+        "coordinates off a screenshot on native screens (system dialogs, settings, permission prompts, login forms). Game engines " +
+        "such as Unity draw their own UI into one surface, which this cannot see: use screenshot there. search filters by text, " +
+        "description or id; interactive_only keeps elements that react to touch.",
+      inputSchema: {
+        device: deviceParam,
+        search: z.string().optional().describe("Case-insensitive part of the text, description or resource id"),
+        interactive_only: z.boolean().default(false).describe("Only clickable, long-clickable, scrollable or checkable elements"),
+        limit: z.number().int().min(1).max(1000).default(150),
+      },
+    },
+    ({ device, search, interactive_only, limit }) =>
+      guard(async () => {
+        await androidOnly(device, "ui_tree");
+        const { serial, warn } = await connectAwake(device);
+        const file = "/sdcard/adbal-ui.xml";
+        // rm first so a failed dump can never return an older file.
+        const out = await shell(serial, `rm -f ${file}; uiautomator dump ${file} 2>&1; cat ${file} 2>/dev/null; rm -f ${file}`, 30_000);
+        const failure = dumpFailure(out);
+        if (failure === "idle") {
+          throw new Error(
+            "The screen kept changing, so uiautomator could not read it. This is typical while a game redraws every frame: " +
+              "use screenshot instead, or pause the game and try again.",
+          );
+        }
+        if (failure) throw new Error(`uiautomator dump failed on ${serial}: ${out.trim().slice(0, 300)}`);
+        const nodes = parseUiDump(out);
+        const { shown, total } = filterUi(nodes, { search, interactiveOnly: interactive_only, limit });
+        const app = nodes.find((n) => n.pkg && n.pkg !== "com.android.systemui")?.pkg ?? nodes[0]?.pkg;
+        const head = `UI tree of ${serial}${app ? ` (foreground: ${app})` : ""}: ${total} element(s)`;
+        const lines = [total > shown.length ? `${head}, showing the first ${shown.length} (raise limit or use search)` : head];
+        lines.push(...shown.map(formatUiNode));
+        if (total === 0) lines.push(search ? `No element matches "${search}".` : "No readable elements on this screen.");
+        if (looksLikeGameSurface(nodes)) {
+          lines.push("Note: the screen is drawn by a game engine (e.g. Unity), whose buttons are not in the UI tree. Use screenshot to see them.");
+        }
+        lines.push("Tap an element with tap at its center=(x,y).");
+        return text(lines.join("\n") + warn);
       }),
   );
 
@@ -693,7 +741,7 @@ export function registerTools(server: McpServer): void {
         const wireless = isAddressSerial(serial) || isMdnsSerial(serial);
         try {
           const physical = (await shell(serial, "getprop ro.serialno", 10_000).catch(() => "")).trim();
-          const cmd = setupBroadcastCommand({ addCurrentWifi: wireless, beaconToken: beaconToken(), serial: physical });
+          const cmd = setupBroadcastCommand({ addCurrentWifi: wireless, beaconToken: beaconToken(), wakeKey: wakeKey(), serial: physical });
           const r = parseSetupBroadcast(await shell(serial, cmd, 15_000));
           if (r.kind === "whitelisted") steps.push(t("companion.wifiAdded", r.ssid));
           else if (r.kind === "no_ssid") steps.push(t("companion.wifiNoSsid"));

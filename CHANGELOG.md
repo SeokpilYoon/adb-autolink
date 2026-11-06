@@ -11,6 +11,18 @@ All notable changes to adb-autolink are recorded here. Each version must match a
 
 Release pages are generated from these sections.
 
+## v0.6.0 - Turn a phone back on from Claude Code, and read the screen as text
+
+**Upgrading from 0.5.0:** run `/plugin update adb-autolink`, restart Claude Code, and run `install_companion_app` once per phone while it is connected. That installs the new app and hands it this PC's wake key; until then the phone behaves as before. Phones on the old app still reconnect normally.
+
+- **`connect_device` turns Wireless debugging back on by itself.** With it off, even through the Quick Settings tile or the app's main switch and on a Wi-Fi that is not allowed, a request for that phone asks the app to turn it on and connects to the new port, in about 5 seconds and without touching the phone. Verified on a Galaxy S24+ and a Galaxy S21, screen off included.
+  - **Name the phone** when several answer: a bare `connect` wakes only an obvious single candidate, never every phone on the network.
+  - **Android still asks once per access point:** on a new one, "Always allow on this network" must be accepted on the phone. The PC and the phone must also be able to reach each other on the same Wi-Fi, which guest networks often block.
+- **Behaviour change:** the main switch no longer stops everything. While it is off the app keeps a small service and its notification, listening on TCP 47383 on the current Wi-Fi for your PC, on any Wi-Fi. To get the old behaviour, turn off **Let my PC turn this on** under Advanced. A wake also switches auto-connect back on.
+- **Security:** the request is signed with a new wake key (`~/.adb-autolink/wake-key`) that reaches the phone only through adb at setup and is never sent over the network, over a one-time value from the phone. The beacon token, which travels in the clear, still reveals only a port. Turning Wireless debugging on gives nobody adb access: that still takes a paired key.
+- **New tool `ui_tree` (Android):** lists the on-screen elements with text, description, resource id and a center to tap, using the `uiautomator` built into Android, so nothing extra is installed. Options: `search`, `interactive_only`, `limit`. Password fields are masked. Game engines draw their own UI, so on those screens it says to use a screenshot instead.
+- **Clearer error when a phone no longer trusts this PC:** if the app reports Wireless debugging on but adb is refused, the message now says to pair again instead of pointing at Wi-Fi and the firewall. The app cannot fix this for you: Android only lets someone at the phone approve a PC.
+
 ## v0.5.0 - iPhone on macOS (preview)
 
 **Upgrading from 0.4.4:** run `/plugin update adb-autolink` and restart Claude Code. Android behaves as before and the phone app is unchanged apart from its version number.

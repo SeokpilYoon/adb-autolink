@@ -28,9 +28,9 @@
 
     <string name="auto_switch_label">자동 연결</string>
     <string name="auto_switch_on_hint">끄면 무선 디버깅도 함께 꺼집니다.</string>
-    <string name="auto_switch_off_hint">꺼져 있는 동안은 백그라운드에서 아무것도 동작하지 않습니다. 허용된 Wi-Fi 목록은 그대로 남습니다.</string>
+    <string name="auto_switch_off_hint">허용된 Wi-Fi 목록은 그대로 남습니다. 이 앱으로 설정한 PC는 다시 켤 수 있습니다(고급 참고).</string>
     <string name="hero_paused">자동 연결이 꺼져 있습니다</string>
-    <string name="hero_paused_body">켜면 허용된 Wi-Fi에서 무선 디버깅이 다시 켜집니다. 빠른 설정 타일로도 켜고 끌 수 있습니다.</string>
+    <string name="hero_paused_body">켜면 허용된 Wi-Fi에서 무선 디버깅이 다시 켜집니다. PC에서 요청해도 켜집니다. 빠른 설정 타일로도 켜고 끌 수 있습니다.</string>
     <string name="resume_auto">자동 연결 켜기</string>
     <string name="hero_linked">지금 PC에서 연결할 수 있습니다</string>
     <string name="hero_setup">설정을 마치면 자동으로 연결됩니다</string>
@@ -60,6 +60,8 @@
     <string name="disable_auth_timeout">7일 승인 만료 사용 안 함</string>
     <string name="auth_timeout_warning">Android는 7일 동안 사용하지 않은 PC 승인을 삭제합니다. 이 옵션을 끄면 PC가 영구적으로 승인되어, 무선 디버깅이 켜져 있는 동안 해당 PC의 adb 키를 가진 누구나 연결할 수 있습니다. 신뢰할 수 있는 PC와 네트워크에서만 사용하세요.</string>
 
+    <string name="remote_wake_label">PC에서 켜기 허용</string>
+    <string name="remote_wake_hint">이 앱으로 설정한 PC는 허용되지 않은 Wi-Fi에서도, 자동 연결이 꺼져 있어도 Wi-Fi로 무선 디버깅을 켤 수 있습니다. 이 옵션을 끄면 자동 연결이 꺼져 있는 동안 백그라운드 동작이 모두 멈춥니다.</string>
     <string name="language_label">앱 언어</string>
     <string name="change_language">변경</string>
 
@@ -70,6 +72,7 @@
     <string name="status_ssid_hidden">오류: SSID 숨겨짐 (&lt;unknown ssid&gt;). 위치를 “항상 허용”으로 설정하고 위치를 켜세요</string>
     <string name="status_not_whitelisted">%1$s: 허용 목록에 없음</string>
     <string name="status_waiting_ip">%1$s: IP 대기 중…</string>
+    <string name="status_standby">꺼짐, PC 요청 대기 중</string>
     <string name="status_on">%1$s: 무선 디버깅 켜짐</string>
     <string name="status_off_manual">%1$s: 무선 디버깅 꺼짐 (수동으로 끔)</string>
     <string name="status_waiting_approval">%1$s: 이 액세스 포인트에서 승인 대기 중</string>

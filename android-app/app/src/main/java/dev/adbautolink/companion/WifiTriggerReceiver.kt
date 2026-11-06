@@ -16,7 +16,7 @@ import android.util.Log
 class WifiTriggerReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val prefs = Prefs(context)
-        if (!prefs.autoEnabled || WifiWatcherService.start(context)) return
+        if (!prefs.serviceNeeded || WifiWatcherService.start(context) || !prefs.autoEnabled) return
         // Service could not start from the background: enable directly (best-effort).
         val ssid = WifiMonitor.currentSsid(context)
         if (ssid != null && ssid in prefs.whitelist && !AdbWifiController.isEnabled(context)) {

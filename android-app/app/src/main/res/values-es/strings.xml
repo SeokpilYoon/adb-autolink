@@ -28,9 +28,9 @@
 
     <string name="auto_switch_label">Conexión automática</string>
     <string name="auto_switch_on_hint">Al desactivarla también se desactiva la depuración inalámbrica.</string>
-    <string name="auto_switch_off_hint">Mientras está desactivada no se ejecuta nada en segundo plano. Tu lista de Wi-Fi permitidas se conserva.</string>
+    <string name="auto_switch_off_hint">Tu lista de Wi-Fi permitidas se conserva. Un PC configurado con esta app puede volver a activarla (ver Avanzado).</string>
     <string name="hero_paused">La conexión automática está desactivada</string>
-    <string name="hero_paused_body">Actívala para volver a encender la depuración inalámbrica en tus Wi-Fi permitidas. También puedes cambiarla desde el mosaico de Ajustes rápidos.</string>
+    <string name="hero_paused_body">Actívala para volver a encender la depuración inalámbrica en tus Wi-Fi permitidas, o solicítalo desde tu PC. También puedes cambiarla desde el mosaico de Ajustes rápidos.</string>
     <string name="resume_auto">Activar conexión automática</string>
     <string name="hero_linked">Tu PC ya puede conectarse</string>
     <string name="hero_setup">Termina la configuración para conectarte automáticamente</string>
@@ -62,6 +62,8 @@
     <string name="disable_auth_timeout">Desactivar la caducidad de 7 días</string>
     <string name="auth_timeout_warning">Android olvida las autorizaciones de PC que no se usan en 7 días. Si lo desactivas, tu PC quedará autorizado para siempre: cualquiera con la clave adb de ese PC podrá conectarse mientras la depuración inalámbrica esté activada. Úsalo solo con PC y redes de confianza.</string>
 
+    <string name="remote_wake_label">Permitir que mi PC la active</string>
+    <string name="remote_wake_hint">Los PC configurados con esta app pueden activar la depuración inalámbrica por Wi-Fi, incluso en una Wi-Fi no permitida o con la conexión automática desactivada. Desactiva esto para detener todo en segundo plano mientras la conexión automática esté desactivada.</string>
     <string name="language_label">Idioma de la app</string>
     <string name="change_language">Cambiar</string>
 
@@ -72,6 +74,7 @@
     <string name="status_ssid_hidden">ERROR: SSID oculto (&lt;unknown ssid&gt;). Permite la ubicación «todo el tiempo» y activa la ubicación</string>
     <string name="status_not_whitelisted">%1$s: no está en la lista blanca</string>
     <string name="status_waiting_ip">%1$s: esperando IP…</string>
+    <string name="status_standby">Desactivada, esperando a tu PC</string>
     <string name="status_on">%1$s: depuración inalámbrica activada</string>
     <string name="status_off_manual">%1$s: depuración inalámbrica desactivada (manualmente)</string>
     <string name="status_waiting_approval">%1$s: esperando aprobación en este punto de acceso</string>

@@ -109,6 +109,7 @@ Chaque outil d'appareil se connecte d'abord automatiquement. Sélectionnez un ap
 | `install_apk` | Installe un APK (`-r -g`) |
 | `launch_app` / `stop_app` | Lance (launcher ou activité précise) / force l'arrêt |
 | `screenshot` | Aperçu JPEG de 1280px par défaut, `full_resolution` pour le PNG d'origine, `save_path` facultatif |
+| `ui_tree` | Éléments à l'écran (texte, description, id, touchable ou non) avec le centre à toucher, via uiautomator. Pas pour les écrans de moteurs de jeu |
 | `tap` / `swipe` / `input_text` / `key_event` | Saisie (`input_text` est limité à l'ASCII, une limite de `input` sous Android) |
 | `wake_device` | Réveille l'écran et ferme un verrouillage non sécurisé |
 | `logcat` | Filtre par package, tag ou priorité, limite de lignes, tampon de crash |
@@ -144,7 +145,8 @@ Voir [docs/](docs/README.md) : [architecture](docs/architecture.md), [dépannage
 
 - Le débogage sans fil n'est activé automatiquement que sur les SSID de votre liste blanche, et Android continue d'imposer la confiance par point d'accès ainsi que l'appairage par clés. N'ajoutez pas de Wi-Fi public à la liste blanche.
 - Le serveur MCP ne se connecte automatiquement qu'aux téléphones auxquels il s'est déjà connecté. La première exécution est la seule exception.
-- La tuile des réglages rapides active et désactive la connexion automatique. La désactiver arrête tout travail en arrière-plan et le débogage sans fil ; l'activer nécessite un téléphone déverrouillé.
+- La tuile des réglages rapides active et désactive la connexion automatique. La désactiver coupe le débogage sans fil et arrête le suivi du Wi-Fi ; pour la réactiver, le téléphone doit être déverrouillé.
+- Un PC configuré avec `install_companion_app` peut réactiver le débogage sans fil par Wi-Fi, même lorsque la connexion automatique est désactivée ou sur un Wi-Fi non autorisé. Pour cela, l'application écoute sur TCP 47383 sur le Wi-Fi actuel, et le PC s'identifie avec une clé qu'il n'envoie jamais sur le réseau. Pour tout arrêter en arrière-plan tant que la connexion automatique est désactivée, désactivez **Autoriser mon PC à l'activer** dans Avancé.
 - Activer le débogage sans fil active aussi les Options pour les développeurs et le débogage USB ; le désactiver ne les rétablit pas.
 - La sortie de Logcat et le contenu de l'écran sont transmis au modèle : traitez donc les logs d'applications non fiables comme une entrée non fiable.
 

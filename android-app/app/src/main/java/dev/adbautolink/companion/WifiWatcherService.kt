@@ -21,7 +21,8 @@ import androidx.core.content.ContextCompat
 import java.util.concurrent.Executors
 
 /**
- * Foreground service that enables Wireless debugging when a whitelisted Wi-Fi is connected.
+ * Foreground service that enables Wireless debugging when a whitelisted Wi-Fi is connected, and that
+ * lets a set-up PC turn it on over the network (see [PortBeacon]), also when auto-connect is paused.
  *
  * Android trusts wireless debugging per BSSID: on an untrusted AP (new network, mesh/band roam)
  * adbd shows a confirmation dialog and resets adb_wifi_enabled to 0. So we act once per
@@ -51,7 +52,13 @@ class WifiWatcherService : Service() {
     private var locateAttempts = 0
     /** Last confirmed port: Wireless debugging sometimes comes back on the same one, which is the cheapest check. */
     private var lastAdbPort: Int? = null
-    private val beacon = PortBeacon(tokens = { prefs.beaconTokens }, reply = ::beaconReply)
+    private val beacon = PortBeacon(
+        tokens = { prefs.beaconTokens },
+        wakeKeys = { if (prefs.remoteWake && !AdbWifiController.isEnabled(this)) prefs.wakeKeys else emptySet() },
+        serial = { prefs.deviceSerial },
+        reply = ::beaconReply,
+        onWake = { handler.post(::wakeFromPc) },
+    )
     private val adbObserver = object : ContentObserver(handler) {
         override fun onChange(selfChange: Boolean) = onAdbWifiChanged()
     }
@@ -91,7 +98,7 @@ class WifiWatcherService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (!prefs.autoEnabled) {
+        if (!prefs.serviceNeeded) {
             stopSelf()
             return START_NOT_STICKY
         }
@@ -119,7 +126,7 @@ class WifiWatcherService : Service() {
     private fun onAdbWifiChanged() {
         // Switching auto-connect off turns Wireless debugging off just before this service stops:
         // that drop is intended, not a reset to retry.
-        if (!prefs.autoEnabled) {
+        if (!prefs.serviceNeeded) {
             stopSelf()
             return
         }
@@ -130,7 +137,7 @@ class WifiWatcherService : Service() {
         // A pending evaluation or the verify step will refresh the notification itself.
         if (state == State.VERIFYING || handler.hasCallbacks(evaluateRunnable)) return
         val ssid = snapshot?.ssid
-        val dropped = state == State.DONE && !prefs.userDisabled && !AdbWifiController.isEnabled(this) &&
+        val dropped = state == State.DONE && !prefs.paused && !prefs.userDisabled && !AdbWifiController.isEnabled(this) &&
             ssid != null && ssid in prefs.whitelist && snapshot?.ipv4 != null
         // The single retry guards against a pending approval prompt resetting it at once. A drop after a
         // stretch of working fine is a new event (e.g. the system restarted adbd), so it gets a retry again.
@@ -148,7 +155,7 @@ class WifiWatcherService : Service() {
     }
 
     private fun evaluate() {
-        if (!prefs.autoEnabled) {
+        if (!prefs.serviceNeeded) {
             stopSelf()
             return
         }
@@ -158,9 +165,13 @@ class WifiWatcherService : Service() {
 
         val enabled = AdbWifiController.isEnabled(this)
         if (enabled) notifications.cancel(ALERT_ID)
-        updateBeacon(if (whitelisted) snap?.ipv4 else null, enabled)
+        updateBeacon(if (prefs.wakeReady || (whitelisted && !prefs.paused)) snap?.ipv4 else null, enabled)
         val text = when {
             !AdbWifiController.hasPermission(this) -> getString(R.string.status_no_permission)
+            prefs.paused -> {
+                state = State.IDLE // the service outlives the pause: switching back on must enable again
+                getString(R.string.status_standby)
+            }
             snap == null -> getString(R.string.status_no_wifi)
             ssid == null -> getString(R.string.status_ssid_hidden)
             !whitelisted -> {
@@ -185,7 +196,18 @@ class WifiWatcherService : Service() {
         notifications.notify(STATUS_ID, statusNotification(text))
     }
 
-    /** Serve the port beacon on whitelisted Wi-Fi once a PC has set it up, and keep the port it reports current. */
+    /** A set-up PC asked for Wireless debugging: same as the user switching auto-connect back on. */
+    private fun wakeFromPc() {
+        Log.i(TAG, "Wireless debugging requested by a PC")
+        prefs.paused = false
+        prefs.userDisabled = false
+        retried = false
+        sync(this)
+        AutoConnect.refreshTile(this)
+        if (!AdbWifiController.isEnabled(this)) AdbWifiController.setEnabled(this, true)?.let { Log.w(TAG, it) }
+    }
+
+    /** Serve the port beacon once a PC has set it up, and keep the port it reports current. */
     private fun updateBeacon(ipv4: String?, enabled: Boolean) {
         if (ipv4 == null || prefs.beaconTokens.isEmpty()) {
             beacon.stop()
@@ -290,9 +312,9 @@ class WifiWatcherService : Service() {
             context.stopService(Intent(context, WifiWatcherService::class.java))
         }
 
-        /** Starts or stops background watching to match [Prefs.autoEnabled] (a non-empty whitelist). */
+        /** Starts or stops the service to match [Prefs.serviceNeeded]. */
         fun sync(context: Context) {
-            if (Prefs(context).autoEnabled) {
+            if (Prefs(context).serviceNeeded) {
                 WifiTriggerReceiver.register(context)
                 start(context)
             } else {

@@ -109,6 +109,7 @@ Every device tool auto-connects first. Select a device by serial, `ip:port`, ali
 | `install_apk` | Install an APK (`-r -g`) |
 | `launch_app` / `stop_app` | Start (launcher or a specific activity) / force-stop |
 | `screenshot` | 1280px JPEG preview by default, `full_resolution` for the original PNG, optional `save_path` |
+| `ui_tree` | On-screen elements (text, description, id, clickable) with the center to tap, via uiautomator. Not for game-engine screens |
 | `tap` / `swipe` / `input_text` / `key_event` | Input (`input_text` is ASCII only, an Android `input` limitation) |
 | `wake_device` | Wake the screen and dismiss a non-secure keyguard |
 | `logcat` | Filter by package, tag or priority, limit lines, crash buffer |
@@ -144,7 +145,8 @@ See [docs/](docs/README.md): [architecture](docs/architecture.md), [troubleshoot
 
 - Wireless debugging is only auto-enabled on SSIDs you whitelist, and Android still enforces per-access-point trust plus key-based pairing. Don't whitelist public Wi-Fi.
 - The MCP server auto-connects only to phones it has connected to before. The first run is the only exception.
-- The Quick Settings tile switches auto-connect on and off. Turning it off stops all background work and Wireless debugging; turning it on requires an unlocked phone.
+- The Quick Settings tile switches auto-connect on and off. Turning it off turns Wireless debugging off and stops following the Wi-Fi; turning it on requires an unlocked phone.
+- A PC set up with `install_companion_app` can turn Wireless debugging back on over Wi-Fi, even while auto-connect is off or on a Wi-Fi that is not allowed. The app listens on TCP 47383 on the current Wi-Fi for this, and the PC proves itself with a key it never sends over the network. Turn off **Let my PC turn this on** under Advanced to stop all background work while auto-connect is off.
 - Enabling wireless debugging also turns on Developer options and USB debugging; turning it off does not revert those.
 - Logcat output and screen content are passed to the model, so treat logs from untrusted apps as untrusted input.
 

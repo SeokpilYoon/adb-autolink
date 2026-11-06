@@ -587,6 +587,18 @@ private fun Advanced(status: Status, refresh: () -> Unit) {
                 }
                 Text(stringResource(R.string.auth_timeout_warning), fontSize = 13.sp, lineHeight = 18.sp, color = c.muted)
 
+                HorizontalDivider(color = c.line)
+                var remoteWake by remember { mutableStateOf(Prefs(context).remoteWake) }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.remote_wake_label), Modifier.weight(1f), color = c.ink)
+                    Switch(checked = remoteWake, onCheckedChange = { on ->
+                        remoteWake = on
+                        Prefs(context).remoteWake = on
+                        WifiWatcherService.sync(context)
+                    })
+                }
+                Text(stringResource(R.string.remote_wake_hint), fontSize = 13.sp, lineHeight = 18.sp, color = c.muted)
+
                 // The system per-app language picker exists only on Android 13+.
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     HorizontalDivider(color = c.line)

@@ -109,6 +109,7 @@ Claude 会引导你完成配对并安装配套应用（从最新的 GitHub relea
 | `install_apk` | 安装 APK（`-r -g`） |
 | `launch_app` / `stop_app` | 启动（启动器或指定 Activity）/ 强制停止 |
 | `screenshot` | 默认返回 1280px 的 JPEG 预览，`full_resolution` 返回原始 PNG，可选 `save_path` |
+| `ui_tree` | 屏幕元素（文字、描述、ID、是否可点按）及可点按的中心坐标，基于 uiautomator。不适用于游戏引擎画面 |
 | `tap` / `swipe` / `input_text` / `key_event` | 输入（`input_text` 仅支持 ASCII，这是 Android `input` 的限制） |
 | `wake_device` | 唤醒屏幕并解除非安全锁屏 |
 | `logcat` | 按包名、标签或优先级过滤，限制行数，崩溃缓冲区 |
@@ -144,7 +145,8 @@ CLI：`node mcp-server/dist/cli.js devices` · `node mcp-server/dist/cli.js conn
 
 - 无线调试只会在你加入白名单的 SSID 上自动开启，Android 仍会强制执行按接入点的信任和基于密钥的配对。不要把公共 Wi-Fi 加入白名单。
 - MCP 服务器只会自动连接之前连接过的手机，首次运行是唯一的例外。
-- 快速设置图块可开关自动连接。关闭后后台运行和无线调试都会停止；开启时手机需要处于解锁状态。
+- 快速设置图块可开关自动连接。关闭后无线调试会关闭并停止跟随 Wi-Fi;开启时手机需要处于解锁状态。
+- 通过 `install_companion_app` 设置的电脑可经 Wi-Fi 重新开启无线调试,即使自动连接已关闭或 Wi-Fi 未被允许。为此应用会在当前 Wi-Fi 的 TCP 47383 上监听,电脑用一个从不经网络发送的密钥证明身份。若要在自动连接关闭期间停止所有后台活动,请在“高级”中关闭 **允许电脑开启**。
 - 开启无线调试也会同时开启开发者选项和 USB 调试；关闭无线调试不会还原这些设置。
 - Logcat 输出和屏幕内容会传递给模型，因此请将来自不受信任应用的日志视为不受信任的输入。
 

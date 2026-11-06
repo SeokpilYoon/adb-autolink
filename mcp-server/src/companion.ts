@@ -62,6 +62,8 @@ export interface SetupOptions {
   addCurrentWifi: boolean;
   /** This PC's port-beacon token; the app answers beacon requests only with a token it was given here. */
   beaconToken?: string;
+  /** This PC's wake key; lets it turn Wireless debugging on over the network later. */
+  wakeKey?: string;
   /** ro.serialno, echoed in beacon replies (apps cannot read it themselves). */
   serial?: string;
 }
@@ -71,6 +73,7 @@ export function setupBroadcastCommand(o: SetupOptions, pkg = COMPANION_PACKAGE):
   const extras = [`--ez add_current_wifi ${o.addCurrentWifi}`];
   // Both go through the device shell unquoted, so only accept their plain formats.
   if (o.beaconToken && /^[0-9a-f]{32}$/.test(o.beaconToken)) extras.push(`--es beacon_token ${o.beaconToken}`);
+  if (o.wakeKey && /^[0-9a-f]{64}$/.test(o.wakeKey)) extras.push(`--es wake_key ${o.wakeKey}`);
   if (o.serial && /^[\w.-]{1,64}$/.test(o.serial)) extras.push(`--es serial ${o.serial}`);
   return `am broadcast -n ${pkg}/.SetupReceiver -a ${pkg}.action.SETUP ${extras.join(" ")}`;
 }

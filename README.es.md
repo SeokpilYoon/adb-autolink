@@ -109,6 +109,7 @@ Todas las herramientas de dispositivo se conectan automáticamente primero. Sele
 | `install_apk` | Instala un APK (`-r -g`) |
 | `launch_app` / `stop_app` | Inicia (launcher o una actividad concreta) / fuerza la detención |
 | `screenshot` | Vista previa JPEG de 1280px por defecto, `full_resolution` para el PNG original, `save_path` opcional |
+| `ui_tree` | Elementos en pantalla (texto, descripción, id, si se pueden tocar) con el centro para tocar, mediante uiautomator. No sirve para pantallas de motores de juego |
 | `tap` / `swipe` / `input_text` / `key_event` | Entrada (`input_text` solo admite ASCII, una limitación de `input` de Android) |
 | `wake_device` | Enciende la pantalla y descarta un bloqueo de pantalla no seguro |
 | `logcat` | Filtra por paquete, etiqueta o prioridad, limita líneas, búfer de fallos |
@@ -144,7 +145,8 @@ Consulta [docs/](docs/README.md): [arquitectura](docs/architecture.md), [soluci�
 
 - La depuración inalámbrica solo se activa automáticamente en los SSID de tu lista blanca, y Android sigue exigiendo confianza por punto de acceso y emparejamiento basado en claves. No añadas Wi-Fi públicas a la lista blanca.
 - El servidor MCP solo se conecta automáticamente a teléfonos a los que ya se haya conectado antes. La primera ejecución es la única excepción.
-- El mosaico de Ajustes rápidos activa y desactiva la conexión automática. Al desactivarla se detienen el trabajo en segundo plano y la depuración inalámbrica; para activarla, el teléfono debe estar desbloqueado.
+- El mosaico de Ajustes rápidos activa y desactiva la conexión automática. Al desactivarla se apaga la depuración inalámbrica y se deja de seguir la Wi-Fi; para activarla, el teléfono debe estar desbloqueado.
+- Un PC configurado con `install_companion_app` puede volver a activar la depuración inalámbrica por Wi-Fi, incluso con la conexión automática desactivada o en una Wi-Fi no permitida. Para ello la app escucha en TCP 47383 en la Wi-Fi actual, y el PC se identifica con una clave que nunca envía por la red. Para detener todo en segundo plano mientras la conexión automática esté desactivada, desactiva **Permitir que mi PC la active** en Avanzado.
 - Activar la depuración inalámbrica también activa las Opciones para desarrolladores y la depuración USB; desactivarla no revierte esos cambios.
 - La salida de Logcat y el contenido de la pantalla se pasan al modelo, así que trata los logs de apps no fiables como entrada no fiable.
 

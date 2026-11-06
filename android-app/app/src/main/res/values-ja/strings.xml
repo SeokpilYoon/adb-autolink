@@ -28,9 +28,9 @@
 
     <string name="auto_switch_label">自動接続</string>
     <string name="auto_switch_on_hint">オフにするとワイヤレス デバッグもオフになります。</string>
-    <string name="auto_switch_off_hint">オフの間はバックグラウンドで何も動作しません。許可した Wi-Fi の一覧はそのまま残ります。</string>
+    <string name="auto_switch_off_hint">許可した Wi-Fi の一覧はそのまま残ります。このアプリで設定した PC からは再びオンにできます(詳細設定を参照)。</string>
     <string name="hero_paused">自動接続はオフです</string>
-    <string name="hero_paused_body">オンにすると、許可した Wi-Fi でワイヤレス デバッグが再びオンになります。クイック設定タイルからも切り替えられます。</string>
+    <string name="hero_paused_body">オンにすると、許可した Wi-Fi でワイヤレス デバッグが再びオンになります。PC からのリクエストでもオンになります。クイック設定タイルからも切り替えられます。</string>
     <string name="resume_auto">自動接続をオンにする</string>
     <string name="hero_linked">PC から接続できます</string>
     <string name="hero_setup">設定を完了すると自動で接続されます</string>
@@ -60,6 +60,8 @@
     <string name="disable_auth_timeout">7 日間の承認期限を無効にする</string>
     <string name="auth_timeout_warning">Android は 7 日間使われていない PC の承認を破棄します。これを無効にすると PC は永久に承認されたままになり、ワイヤレス デバッグが ON の間はその PC の adb 鍵を持つ誰でも接続できます。信頼できる PC とネットワークでのみ使用してください。</string>
 
+    <string name="remote_wake_label">PC からのオンを許可</string>
+    <string name="remote_wake_hint">このアプリで設定した PC は、許可していない Wi-Fi でも、自動接続がオフでも、Wi-Fi 経由でワイヤレス デバッグをオンにできます。これをオフにすると、自動接続がオフの間はバックグラウンドの動作がすべて止まります。</string>
     <string name="language_label">アプリの言語</string>
     <string name="change_language">変更</string>
 
@@ -70,6 +72,7 @@
     <string name="status_ssid_hidden">エラー: SSID が非表示です（&lt;unknown ssid&gt;）。位置情報を「常に許可」にし、位置情報を ON にしてください</string>
     <string name="status_not_whitelisted">%1$s: 許可リストにありません</string>
     <string name="status_waiting_ip">%1$s: IP を待機中…</string>
+    <string name="status_standby">オフ、PC からのリクエスト待ち</string>
     <string name="status_on">%1$s: ワイヤレス デバッグ ON</string>
     <string name="status_off_manual">%1$s: ワイヤレス デバッグ OFF（手動で OFF）</string>
     <string name="status_waiting_approval">%1$s: このアクセス ポイントでの承認待ち</string>

@@ -9,7 +9,7 @@
     {
       "name": "adb-autolink",
       "description": "Zero-touch wireless device control: Android re-enables wireless debugging on trusted Wi-Fi and reconnects on its own (install, screenshot, input, logcat); iPhone on macOS through devicectl (preview).",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "source": "./",
       "category": "development",
       "homepage": "https://github.com/SeokpilYoon/adb-autolink",

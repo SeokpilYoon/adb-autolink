@@ -32,6 +32,12 @@ describe("companion setup", () => {
     );
   });
 
+  it("hands over the wake key, and only in its plain format", () => {
+    const key = "c".repeat(64);
+    expect(setupBroadcastCommand({ addCurrentWifi: false, wakeKey: key }, "x.y")).toContain(`--es wake_key ${key}`);
+    expect(setupBroadcastCommand({ addCurrentWifi: false, wakeKey: "x; reboot" }, "x.y")).not.toContain("wake_key");
+  });
+
   it("drops extras that are not in their plain format (they reach the device shell unquoted)", () => {
     const cmd = setupBroadcastCommand({ addCurrentWifi: true, beaconToken: "x; reboot", serial: "a b" }, "x.y");
     expect(cmd).not.toContain("reboot");

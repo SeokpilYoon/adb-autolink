@@ -9,9 +9,9 @@ object AutoConnect {
     fun isOn(context: Context): Boolean = !Prefs(context).paused
 
     /**
-     * Off: stops background watching (service, Wi-Fi trigger, port beacon) and turns Wireless debugging off,
-     * so nothing runs or listens until it is switched back on. On: watching resumes and turns Wireless
-     * debugging on again on an allowed Wi-Fi. Returns an error message, or null.
+     * Off: turns Wireless debugging off and stops following the Wi-Fi. Unless the user disabled remote
+     * wake, the service stays to answer a set-up PC, which can switch this back on; otherwise nothing runs
+     * or listens. On: Wireless debugging comes back on an allowed Wi-Fi. Returns an error message, or null.
      */
     fun set(context: Context, on: Boolean): String? {
         val prefs = Prefs(context)
